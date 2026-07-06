@@ -99,6 +99,7 @@
   <div class="tabs">
     <button id="b0" class="on" onclick="tab(0)">Калькулятор</button>
     <button id="b1" onclick="tab(1)">График клиента</button>
+    <button id="b10" onclick="tab(10)">Развёрнутый график</button>
     <button id="b2" onclick="tab(2)">Отсрочка + кредит (ДДС)</button>
     <button id="b9" onclick="tab(9)">Полная отсрочка Импортёра</button>
     <button id="b6" onclick="tab(6)">Банковская гарантия</button>
@@ -209,6 +210,26 @@
       <p><b>Тело и проценты — без НДС</b> (фондирование без НДС). Столбцы «с НДС» = соответствующая сумма × 1,22; НДС клиент принимает к вычету.</p>
       <p><b>Остаток с НДС</b> — сколько остаётся «закрыть» по договору в ценах с НДС (для сверки с бухгалтерией клиента и досрочного выкупа).</p>
       <p><b>Налог на имущество = 0:</b> движимое имущество (грузовая техника, оборудование) налогом на имущество не облагается с 2019 г., правило действует в 2026 г. В графике его нет намеренно.</p>
+    </div>
+  </div>
+
+  <!-- ===== TAB 10: РАЗВЁРНУТЫЙ ГРАФИК ===== -->
+  <div id="t10" style="display:none">
+    <h2>Развёрнутый график платежей клиента</h2>
+    <p style="font-size:12.5px;color:var(--muted);margin-bottom:14px">Лизинговый платёж разложен на составляющие. Осн. долг + Проценты + Доп. услуги + КАСКО = Платёж без НДС. Столбцы, которые не включены в график клиента (через чек-боксы «включить в график платежей клиенту»), показаны нулями.</p>
+    <div class="tableWrap">
+      <table>
+        <thead><tr><th>№</th><th>Дата</th><th>Осн. долг</th><th>Проценты</th><th>Доп. услуги (абонпл.)</th><th>КАСКО</th><th>Платёж без НДС</th><th>НДС</th><th>Платёж с НДС</th><th>Остаток тела</th></tr></thead>
+        <tbody id="expBody"></tbody>
+        <tfoot id="expFoot"></tfoot>
+      </table>
+    </div>
+    <div class="edu">
+      <h3>Как читать</h3>
+      <p><b>Осн. долг + Проценты</b> — тело аннуитета (без НДС). Проценты месяца = остаток тела × (лиз. процент / 12); доля процентов убывает, доля тела растёт.</p>
+      <p><b>Доп. услуги (абонпл.)</b> — ежемесячная абонплата (напр. телематика), если включена в график клиента; надбавка к платежу без процентов.</p>
+      <p><b>КАСКО</b> — в платёж клиента попадает только при способе оплаты «в ежемесячный платёж» (вариант 2, пока не реализован); при варианте 1 = 0.</p>
+      <p style="color:var(--muted)"><b>Важно:</b> разовые доп. расходы, отсрочка и гарантия, если они «включены в график клиента», финансируются в тело лизинга — поэтому они уже зашиты в столбцах «Осн. долг» и «Проценты», а не показаны отдельной статьёй.</p>
     </div>
   </div>
 
@@ -987,7 +1008,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     if(divId==='t8'){ kasko=[0,0,0]; kaskoTermEdited=false; renderKasko(); }
     calc();
   }
-  function tab(i){for(var j=0;j<10;j++){var t=document.getElementById('t'+j),b=document.getElementById('b'+j);if(t)t.style.display=(j===i)?'block':'none';if(b)b.className=(j===i)?'on':'';}}
+  function tab(i){for(var j=0;j<11;j++){var t=document.getElementById('t'+j),b=document.getElementById('b'+j);if(t)t.style.display=(j===i)?'block':'none';if(b)b.className=(j===i)?'on':'';}}
   function setVat(v){
     if(v!==withVat){
       var k=1+(val('vat')||0)/100;
@@ -1327,6 +1348,18 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     cli.forEach(function(r){var pg=r.payG+subGross,pn=pg/k,pv=pg-pn;h+='<tr><td>'+r.t+'</td><td>'+fmtRub(pg)+'</td><td>'+fmtRub(pv)+'</td><td>'+fmtRub(pn)+'</td><td>'+fmtRub(r.intr)+'</td><td>'+fmtRub(r.pr)+'</td><td>'+fmtRub(r.balN)+'</td><td>'+fmtRub(r.balG)+'</td></tr>';});
     cb.innerHTML=h;
     document.getElementById('cliFoot').innerHTML='<tr><td>Итого</td><td>'+fmtRub(sumGross+subGross*N)+'</td><td>'+fmtRub((sumGross+subGross*N)-(sumNet+subGross/k*N))+'</td><td>'+fmtRub(sumNet+subGross/k*N)+'</td><td>'+fmtRub(sIntCli)+'</td><td>'+fmtRub(body+advNet)+'</td><td>—</td><td>—</td></tr>';
+
+    // --- РАЗВЁРНУТЫЙ ГРАФИК (детализация платежа клиента) ---
+    var subNetM=subGross/k, kaskoInPay=0;   // КАСКО в платёж входит только в варианте 2 (не реализован)
+    var eb='', tPr=0,tInt=0,tSub=0,tKas=0,tNet=0,tVat=0,tGross=0;
+    cli.forEach(function(r){
+      var pr=r.pr, intr=r.intr, sub=subNetM, kas=kaskoInPay;
+      var net=pr+intr+sub+kas, vt=net*(vat/100), gross=net+vt;
+      tPr+=pr;tInt+=intr;tSub+=sub;tKas+=kas;tNet+=net;tVat+=vt;tGross+=gross;
+      eb+='<tr><td>'+r.t+'</td><td>'+dateAt(r.t).toLocaleDateString('ru-RU',{month:'short',year:'2-digit'})+'</td><td>'+fmtRub(pr)+'</td><td>'+fmtRub(intr)+'</td><td>'+fmtRub(sub)+'</td><td>'+fmtRub(kas)+'</td><td>'+fmtRub(net)+'</td><td>'+fmtRub(vt)+'</td><td>'+fmtRub(gross)+'</td><td>'+fmtRub(r.balN)+'</td></tr>';
+    });
+    document.getElementById('expBody').innerHTML=eb;
+    document.getElementById('expFoot').innerHTML='<tr><td>Итого</td><td>—</td><td>'+fmtRub(tPr)+'</td><td>'+fmtRub(tInt)+'</td><td>'+fmtRub(tSub)+'</td><td>'+fmtRub(tKas)+'</td><td>'+fmtRub(tNet)+'</td><td>'+fmtRub(tVat)+'</td><td>'+fmtRub(tGross)+'</td><td>—</td></tr>';
     KP={item:(document.getElementById('item').value||'Грузовая техника'),client:document.getElementById('client').value||'',
         priceVat:priceVat,adv:adv,advGross:advGross,annGross:annGross+subGross,annNet:annNet,sumGross:sumGross+subGross*N,sumNet:sumNet,sub:subGross,
         overpay:(sumGross+subGross*N)-priceVat,udorYear:udorYear,udorTotal:udorTotal,N:N,vat:vat,k:k,leaseRate:leaseRate,
