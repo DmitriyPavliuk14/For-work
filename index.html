@@ -142,13 +142,15 @@
       <div><label class="lbl">Комиссия за кредит, %</label><input id="comm" type="number" step="0.1" value="1"></div>
       <div><label class="lbl">Налог на прибыль, %</label><input id="ptax" type="number" value="25"></div>
     </div>
-    <div class="grid g2 mb12">
+    <div class="grid g3 mb12">
       <div><label class="lbl">Предмет лизинга (для КП)</label><input id="item" type="text" value="Грузовая техника"></div>
       <div><label class="lbl">Клиент / лизингополучатель (для КП)</label><input id="client" type="text" value=""></div>
+      <div><label class="lbl">ИНН клиента</label><input id="inn" type="text" value="" placeholder="7700000000"></div>
     </div>
-    <div class="mb22">
+    <div class="mb22" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
       <button onclick="generateKP()" style="padding:11px 20px;background:var(--blue);color:#fff;border:none;border-radius:9px;font-size:14px;font-weight:600;cursor:pointer">Сформировать КП (PDF)</button>
-      <span style="font-size:12px;color:var(--muted);margin-left:12px">Откроется PDF в новой вкладке — сохраните или распечатайте.</span>
+      <button onclick="shareKP()" style="padding:11px 20px;background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:9px;font-size:14px;font-weight:600;cursor:pointer">🔗 Отправить КП ссылкой</button>
+      <span id="kpMsg" style="font-size:12px;color:var(--muted)">PDF откроется в новой вкладке — сохраните или распечатайте.</span>
     </div>
 
     <div class="hero">
@@ -1066,8 +1068,39 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
   function setRT(v){repayType=v;document.getElementById('rtSweep').className=v==='sweep'?'on':'';document.getElementById('rtAnn').className=v==='annuity'?'on':'';document.getElementById('rtDiff').className=v==='diff'?'on':'';calc();}
   function syncFdef(target,v){var el=document.getElementById(target);if(el){el.value=v;}calc();}
 
+  // двусторонняя синхронизация полей «Калькулятор» ↔ «Мои сделки»
+  function linkFields(a,b){
+    var ea=document.getElementById(a), eb=document.getElementById(b);
+    if(!ea||!eb)return;
+    ea.addEventListener('input',function(){if(eb.value!==ea.value)eb.value=ea.value;});
+    eb.addEventListener('input',function(){if(ea.value!==eb.value)ea.value=eb.value;});
+  }
+  function initFieldSync(){
+    linkFields('client','dlClient');
+    linkFields('item','dlItem');
+    linkFields('inn','dlInn');
+  }
+  // ссылка, по которой у получателя сразу откроется КП
+  function shareKP(){
+    var m=document.getElementById('kpMsg');
+    function say(t,err){if(m){m.textContent=t;m.style.color=err?'var(--red)':'var(--teal)';setTimeout(function(){if(m.textContent===t){m.textContent='PDF откроется в новой вкладке — сохраните или распечатайте.';m.style.color='var(--muted)';}},6000);}}
+    if(location.protocol==='file:'){say('Ссылка работает только когда калькулятор открыт с сайта.',true);return;}
+    var url;
+    try{url=buildShareUrl()+'&kp=1';}catch(e){say('Не удалось сформировать ссылку.',true);return;}
+    var cl=(document.getElementById('client').value||'').trim();
+    var isMobile=/iPhone|iPad|iPod|Android/i.test(navigator.userAgent||'')||(navigator.maxTouchPoints>1&&/Mac/i.test(navigator.platform||''));
+    if(isMobile&&navigator.share){
+      navigator.share({title:'КП по лизингу'+(cl?' — '+cl:''),url:url}).then(function(){say('Ссылка отправлена.');},function(){kpCopy(url,say);});
+    } else kpCopy(url,say);
+  }
+  function kpCopy(url,say){
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(url).then(function(){say('Ссылка на КП скопирована — вставьте в мессенджер. У получателя КП откроется сразу.');},function(){prompt('Скопируйте ссылку на КП:',url);});
+    } else prompt('Скопируйте ссылку на КП:',url);
+  }
+
   // ================= СДЕЛКИ: состояние, сохранение, ссылка, экспорт =================
-  var DEAL_IDS=['price','priceD','vat','fund','spread','adv','term','cdate','vatlag','comm','ptax','item','client','suppOff','suppGLP','suppRate','repterm','guarOff','guarGLP','guarRate','guarBase','guarTerm','ae1_lk','ae1_cli','ae1_off','ae1_glp','ae2_lk','ae2_cli','ae2_off','ae2_glp','ae3_lk','ae3_cli','ae3_off','ae3_glp','ae4_lk','ae4_cli','ae4_off','ae4_glp','kaskoTerm','kaskoComm','fdefOn','fdefRate','fdefTerm','fdefSpread'];
+  var DEAL_IDS=['price','priceD','vat','fund','spread','adv','term','cdate','vatlag','comm','ptax','item','client','inn','suppOff','suppGLP','suppRate','repterm','guarOff','guarGLP','guarRate','guarBase','guarTerm','ae1_lk','ae1_cli','ae1_off','ae1_glp','ae2_lk','ae2_cli','ae2_off','ae2_glp','ae3_lk','ae3_cli','ae3_off','ae3_glp','ae4_lk','ae4_cli','ae4_off','ae4_glp','kaskoTerm','kaskoComm','fdefOn','fdefRate','fdefTerm','fdefSpread'];
   var DEAL_SELECTS=['kaskoSK','kaskoPay'];
   function getState(){
     var s={f:{},c:{},s:{},supp:supp,kasko:kasko,kte:kaskoTermEdited,wv:withVat,rt:repayType};
@@ -1101,7 +1134,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
   function saveDeal(){
     var a=dealsAll();
     var cl=(document.getElementById('dlClient').value||document.getElementById('client').value||'Без названия').trim();
-    a.unshift({id:Date.now(),dt:new Date().toISOString(),client:cl,inn:(document.getElementById('dlInn').value||'').trim(),
+    a.unshift({id:Date.now(),dt:new Date().toISOString(),client:cl,inn:(document.getElementById('dlInn').value||document.getElementById('inn').value||'').trim(),
       item:(document.getElementById('dlItem').value||document.getElementById('item').value||'').trim(),
       note:(document.getElementById('dlNote').value||'').trim(),
       sum:document.getElementById('price').value,term:document.getElementById('term').value,
@@ -1115,6 +1148,10 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     setState(d.st);
     document.getElementById('dlClient').value=d.client||'';document.getElementById('dlInn').value=d.inn||'';
     document.getElementById('dlItem').value=d.item||'';document.getElementById('dlNote').value=d.note||'';
+    // зеркалим в поля «Калькулятора» (для КП)
+    if(d.client)document.getElementById('client').value=d.client;
+    if(d.inn)document.getElementById('inn').value=d.inn;
+    if(d.item)document.getElementById('item').value=d.item;
     msgDeal('Открыта сделка: '+(d.client||''));tab(0);}
   function delDeal(id){if(!confirm('Удалить сделку?'))return;dealsSave(dealsAll().filter(function(x){return x.id!==id;}));renderDeals();}
   function renderDeals(){
@@ -1199,10 +1236,13 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
   }
   function loadFromHash(){
     if(!location.hash||location.hash.indexOf('#d=')!==0)return false;
-    var raw=location.hash.slice(3);
+    var raw=location.hash.slice(3), autoKP=false;
+    var amp=raw.indexOf('&');
+    if(amp>=0){autoKP=/(^|&)kp=1(&|$)/.test(raw.slice(amp)); raw=raw.slice(0,amp);}
     try{var s=JSON.parse(unb64url(raw));
-      if(s&&s.v===1)return applyStateSlim(s);
-      setState(s);return true;                       // совместимость со старыми длинными ссылками
+      var ok=(s&&s.v===1)?applyStateSlim(s):(setState(s),true);   // совместимость со старыми длинными ссылками
+      if(ok&&autoKP)setTimeout(function(){try{generateKP();}catch(e){}},600);
+      return ok;
     }catch(e){return false;}
   }
   function dlBlob(name,text,type){
@@ -1248,7 +1288,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     doc.text('Коммерческое предложение по финансовому лизингу', Mg, y+6); y+=14;
     doc.setDrawColor.apply(doc,BLUE); doc.setLineWidth(2); doc.line(Mg,y,W-Mg,y); y+=18;
     doc.setTextColor.apply(doc,INK); doc.setFontSize(10.5);
-    if(KP.client){doc.text('Кому: '+KP.client, Mg, y); y+=16;}
+    if(KP.client){doc.text('Кому: '+KP.client+(KP.inn?', ИНН '+KP.inn:''), Mg, y); y+=16;}
     doc.text('Предлагаем приобретение техники в финансовый лизинг на следующих условиях:', Mg, y); y+=18;
     var terms=[['Предмет лизинга',KP.item],['Стоимость техники (с НДС '+KP.vat+'%)',fmtRub(KP.priceVat)],
      ['Авансовый платёж ('+KP.adv+'%)',fmtRub(KP.advGross)],['Срок лизинга',KP.N+' мес.'],
@@ -1569,7 +1609,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     });
     document.getElementById('expBody').innerHTML=eb;
     document.getElementById('expFoot').innerHTML='<tr><td>Итого</td><td>—</td><td>'+fmtRub(tPr)+'</td><td>'+fmtRub(tInt)+'</td><td>'+fmtRub(tSub)+'</td><td>'+fmtRub(tKas)+'</td><td>'+fmtRub(tNet)+'</td><td>'+fmtRub(tVat)+'</td><td>'+fmtRub(tGross)+'</td><td>—</td></tr>';
-    KP={item:(document.getElementById('item').value||'Грузовая техника'),client:document.getElementById('client').value||'',
+    KP={item:(document.getElementById('item').value||'Грузовая техника'),client:document.getElementById('client').value||'',inn:(document.getElementById('inn')||{}).value||'',
         priceVat:priceVat,adv:adv,advGross:advGross,annGross:annGross+subGross,annNet:annNet,sumGross:sumGross+subGross*N,sumNet:sumNet,sub:subGross,
         overpay:(sumGross+subGross*N)-priceVat,udorYear:udorYear,udorTotal:udorTotal,N:N,vat:vat,k:k,leaseRate:leaseRate,
         start:{y:start.getFullYear(),m:start.getMonth(),d:start.getDate()},rows:cli};
@@ -1782,6 +1822,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
 
   document.querySelectorAll('input').forEach(function(el){el.addEventListener('input',calc);});
   renderSupp();renderKasko();calc();
+  try{initFieldSync();}catch(e){}
   try{loadFromHash();}catch(e){}
   try{renderDeals();}catch(e){}
 </script>
