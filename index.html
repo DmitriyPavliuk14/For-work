@@ -86,6 +86,12 @@
   .tabreset{padding:6px 12px;border:1px solid var(--line);background:var(--card);color:var(--muted);border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap}
   .tabresetRow{display:flex;justify-content:flex-end;margin-bottom:10px}
 </style>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Лизинг">
+  <meta name="theme-color" content="#1E3A5F">
+  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='38' fill='%231E3A5F'/%3E%3Ctext x='90' y='118' font-family='Arial,Helvetica,sans-serif' font-size='96' font-weight='bold' fill='%23ffffff' text-anchor='middle'%3E%E2%82%BD%3C/text%3E%3C/svg%3E">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%231E3A5F'/%3E%3Ctext x='32' y='43' font-family='Arial' font-size='36' font-weight='bold' fill='%23fff' text-anchor='middle'%3E%E2%82%BD%3C/text%3E%3C/svg%3E">
 </head>
 <body>
 <div class="wrap">
@@ -106,6 +112,7 @@
     <button id="b7" onclick="tab(7)">Доп. расходы</button>
     <button id="b8" onclick="tab(8)">КАСКО</button>
     <button id="b3" onclick="tab(3)">Маржа и прибыль</button>
+    <button id="b11" onclick="tab(11)">Мои сделки</button>
     <button id="b4" onclick="tab(4)">Методология</button>
   </div>
 
@@ -528,6 +535,43 @@
       <p><b>Погашение Импортёру</b> — аннуитет (основной долг + проценты за отсрочку) на весь срок лизинга. Проценты за отсрочку (коммерческий кредит) НДС не облагаются (ст. 823 ГК, пп. 15 п. 3 ст. 149 НК).</p>
       <p><b>Без банковского кредита.</b> Аванс клиента идёт в аванс Импортёру; кассовый разрыв (гарантия в мес. 0, доп. расходы в мес. 1, разница НДС) закрываем собственными средствами — процент на них не начисляется. Комиссия за кредит = 0. Отсрочка на вкладке «Отсрочка Импортера» автоматически отключается (её заменяет эта модель).</p>
       <p><b>НДС.</b> Входной НДС с цены дилера — к вычету в квартале постановки на учёт (в мес. 0), несмотря на то что Импортёру платим весь срок.</p>
+    </div>
+  </div>
+
+  <!-- ===== TAB 11: МОИ СДЕЛКИ ===== -->
+  <div id="t11" style="display:none">
+    <h2>Мои сделки</h2>
+    <div class="panel mb16">
+      <div class="pt"><div class="ptt">Сохранить текущий расчёт</div></div>
+      <div class="grid g3 mb12">
+        <div><label class="lbl">Клиент</label><input id="dlClient" type="text" placeholder="ООО «Ромашка»"></div>
+        <div><label class="lbl">ИНН</label><input id="dlInn" type="text" placeholder="7700000000"></div>
+        <div><label class="lbl">Предмет</label><input id="dlItem" type="text" placeholder="Грузовая техника"></div>
+      </div>
+      <div class="mb12"><label class="lbl">Комментарий</label><input id="dlNote" type="text" placeholder="условия, договорённости, срок действия"></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button onclick="saveDeal()" style="padding:9px 16px;border:none;background:var(--blue);color:#fff;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer">💾 Сохранить сделку</button>
+        <button onclick="shareLink()" style="padding:9px 16px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;font-size:13px;font-weight:600;cursor:pointer">🔗 Ссылка на расчёт</button>
+        <button onclick="exportCSV()" style="padding:9px 16px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;font-size:13px;font-weight:600;cursor:pointer">📊 Таблица сделок в Excel</button>
+        <button onclick="exportDeals()" style="padding:9px 16px;border:1px solid var(--line);background:var(--card);color:var(--muted);border-radius:8px;font-size:13px;font-weight:600;cursor:pointer" title="Служебный файл для переноса сделок на другое устройство">🗄 Резервная копия</button>
+        <label style="padding:9px 16px;border:1px solid var(--line);background:var(--card);color:var(--muted);border-radius:8px;font-size:13px;font-weight:600;cursor:pointer" title="Загрузить резервную копию, созданную кнопкой «Резервная копия»">↩ Восстановить из копии<input type="file" id="dlFile" accept=".json,application/json" style="display:none" onchange="importDeals(this)"></label>
+      </div>
+      <div id="dlMsg" style="margin-top:10px;font-size:12.5px;font-weight:600;color:var(--teal)"></div>
+    </div>
+    <div class="mb12"><input id="dlSearch" type="text" placeholder="Поиск по клиенту, ИНН, предмету…" oninput="renderDeals()" style="width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:8px;font-size:14px;background:var(--card);color:var(--ink)"></div>
+    <div class="tableWrap">
+      <table>
+        <thead><tr><th>Дата</th><th>Клиент</th><th>ИНН</th><th>Предмет</th><th>Цена клиенту</th><th>Аванс</th><th>Срок</th><th>Ставка</th><th>Платёж</th><th>Итоговая маржа</th><th>Действия</th></tr></thead>
+        <tbody id="dealsBody"></tbody>
+      </table>
+    </div>
+    <div class="edu">
+      <h3>Как это работает</h3>
+      <p><b>Сохранение.</b> «Сохранить сделку» запоминает все параметры расчёта (все вкладки, чек-боксы, этапы, КАСКО) в памяти этого браузера. «Открыть» — восстанавливает расчёт целиком.</p>
+      <p><b>Ссылка на расчёт.</b> Формирует короткую ссылку со всеми параметрами внутри. На телефоне откроется меню «Поделиться» — отправьте прямо в мессенджер; на компьютере ссылка копируется в буфер. У получателя откроется точно такой же расчёт. Работает, когда калькулятор открыт с сайта (не с локального файла).</p>
+      <p><b>📊 Таблица сделок в Excel</b> — обычный файл для чтения и отчёта: клиент, ИНН, цена, аванс, ставка, платёж, маржа. Открывается в Excel. Обратно в калькулятор не загружается.</p>
+      <p><b>🗄 Резервная копия / ↩ Восстановить.</b> Служебный файл (.json) — он не для чтения, в нём сохранены все параметры каждого расчёта. Нужен, чтобы перенести сделки на другой компьютер или телефон: там нажмите «Восстановить из копии» и выберите этот файл. Загрузить можно только такой файл; Excel/CSV не подойдёт.</p>
+      <p style="color:var(--muted)"><b>Важно:</b> сделки хранятся локально в браузере этого устройства — это не общая база. Другой человек ваших сделок не видит. При очистке данных браузера список пропадёт, поэтому периодически сохраняйте резервную копию.</p>
     </div>
   </div>
 
@@ -1008,7 +1052,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     if(divId==='t8'){ kasko=[0,0,0]; kaskoTermEdited=false; renderKasko(); }
     calc();
   }
-  function tab(i){for(var j=0;j<11;j++){var t=document.getElementById('t'+j),b=document.getElementById('b'+j);if(t)t.style.display=(j===i)?'block':'none';if(b)b.className=(j===i)?'on':'';}}
+  function tab(i){for(var j=0;j<12;j++){var t=document.getElementById('t'+j),b=document.getElementById('b'+j);if(t)t.style.display=(j===i)?'block':'none';if(b)b.className=(j===i)?'on':'';}}
   function setVat(v){
     if(v!==withVat){
       var k=1+(val('vat')||0)/100;
@@ -1021,6 +1065,170 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
   }
   function setRT(v){repayType=v;document.getElementById('rtSweep').className=v==='sweep'?'on':'';document.getElementById('rtAnn').className=v==='annuity'?'on':'';document.getElementById('rtDiff').className=v==='diff'?'on':'';calc();}
   function syncFdef(target,v){var el=document.getElementById(target);if(el){el.value=v;}calc();}
+
+  // ================= СДЕЛКИ: состояние, сохранение, ссылка, экспорт =================
+  var DEAL_IDS=['price','priceD','vat','fund','spread','adv','term','cdate','vatlag','comm','ptax','item','client','suppOff','suppGLP','suppRate','repterm','guarOff','guarGLP','guarRate','guarBase','guarTerm','ae1_lk','ae1_cli','ae1_off','ae1_glp','ae2_lk','ae2_cli','ae2_off','ae2_glp','ae3_lk','ae3_cli','ae3_off','ae3_glp','ae4_lk','ae4_cli','ae4_off','ae4_glp','kaskoTerm','kaskoComm','fdefOn','fdefRate','fdefTerm','fdefSpread'];
+  var DEAL_SELECTS=['kaskoSK','kaskoPay'];
+  function getState(){
+    var s={f:{},c:{},s:{},supp:supp,kasko:kasko,kte:kaskoTermEdited,wv:withVat,rt:repayType};
+    DEAL_IDS.forEach(function(id){var e=document.getElementById(id);if(!e)return;if(e.type==='checkbox')s.c[id]=e.checked?1:0;else s.f[id]=e.value;});
+    DEAL_SELECTS.forEach(function(id){var e=document.getElementById(id);if(e)s.s[id]=e.value;});
+    return s;
+  }
+  function setState(s){
+    if(!s)return;
+    DEAL_IDS.forEach(function(id){var e=document.getElementById(id);if(!e)return;
+      if(e.type==='checkbox'){if(s.c&&(id in s.c))e.checked=!!s.c[id];}
+      else if(s.f&&(id in s.f))e.value=s.f[id];});
+    DEAL_SELECTS.forEach(function(id){var e=document.getElementById(id);if(e&&s.s&&(id in s.s))e.value=s.s[id];});
+    if(s.supp&&s.supp.length)supp=s.supp.map(function(r){return {m:Number(r.m)||0,s:Number(r.s)||0};});
+    if(s.kasko&&s.kasko.length){kasko=s.kasko.map(function(x){return Number(x)||0;});
+      var ktS=document.getElementById('kaskoTerm');
+      if(ktS&&Math.round(parseFloat(ktS.value)||0)!==kasko.length)ktS.value=kasko.length;}
+    kaskoTermEdited=!!s.kte;
+    withVat=(s.wv!==undefined)?!!s.wv:true;
+    document.getElementById('vatYes').className=withVat?'on':'';
+    document.getElementById('vatNo').className=withVat?'':'on';
+    repayType=s.rt||'annuity';
+    document.getElementById('rtSweep').className=repayType==='sweep'?'on':'';
+    document.getElementById('rtAnn').className=repayType==='annuity'?'on':'';
+    document.getElementById('rtDiff').className=repayType==='diff'?'on':'';
+    renderSupp();renderKasko();calc();
+  }
+  function dealsAll(){try{return JSON.parse(localStorage.getItem('lizingDeals')||'[]');}catch(e){return [];}}
+  function dealsSave(a){try{localStorage.setItem('lizingDeals',JSON.stringify(a));return true;}catch(e){msgDeal('Не удалось сохранить: хранилище браузера недоступно.',true);return false;}}
+  function msgDeal(txt,err){var m=document.getElementById('dlMsg');if(!m)return;m.textContent=txt;m.style.color=err?'var(--red)':'var(--teal)';setTimeout(function(){if(m.textContent===txt)m.textContent='';},5000);}
+  function saveDeal(){
+    var a=dealsAll();
+    var cl=(document.getElementById('dlClient').value||document.getElementById('client').value||'Без названия').trim();
+    a.unshift({id:Date.now(),dt:new Date().toISOString(),client:cl,inn:(document.getElementById('dlInn').value||'').trim(),
+      item:(document.getElementById('dlItem').value||document.getElementById('item').value||'').trim(),
+      note:(document.getElementById('dlNote').value||'').trim(),
+      sum:document.getElementById('price').value,term:document.getElementById('term').value,
+      rate:(document.getElementById('oRate').textContent||''),pay:(document.getElementById('oPay').textContent||''),
+      advSum:(document.getElementById('oAdv').textContent||''),advPct:document.getElementById('adv').value,
+      marg:(document.getElementById('oMarg').textContent||''),
+      st:getState()});
+    if(dealsSave(a)){renderDeals();msgDeal('Сделка сохранена: '+cl);}
+  }
+  function openDeal(id){var d=dealsAll().filter(function(x){return x.id===id;})[0];if(!d)return;
+    setState(d.st);
+    document.getElementById('dlClient').value=d.client||'';document.getElementById('dlInn').value=d.inn||'';
+    document.getElementById('dlItem').value=d.item||'';document.getElementById('dlNote').value=d.note||'';
+    msgDeal('Открыта сделка: '+(d.client||''));tab(0);}
+  function delDeal(id){if(!confirm('Удалить сделку?'))return;dealsSave(dealsAll().filter(function(x){return x.id!==id;}));renderDeals();}
+  function renderDeals(){
+    var q=((document.getElementById('dlSearch')||{}).value||'').toLowerCase();
+    var a=dealsAll().filter(function(d){return !q||((d.client||'')+' '+(d.inn||'')+' '+(d.item||'')+' '+(d.note||'')).toLowerCase().indexOf(q)>=0;});
+    var b=document.getElementById('dealsBody');if(!b)return;
+    if(!a.length){b.innerHTML='<tr><td colspan="11" style="color:var(--muted)">Сохранённых сделок нет. Посчитайте сделку и нажмите «Сохранить сделку».</td></tr>';return;}
+    b.innerHTML=a.map(function(d){var dt=new Date(d.dt);
+      var advTxt=d.advSum?(esc(d.advSum)+(d.advPct?' <span style="color:var(--faint);font-size:11px">('+esc(d.advPct)+'%)</span>':'')):'—';
+      var margTxt=d.marg?esc(d.marg):'—';
+      return '<tr><td>'+dt.toLocaleDateString('ru-RU')+'</td><td>'+esc(d.client)+'</td><td>'+esc(d.inn)+'</td><td>'+esc(d.item)+'</td><td>'+fmtRub(parseFloat(d.sum)||0)+'</td><td>'+advTxt+'</td><td>'+esc(d.term)+' мес.</td><td>'+esc(d.rate)+'</td><td>'+esc(d.pay)+'</td><td style="font-weight:600;color:var(--teal)">'+margTxt+'</td>'+
+      '<td><button onclick="openDeal('+d.id+')" style="border:none;background:var(--blue);color:#fff;border-radius:6px;padding:4px 9px;font-size:11px;cursor:pointer;margin-right:4px">открыть</button>'+
+      '<button onclick="delDeal('+d.id+')" style="border:1px solid var(--line);background:var(--card);color:var(--muted);border-radius:6px;padding:4px 9px;font-size:11px;cursor:pointer">×</button></td></tr>';}).join('');
+  }
+  function esc(s){return String(s===undefined||s===null?'':s).replace(/[<>&"]/g,function(c){return {'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c];});}
+  // компактное состояние: сохраняем ТОЛЬКО отличия от базовых значений → короткая ссылка
+  function baseDefaults(){
+    var d={};
+    DEAL_IDS.forEach(function(id){var e=document.getElementById(id);if(!e)return;
+      d[id]=(e.type==='checkbox')?(e.defaultChecked?1:0):e.defaultValue;});
+    return d;
+  }
+  function getStateSlim(){
+    var full=getState(), base=baseDefaults(), out={};
+    DEAL_IDS.forEach(function(id){
+      var cur=(id in full.c)?full.c[id]:full.f[id];
+      if(String(cur)!==String(base[id]))out[id]=cur;
+    });
+    var s={v:1,d:out};
+    if(document.getElementById('kaskoSK')&&document.getElementById('kaskoSK').value)s.sk=document.getElementById('kaskoSK').value;
+    if(document.getElementById('kaskoPay')&&document.getElementById('kaskoPay').value!=='1')s.kp=document.getElementById('kaskoPay').value;
+    var baseSupp=JSON.stringify([{m:0,s:10},{m:6,s:10},{m:9,s:30},{m:12,s:50}]);
+    if(JSON.stringify(supp)!==baseSupp)s.sp=supp.map(function(r){return [r.m,r.s];});
+    if(kasko.some(function(x){return Number(x)!==0;}))s.ks=kasko;
+    if(kaskoTermEdited)s.kte=1;
+    if(!withVat)s.wv=0;
+    if(repayType!=='annuity')s.rt=repayType;
+    return s;
+  }
+  function applyStateSlim(s){
+    if(!s||!s.d)return false;
+    resetToBase();
+    Object.keys(s.d).forEach(function(id){var e=document.getElementById(id);if(!e)return;
+      if(e.type==='checkbox')e.checked=!!Number(s.d[id]); else e.value=s.d[id];});
+    if(s.sk){var e1=document.getElementById('kaskoSK');if(e1)e1.value=s.sk;}
+    if(s.kp){var e2=document.getElementById('kaskoPay');if(e2)e2.value=s.kp;}
+    if(s.sp)supp=s.sp.map(function(a){return {m:Number(a[0])||0,s:Number(a[1])||0};});
+    if(s.ks){kasko=s.ks.map(function(x){return Number(x)||0;});
+      var kt=document.getElementById('kaskoTerm');
+      if(kt&&Math.round(parseFloat(kt.value)||0)!==kasko.length)kt.value=kasko.length;}   // срок полиса под восстановленный массив, иначе годы обрежутся
+    kaskoTermEdited=!!s.kte;
+    withVat=(s.wv===0)?false:true;
+    document.getElementById('vatYes').className=withVat?'on':'';
+    document.getElementById('vatNo').className=withVat?'':'on';
+    repayType=s.rt||'annuity';
+    document.getElementById('rtSweep').className=repayType==='sweep'?'on':'';
+    document.getElementById('rtAnn').className=repayType==='annuity'?'on':'';
+    document.getElementById('rtDiff').className=repayType==='diff'?'on':'';
+    renderSupp();renderKasko();calc();
+    return true;
+  }
+  function b64url(str){return btoa(unescape(encodeURIComponent(str))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');}
+  function unb64url(s){s=s.replace(/-/g,'+').replace(/_/g,'/');while(s.length%4)s+='=';return decodeURIComponent(escape(atob(s)));}
+  function buildShareUrl(){
+    return location.origin+location.pathname+'#d='+b64url(JSON.stringify(getStateSlim()));
+  }
+  function shareLink(){
+    if(location.protocol==='file:'){msgDeal('Ссылка работает только когда калькулятор открыт с сайта. Сейчас файл открыт локально.',true);return;}
+    var url;
+    try{url=buildShareUrl();}catch(e){msgDeal('Не удалось сформировать ссылку.',true);return;}
+    var cl=(document.getElementById('dlClient').value||document.getElementById('client').value||'').trim();
+    var title='Расчёт лизинга'+(cl?' — '+cl:'');
+    if(navigator.share){
+      navigator.share({title:title,text:title,url:url}).then(function(){msgDeal('Ссылка отправлена.');},function(){copyUrl(url);});
+    } else copyUrl(url);
+  }
+  function copyUrl(url){
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(url).then(function(){msgDeal('Ссылка скопирована ('+url.length+' знаков) — вставьте в мессенджер, она будет кликабельной.');},function(){prompt('Скопируйте ссылку:',url);});
+    } else prompt('Скопируйте ссылку:',url);
+  }
+  function loadFromHash(){
+    if(!location.hash||location.hash.indexOf('#d=')!==0)return false;
+    var raw=location.hash.slice(3);
+    try{var s=JSON.parse(unb64url(raw));
+      if(s&&s.v===1)return applyStateSlim(s);
+      setState(s);return true;                       // совместимость со старыми длинными ссылками
+    }catch(e){return false;}
+  }
+  function dlBlob(name,text,type){
+    var blob=new Blob([text],{type:type||'application/json'});var u=URL.createObjectURL(blob);
+    var a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();
+    setTimeout(function(){URL.revokeObjectURL(u);},1000);
+  }
+  function exportDeals(){var a=dealsAll();if(!a.length){msgDeal('Нет сохранённых сделок.',true);return;}
+    dlBlob('Лизинг_резервная_копия_'+new Date().toISOString().slice(0,10)+'.json',JSON.stringify(a,null,1));
+    msgDeal('Резервная копия сохранена ('+a.length+' сделок). Этот файл не для чтения — он нужен, чтобы восстановить сделки на другом устройстве.');}
+  function importDeals(inp){var f=inp.files&&inp.files[0];if(!f)return;
+    if(!/\.json$/i.test(f.name)){msgDeal('Нужен файл резервной копии (.json), созданный кнопкой «Резервная копия». Таблицу Excel/CSV загрузить нельзя.',true);inp.value='';return;}
+    var r=new FileReader();
+    r.onload=function(){try{var add=JSON.parse(r.result);
+      if(!Array.isArray(add)||(add.length&&!add[0].st))throw 0;
+      var cur=dealsAll(),ids={};cur.forEach(function(d){ids[d.id]=1;});
+      var n=0;add.forEach(function(d){if(d&&d.id&&!ids[d.id]){cur.push(d);n++;}});
+      cur.sort(function(x,y){return (y.id||0)-(x.id||0);});
+      dealsSave(cur);renderDeals();
+      msgDeal(n?('Восстановлено сделок: '+n):'Новых сделок нет — все уже есть в списке.');
+    }catch(e){msgDeal('Это не резервная копия калькулятора. Загрузите файл, созданный кнопкой «Резервная копия».',true);}inp.value='';};
+    r.readAsText(f);}
+  function exportCSV(){var a=dealsAll();if(!a.length){msgDeal('Нет сохранённых сделок.',true);return;}
+    var rows=[['Дата','Клиент','ИНН','Предмет','Цена клиенту','Аванс','Аванс, %','Срок, мес.','Ставка','Платёж','Итоговая маржа','Комментарий']];
+    a.forEach(function(d){rows.push([new Date(d.dt).toLocaleDateString('ru-RU'),d.client||'',d.inn||'',d.item||'',d.sum||'',(d.advSum||'').replace(/\u00A0/g,' '),d.advPct||'',d.term||'',(d.rate||'').replace(/\u00A0/g,' '),(d.pay||'').replace(/\u00A0/g,' '),(d.marg||'').replace(/\u00A0/g,' '),d.note||'']);});
+    var csv='\uFEFF'+rows.map(function(r){return r.map(function(c){return '"'+String(c).replace(/"/g,'""')+'"';}).join(';');}).join('\r\n');
+    dlBlob('lizing_deals_'+new Date().toISOString().slice(0,10)+'.csv',csv,'text/csv;charset=utf-8');msgDeal('CSV выгружен — открывается в Excel.');}
 
   var KP={};
   function kpD(dt){return ('0'+dt.getDate()).slice(-2)+'.'+('0'+(dt.getMonth()+1)).slice(-2)+'.'+dt.getFullYear();}
@@ -1573,6 +1781,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
 
   document.querySelectorAll('input').forEach(function(el){el.addEventListener('input',calc);});
   renderSupp();renderKasko();calc();
+  try{loadFromHash();}catch(e){}
+  try{renderDeals();}catch(e){}
 </script>
 </body>
 </html>
