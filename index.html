@@ -147,9 +147,12 @@
       <div><label class="lbl">Клиент / лизингополучатель (для КП)</label><input id="client" type="text" value=""></div>
       <div><label class="lbl">ИНН клиента</label><input id="inn" type="text" value="" placeholder="7700000000"></div>
     </div>
+    <div class="mb12"><label class="lbl">Комментарий к сделке (для реестра)</label><input id="dlNote" type="text" placeholder="условия, договорённости, срок действия"></div>
     <div class="mb22" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
       <button onclick="generateKP()" style="padding:11px 20px;background:var(--blue);color:#fff;border:none;border-radius:9px;font-size:14px;font-weight:600;cursor:pointer">Сформировать КП (PDF)</button>
       <button onclick="shareKP()" style="padding:11px 20px;background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:9px;font-size:14px;font-weight:600;cursor:pointer">🔗 Отправить КП ссылкой</button>
+      <button onclick="saveDeal()" style="padding:11px 20px;background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:9px;font-size:14px;font-weight:600;cursor:pointer">💾 Сохранить сделку</button>
+      <button onclick="shareLink()" style="padding:11px 20px;background:var(--card);color:var(--muted);border:1px solid var(--line);border-radius:9px;font-size:14px;font-weight:600;cursor:pointer" title="Ссылка на расчёт без автооткрытия КП">🔗 Ссылка на расчёт</button>
       <span id="kpMsg" style="font-size:12px;color:var(--muted)">PDF откроется в новой вкладке — сохраните или распечатайте.</span>
     </div>
 
@@ -544,35 +547,56 @@
   <div id="t11" style="display:none">
     <h2>Мои сделки</h2>
     <div class="panel mb16">
-      <div class="pt"><div class="ptt">Сохранить текущий расчёт</div></div>
-      <div class="grid g3 mb12">
-        <div><label class="lbl">Клиент</label><input id="dlClient" type="text" placeholder="ООО «Ромашка»"></div>
-        <div><label class="lbl">ИНН</label><input id="dlInn" type="text" placeholder="7700000000"></div>
-        <div><label class="lbl">Предмет</label><input id="dlItem" type="text" placeholder="Грузовая техника"></div>
+      <div class="pt"><div class="ptt">Отчёт по КП за период</div></div>
+      <div class="toggle mb12" style="flex-wrap:wrap">
+        <button id="rpD" class="on" onclick="setPeriod('today')">Сегодня</button>
+        <button id="rpY" onclick="setPeriod('yesterday')">Вчера</button>
+        <button id="rpW" onclick="setPeriod('week')">7 дней</button>
+        <button id="rpM" onclick="setPeriod('month')">30 дней</button>
+        <button id="rpA" onclick="setPeriod('all')">Все</button>
       </div>
-      <div class="mb12"><label class="lbl">Комментарий</label><input id="dlNote" type="text" placeholder="условия, договорённости, срок действия"></div>
+      <div class="grid g4 mb12">
+        <div class="metric big"><div class="lab">КП за период</div><div class="val num" id="rpCount">—</div><div class="hint" id="rpPendCount">—</div></div>
+        <div class="metric big"><div class="lab">Сумма техники</div><div class="val num" id="rpSum">—</div><div class="hint">цена клиенту, с НДС</div></div>
+        <div class="metric big"><div class="lab">Средняя ставка</div><div class="val num" id="rpRate">—</div><div class="hint">лизинговый процент</div></div>
+        <div class="metric big"><div class="lab">Суммарная маржа</div><div class="val num" id="rpMarg" style="color:var(--teal)">—</div><div class="hint">реальная маржа PV</div></div>
+      </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <button onclick="saveDeal()" style="padding:9px 16px;border:none;background:var(--blue);color:#fff;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer">💾 Сохранить сделку</button>
-        <button onclick="shareLink()" style="padding:9px 16px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;font-size:13px;font-weight:600;cursor:pointer">🔗 Ссылка на расчёт</button>
-        <button onclick="exportCSV()" style="padding:9px 16px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;font-size:13px;font-weight:600;cursor:pointer">📊 Таблица сделок в Excel</button>
-        <button onclick="exportDeals()" style="padding:9px 16px;border:1px solid var(--line);background:var(--card);color:var(--muted);border-radius:8px;font-size:13px;font-weight:600;cursor:pointer" title="Служебный файл для переноса сделок на другое устройство">🗄 Резервная копия</button>
-        <label style="padding:9px 16px;border:1px solid var(--line);background:var(--card);color:var(--muted);border-radius:8px;font-size:13px;font-weight:600;cursor:pointer" title="Загрузить резервную копию, созданную кнопкой «Резервная копия»">↩ Восстановить из копии<input type="file" id="dlFile" accept=".json,application/json" style="display:none" onchange="importDeals(this)"></label>
+        <button onclick="copyReport()" style="padding:9px 16px;border:none;background:var(--blue);color:#fff;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer">📋 Скопировать отчёт (для руководителя)</button>
+        <button onclick="exportReportCSV()" style="padding:9px 16px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;font-size:13px;font-weight:600;cursor:pointer">📊 Отчёт в Excel (2 листа)</button>
+        <button onclick="clearKPLog()" style="padding:9px 16px;border:1px solid var(--line);background:var(--card);color:var(--muted);border-radius:8px;font-size:13px;font-weight:600;cursor:pointer">Снять отметки КП</button>
       </div>
-      <div id="dlMsg" style="margin-top:10px;font-size:12.5px;font-weight:600;color:var(--teal)"></div>
+      <div id="rpMsg" style="margin-top:10px;font-size:12.5px;font-weight:600;color:var(--teal)"></div>
     </div>
-    <div class="mb12"><input id="dlSearch" type="text" placeholder="Поиск по клиенту, ИНН, предмету…" oninput="renderDeals()" style="width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:8px;font-size:14px;background:var(--card);color:var(--ink)"></div>
+    <div class="grid g2 mb12" style="grid-template-columns:2fr 1fr;align-items:end">
+      <div><input id="dlSearch" type="text" placeholder="Поиск по клиенту, ИНН, предмету…" oninput="renderDeals()" style="width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:8px;font-size:14px;background:var(--card);color:var(--ink)"></div>
+      <div class="toggle">
+        <button id="fltAll" class="on" onclick="setDealFilter('all')">Все</button>
+        <button id="fltKp" onclick="setDealFilter('kp')">С КП</button>
+        <button id="fltNo" onclick="setDealFilter('nokp')">Без КП</button>
+      </div>
+    </div>
     <div class="tableWrap">
       <table>
-        <thead><tr><th>Дата</th><th>Клиент</th><th>ИНН</th><th>Предмет</th><th>Цена клиенту</th><th>Аванс</th><th>Срок</th><th>Ставка</th><th>Платёж</th><th>Итоговая маржа</th><th>Действия</th></tr></thead>
+        <thead><tr><th>Действия</th><th>Дата</th><th>Клиент</th><th>ИНН</th><th>Предмет</th><th>Цена клиенту</th><th>Аванс</th><th>Срок</th><th>Ставка</th><th>Платёж</th><th>Итоговая маржа</th><th>КП</th></tr></thead>
         <tbody id="dealsBody"></tbody>
+        <tfoot id="dealsFoot"></tfoot>
       </table>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:12px">
+      <button onclick="exportDeals()" style="padding:9px 16px;border:1px solid var(--line);background:var(--card);color:var(--muted);border-radius:8px;font-size:13px;font-weight:600;cursor:pointer" title="Служебный файл для переноса сделок на другое устройство">🗄 Резервная копия</button>
+      <label style="padding:9px 16px;border:1px solid var(--line);background:var(--card);color:var(--muted);border-radius:8px;font-size:13px;font-weight:600;cursor:pointer" title="Загрузить резервную копию, созданную кнопкой «Резервная копия»">↩ Восстановить из копии<input type="file" id="dlFile" accept=".json,application/json" style="display:none" onchange="importDeals(this)"></label>
+      <span id="dlMsg" style="font-size:12.5px;font-weight:600;color:var(--teal)"></span>
     </div>
     <div class="edu">
       <h3>Как это работает</h3>
-      <p><b>Сохранение.</b> «Сохранить сделку» запоминает все параметры расчёта (все вкладки, чек-боксы, этапы, КАСКО) в памяти этого браузера. «Открыть» — восстанавливает расчёт целиком.</p>
+      <p><b>Единый реестр.</b> Здесь и сохранённые расчёты, и отчётность по КП. Нажали «Сформировать КП (PDF)» или «Отправить КП ссылкой» — сделка появляется в списке автоматически, вручную сохранять не нужно. «Сохранить сделку» нужна, когда КП ещё не делаете. Повторов не возникает: у существующей сделки просто проставляется отметка о КП.</p>
+      <p><b>Период и фильтр.</b> Кнопки «Сегодня / Вчера / 7 дней / 30 дней / Все» задают период, показатели вверху считаются по КП за этот период. Переключатель «Все / С КП / Без КП» фильтрует таблицу — так сразу видно, по каким расчётам КП ещё не отправлено. В колонке <b>«КП»</b> — дата и способ отправки.</p>
+      <p><b>📋 Скопировать отчёт</b> — готовый текст со сводкой, перечнем КП и разделом «без КП». Для сообщения руководителю; содержит маржу, поэтому в общий чат отправлять не стоит. <b>📊 Отчёт в Excel</b> — файл с двумя листами: «КП» и «Сделки без КП». <b>Снять отметки КП</b> — обнуляет отметки, сами сделки остаются.</p>
+      <p><b>Сохранение — на вкладке «Калькулятор».</b> Кнопки «Сохранить сделку», «Сформировать КП (PDF)» и «Отправить КП ссылкой» находятся там же, где считается сделка. Клиент, ИНН, предмет и комментарий тоже заполняются на «Калькуляторе».</p>
       <p><b>Ссылка на расчёт.</b> Формирует короткую ссылку со всеми параметрами внутри. На компьютере она сразу копируется в буфер — вставьте её в Telegram или WhatsApp, она будет кликабельной. На телефоне откроется меню «Поделиться» — можно отправить прямо в мессенджер. У получателя откроется точно такой же расчёт. Работает, когда калькулятор открыт с сайта (не с локального файла).</p>
-      <p><b>📊 Таблица сделок в Excel</b> — обычный файл для чтения и отчёта: клиент, ИНН, цена, аванс, ставка, платёж, маржа. Открывается в Excel. Обратно в калькулятор не загружается.</p>
-      <p><b>🗄 Резервная копия / ↩ Восстановить.</b> Служебный файл (.json) — он не для чтения, в нём сохранены все параметры каждого расчёта. Нужен, чтобы перенести сделки на другой компьютер или телефон: там нажмите «Восстановить из копии» и выберите этот файл. Загрузить можно только такой файл; Excel/CSV не подойдёт.</p>
+
+      <p><b>🗄 Резервная копия / ↩ Восстановить</b> (кнопки под таблицей). Служебный файл (.json) — он не для чтения, в нём сохранены все параметры каждого расчёта. Нужен, чтобы перенести сделки на другой компьютер или телефон: там нажмите «Восстановить из копии» и выберите этот файл. Загрузить можно только такой файл; Excel/CSV не подойдёт.</p>
       <p style="color:var(--muted)"><b>Важно:</b> сделки хранятся локально в браузере этого устройства — это не общая база. Другой человек ваших сделок не видит. При очистке данных браузера список пропадёт, поэтому периодически сохраняйте резервную копию.</p>
     </div>
   </div>
@@ -1054,7 +1078,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     if(divId==='t8'){ kasko=[0,0,0]; kaskoTermEdited=false; renderKasko(); }
     calc();
   }
-  function tab(i){for(var j=0;j<12;j++){var t=document.getElementById('t'+j),b=document.getElementById('b'+j);if(t)t.style.display=(j===i)?'block':'none';if(b)b.className=(j===i)?'on':'';}}
+  function tab(i){for(var j=0;j<13;j++){var t=document.getElementById('t'+j),b=document.getElementById('b'+j);if(t)t.style.display=(j===i)?'block':'none';if(b)b.className=(j===i)?'on':'';}}
   function setVat(v){
     if(v!==withVat){
       var k=1+(val('vat')||0)/100;
@@ -1067,6 +1091,139 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
   }
   function setRT(v){repayType=v;document.getElementById('rtSweep').className=v==='sweep'?'on':'';document.getElementById('rtAnn').className=v==='annuity'?'on':'';document.getElementById('rtDiff').className=v==='diff'?'on':'';calc();}
   function syncFdef(target,v){var el=document.getElementById(target);if(el){el.value=v;}calc();}
+
+  // ================= ЖУРНАЛ КП И ОТЧЁТ =================
+  var rpPeriod='today';
+  function kpAll(){return dealsAll().filter(function(d){return d.kp&&d.kp.dt;});}
+  function kpLog(way){
+    try{
+      var a=dealsAll(), s=snapDeal(), i=findSame(a,s), now=new Date().toISOString();
+      var kp={dt:now,way:way};
+      if(i>=0){ var d=a[i]; a.splice(i,1);
+        a.unshift(Object.assign({},d,s,{id:d.id,dt:d.dt,note:d.note||s.note,kp:kp}));
+      } else {
+        a.unshift(Object.assign({id:Date.now(),dt:now,kp:kp},s));
+      }
+      if(a.length>2000)a=a.slice(0,2000);
+      dealsSave(a);
+      try{renderDeals();}catch(e){}
+      try{renderReport();}catch(e){}
+    }catch(e){}
+  }
+  function setPeriod(p){rpPeriod=p;
+    
+    [['today','rpD'],['yesterday','rpY'],['week','rpW'],['month','rpM'],['all','rpA']].forEach(function(x){
+      var b=document.getElementById(x[1]);if(b)b.className=(p===x[0])?'on':'';});
+    renderDeals();}
+  function periodRange(){
+    var now=new Date(), s=new Date(now.getFullYear(),now.getMonth(),now.getDate()), e=new Date(s.getTime()+86400000);
+    if(rpPeriod==='all')return {from:new Date(0),to:new Date(now.getTime()+86400000)};
+    if(rpPeriod==='yesterday'){e=s;s=new Date(s.getTime()-86400000);}
+    else if(rpPeriod==='week'){s=new Date(s.getTime()-6*86400000);}
+    else if(rpPeriod==='month'){s=new Date(s.getTime()-29*86400000);}
+    return {from:s,to:e};
+  }
+  function periodLabel(){
+    var r=periodRange(), f=r.from, t=new Date(r.to.getTime()-1);
+    var d=function(x){return ('0'+x.getDate()).slice(-2)+'.'+('0'+(x.getMonth()+1)).slice(-2)+'.'+x.getFullYear();};
+    if(rpPeriod==='all')return 'за всё время';
+    return (rpPeriod==='today')?('за '+d(f)):(rpPeriod==='yesterday')?('за '+d(f)):('с '+d(f)+' по '+d(t));
+  }
+  function reportRows(){
+    var r=periodRange();
+    return dealsAll().filter(function(d){if(!d.kp||!d.kp.dt)return false;var t=new Date(d.kp.dt);return t>=r.from&&t<r.to;});
+  }
+  // сделки периода без сформированного КП
+  function pendingRows(){
+    var r=periodRange();
+    return dealsAll().filter(function(d){if(d.kp&&d.kp.dt)return false;var t=new Date(d.dt);return t>=r.from&&t<r.to;});
+  }
+  function numOf(s){s=String(s===undefined?'':s);var neg=/[-−]/.test(s);return (neg?-1:1)*(parseInt(s.replace(/[^\d]/g,'')||'0',10));}
+  function rateOf(s){var m=String(s||'').replace(',','.').match(/[\d.]+/);return m?parseFloat(m[0]):0;}
+  var dealFilter='all';
+  function setDealFilter(f){dealFilter=f;
+    [['all','fltAll'],['kp','fltKp'],['nokp','fltNo']].forEach(function(x){var b=document.getElementById(x[1]);if(b)b.className=(f===x[0])?'on':'';});
+    renderDeals();}
+  function renderReport(){                        // показатели по КП за период (шапка вкладки «Мои сделки»)
+    var a=reportRows(), p=pendingRows();
+    var nSum=0,nMarg=0,rSum=0,rN=0;
+    a.forEach(function(x){nSum+=parseFloat(x.sum)||0;nMarg+=numOf(x.marg);var rr=rateOf(x.rate);if(rr){rSum+=rr;rN++;}});
+    var set=function(id,v){var e=document.getElementById(id);if(e)e.textContent=v;};
+    set('rpCount',a.length);
+    set('rpPendCount',p.length?('без КП: '+p.length):'все с КП');
+    set('rpSum',fmtRub(nSum));
+    set('rpRate',rN?fmtPct(rSum/rN):'—');
+    set('rpMarg',fmtRub(nMarg));
+  }
+  function msgRp(t,err){var m=document.getElementById('rpMsg');if(!m)return;m.textContent=t;m.style.color=err?'var(--red)':'var(--teal)';setTimeout(function(){if(m.textContent===t)m.textContent='';},5000);}
+  function reportText(){
+    var a=reportRows();
+    if(!a.length&&!pendingRows().length)return '';
+    var nSum=0,nMarg=0,rSum=0,rN=0;
+    a.forEach(function(x){nSum+=parseFloat(x.sum)||0;nMarg+=numOf(x.marg);var rr=rateOf(x.rate);if(rr){rSum+=rr;rN++;}});
+    var L=['Отчёт по КП '+periodLabel(),
+      'Сформировано КП: '+a.length,
+      'Сумма техники: '+fmtRub(nSum),
+      'Средняя ставка: '+(rN?fmtPct(rSum/rN):'—'),
+      'Суммарная маржа: '+fmtRub(nMarg),''];
+    a.slice().reverse().forEach(function(x,i){
+      var t=new Date(x.dt), tm=('0'+t.getHours()).slice(-2)+':'+('0'+t.getMinutes()).slice(-2);
+      L.push((i+1)+'. '+(x.client||'без названия')+(x.inn?' (ИНН '+x.inn+')':'')+' — '+(x.item||'')+
+        ': '+fmtRub(parseFloat(x.sum)||0)+', аванс '+x.advPct+'%, '+x.term+' мес., ставка '+x.rate+
+        ', платёж '+x.pay+', маржа '+x.marg+' ['+tm+', '+(x.way==='link'?'ссылка':'PDF')+']');
+    });
+    var p=pendingRows();
+    if(p.length){
+      L.push('');L.push('Сохранено расчётов без КП: '+p.length);
+      p.slice().reverse().forEach(function(d,i){
+        L.push('— '+(d.client||'без названия')+(d.inn?' (ИНН '+d.inn+')':'')+': '+fmtRub(parseFloat(d.sum)||0)+', '+d.term+' мес., платёж '+d.pay+(d.note?' · '+d.note:''));
+      });
+    }
+    return L.join('\n').replace(/\u00A0/g,' ');
+  }
+  function copyReport(){
+    var t=reportText();
+    if(!t){msgRp('За выбранный период данных нет.',true);return;}
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(t).then(function(){msgRp('Отчёт скопирован — вставьте в сообщение руководителю.');},function(){prompt('Скопируйте отчёт:',t);});
+    } else prompt('Скопируйте отчёт:',t);
+  }
+  function xmlEsc(s){return String(s===undefined||s===null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+  function sheetXml(name,rows){
+    var body=rows.map(function(r,ri){
+      return '<Row>'+r.map(function(c){
+        var num=(ri>0&&typeof c==='number');
+        return '<Cell><Data ss:Type="'+(num?'Number':'String')+'">'+xmlEsc(num?c:String(c))+'</Data></Cell>';
+      }).join('')+'</Row>';
+    }).join('');
+    return '<Worksheet ss:Name="'+xmlEsc(name)+'"><Table>'+body+'</Table></Worksheet>';
+  }
+  function exportReportCSV(){                       // выгрузка в Excel: два листа — КП и сделки без КП
+    var a=reportRows(), p=pendingRows();
+    if(!a.length&&!p.length){msgRp('За выбранный период данных нет.',true);return;}
+    var clean=function(s){return String(s||'').replace(/\u00A0/g,' ');};
+    var h1=['Дата','Время','Клиент','ИНН','Предмет','Цена клиенту','Аванс, %','Срок, мес.','Ставка','Платёж','Маржа','Способ'];
+    var r1=[h1];
+    a.slice().reverse().forEach(function(x){var t=new Date(x.kp&&x.kp.dt?x.kp.dt:x.dt);
+      r1.push([t.toLocaleDateString('ru-RU'),('0'+t.getHours()).slice(-2)+':'+('0'+t.getMinutes()).slice(-2),
+        x.client||'',x.inn||'',x.item||'',parseFloat(x.sum)||0,(parseFloat(x.advPct)||0),x.term||'',
+        clean(x.rate),clean(x.pay),clean(x.marg),(x.kp&&x.kp.way==='link')?'ссылка':'PDF']);});
+    var h2=['Дата сохранения','Клиент','ИНН','Предмет','Цена клиенту','Аванс, %','Срок, мес.','Ставка','Платёж','Маржа','Комментарий'];
+    var r2=[h2];
+    p.slice().reverse().forEach(function(d){var t=new Date(d.dt);
+      r2.push([t.toLocaleDateString('ru-RU'),d.client||'',d.inn||'',d.item||'',parseFloat(d.sum)||0,(parseFloat(d.advPct)||0),
+        d.term||'',clean(d.rate),clean(d.pay),clean(d.marg),d.note||'']);});
+    var xml='<?xml version="1.0" encoding="UTF-8"?>\n<?mso-application progid="Excel.Sheet"?>\n'+
+      '<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">'+
+      sheetXml('КП',r1)+sheetXml('Сделки без КП',r2)+'</Workbook>';
+    dlBlob('Отчёт_КП_'+new Date().toISOString().slice(0,10)+'.xls',xml,'application/vnd.ms-excel');
+    msgRp('Отчёт выгружен: лист «КП» ('+a.length+') и лист «Сделки без КП» ('+p.length+').');
+  }
+  function clearKPLog(){
+    if(!confirm('Снять отметки о сформированных КП? Сами сделки останутся в реестре.'))return;
+    var a=dealsAll().map(function(d){d.kp=null;return d;});
+    dealsSave(a);renderReport();try{renderDeals();}catch(e){}msgRp('Отметки о КП сняты. Сделки сохранены.');
+  }
 
   // двусторонняя синхронизация полей «Калькулятор» ↔ «Мои сделки»
   function linkFields(a,b){
@@ -1088,6 +1245,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     var url;
     try{url=buildShareUrl()+'&kp=1';}catch(e){say('Не удалось сформировать ссылку.',true);return;}
     var cl=(document.getElementById('client').value||'').trim();
+    kpLog('link');
     var isMobile=/iPhone|iPad|iPod|Android/i.test(navigator.userAgent||'')||(navigator.maxTouchPoints>1&&/Mac/i.test(navigator.platform||''));
     if(isMobile&&navigator.share){
       navigator.share({title:'КП по лизингу'+(cl?' — '+cl:''),url:url}).then(function(){say('Ссылка отправлена.');},function(){kpCopy(url,say);});
@@ -1130,19 +1288,33 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
   }
   function dealsAll(){try{return JSON.parse(localStorage.getItem('lizingDeals')||'[]');}catch(e){return [];}}
   function dealsSave(a){try{localStorage.setItem('lizingDeals',JSON.stringify(a));return true;}catch(e){msgDeal('Не удалось сохранить: хранилище браузера недоступно.',true);return false;}}
-  function msgDeal(txt,err){var m=document.getElementById('dlMsg');if(!m)return;m.textContent=txt;m.style.color=err?'var(--red)':'var(--teal)';setTimeout(function(){if(m.textContent===txt)m.textContent='';},5000);}
+  function msgDeal(txt,err){
+    ['dlMsg','kpMsg'].forEach(function(id){var m=document.getElementById(id);if(!m)return;
+      m.textContent=txt;m.style.color=err?'var(--red)':'var(--teal)';
+      setTimeout(function(){if(m.textContent===txt){m.textContent=(id==='kpMsg')?'PDF откроется в новой вкладке — сохраните или распечатайте.':'';m.style.color=(id==='kpMsg')?'var(--muted)':'var(--teal)';}},5000);});}
+  // снимок текущего расчёта (общий для сохранения сделки и записи КП)
+  function snapDeal(){
+    var g=function(id){var e=document.getElementById(id);return e?(e.value||''):'';};
+    var tx=function(id){var e=document.getElementById(id);return e?(e.textContent||''):'';};
+    return {client:(g('dlClient')||g('client')||'Без названия').trim(),
+      inn:(g('dlInn')||g('inn')).trim(), item:(g('dlItem')||g('item')).trim(), note:g('dlNote').trim(),
+      sum:g('price'), term:g('term'), advPct:g('adv'),
+      rate:tx('oRate'), pay:tx('oPay'), advSum:tx('oAdv'), marg:tx('oMarg'), st:getState()};
+  }
+  // ищем «ту же» сделку: тот же клиент+ИНН и те же ключевые параметры расчёта
+  function findSame(a,s){
+    for(var i=0;i<a.length;i++){var d=a[i];
+      if((d.client||'')===s.client && (d.inn||'')===s.inn && String(d.sum)===String(s.sum) &&
+         String(d.term)===String(s.term) && String(d.advPct)===String(s.advPct) && (d.pay||'')===s.pay)return i;}
+    return -1;
+  }
   function saveDeal(){
-    var a=dealsAll();
-    var cl=(document.getElementById('dlClient').value||document.getElementById('client').value||'Без названия').trim();
-    a.unshift({id:Date.now(),dt:new Date().toISOString(),client:cl,inn:(document.getElementById('dlInn').value||document.getElementById('inn').value||'').trim(),
-      item:(document.getElementById('dlItem').value||document.getElementById('item').value||'').trim(),
-      note:(document.getElementById('dlNote').value||'').trim(),
-      sum:document.getElementById('price').value,term:document.getElementById('term').value,
-      rate:(document.getElementById('oRate').textContent||''),pay:(document.getElementById('oPay').textContent||''),
-      advSum:(document.getElementById('oAdv').textContent||''),advPct:document.getElementById('adv').value,
-      marg:(document.getElementById('oMarg').textContent||''),
-      st:getState()});
-    if(dealsSave(a)){renderDeals();msgDeal('Сделка сохранена: '+cl);}
+    var a=dealsAll(), s=snapDeal(), i=findSame(a,s);
+    if(i>=0){ var keep=a[i]; a.splice(i,1);
+      a.unshift(Object.assign({},keep,s,{id:keep.id,dt:keep.dt}));
+      if(dealsSave(a)){renderDeals();renderReport();msgDeal('Сделка обновлена: '+s.client);} return; }
+    a.unshift(Object.assign({id:Date.now(),dt:new Date().toISOString(),kp:null},s));
+    if(dealsSave(a)){renderDeals();renderReport();msgDeal('Сделка сохранена: '+s.client);}
   }
   function openDeal(id){var d=dealsAll().filter(function(x){return x.id===id;})[0];if(!d)return;
     setState(d.st);
@@ -1156,15 +1328,30 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
   function delDeal(id){if(!confirm('Удалить сделку?'))return;dealsSave(dealsAll().filter(function(x){return x.id!==id;}));renderDeals();}
   function renderDeals(){
     var q=((document.getElementById('dlSearch')||{}).value||'').toLowerCase();
-    var a=dealsAll().filter(function(d){return !q||((d.client||'')+' '+(d.inn||'')+' '+(d.item||'')+' '+(d.note||'')).toLowerCase().indexOf(q)>=0;});
+    var r=periodRange();
+    var a=dealsAll().filter(function(d){
+      var t=new Date((d.kp&&d.kp.dt)?d.kp.dt:d.dt);
+      if(!(t>=r.from&&t<r.to))return false;
+      if(dealFilter==='kp'&&!(d.kp&&d.kp.dt))return false;
+      if(dealFilter==='nokp'&&(d.kp&&d.kp.dt))return false;
+      return !q||((d.client||'')+' '+(d.inn||'')+' '+(d.item||'')+' '+(d.note||'')).toLowerCase().indexOf(q)>=0;
+    });
+    try{renderReport();}catch(e){}
     var b=document.getElementById('dealsBody');if(!b)return;
-    if(!a.length){b.innerHTML='<tr><td colspan="11" style="color:var(--muted)">Сохранённых сделок нет. Посчитайте сделку и нажмите «Сохранить сделку».</td></tr>';return;}
+    var ft=document.getElementById('dealsFoot');
+    if(!a.length){b.innerHTML='<tr><td colspan="12" style="color:var(--muted)">За выбранный период сделок нет. Посчитайте сделку и нажмите «Сохранить сделку» либо сформируйте КП.</td></tr>';if(ft)ft.innerHTML='';return;}
+    var tSum=0,tMarg=0,nKp=0;
     b.innerHTML=a.map(function(d){var dt=new Date(d.dt);
+      tSum+=parseFloat(d.sum)||0; tMarg+=numOf(d.marg); if(d.kp&&d.kp.dt)nKp++;
       var advTxt=d.advSum?(esc(d.advSum)+(d.advPct?' <span style="color:var(--faint);font-size:11px">('+esc(d.advPct)+'%)</span>':'')):'—';
       var margTxt=d.marg?esc(d.marg):'—';
-      return '<tr><td>'+dt.toLocaleDateString('ru-RU')+'</td><td>'+esc(d.client)+'</td><td>'+esc(d.inn)+'</td><td>'+esc(d.item)+'</td><td>'+fmtRub(parseFloat(d.sum)||0)+'</td><td>'+advTxt+'</td><td>'+esc(d.term)+' мес.</td><td>'+esc(d.rate)+'</td><td>'+esc(d.pay)+'</td><td style="font-weight:600;color:var(--teal)">'+margTxt+'</td>'+
-      '<td><button onclick="openDeal('+d.id+')" style="border:none;background:var(--blue);color:#fff;border-radius:6px;padding:4px 9px;font-size:11px;cursor:pointer;margin-right:4px">открыть</button>'+
-      '<button onclick="delDeal('+d.id+')" style="border:1px solid var(--line);background:var(--card);color:var(--muted);border-radius:6px;padding:4px 9px;font-size:11px;cursor:pointer">×</button></td></tr>';}).join('');
+      var kpTxt='<span style="color:var(--amber);font-weight:600">нет</span>';
+      if(d.kp&&d.kp.dt){var kd=new Date(d.kp.dt);
+        kpTxt='<span style="color:var(--teal);font-weight:600">'+kd.toLocaleDateString('ru-RU')+'</span><br><span style="font-size:10px;color:var(--muted)">'+(d.kp.way==='link'?'ссылка':'PDF')+'</span>';}
+      return '<tr><td style="white-space:nowrap"><button onclick="openDeal('+d.id+')" style="border:none;background:var(--blue);color:#fff;border-radius:6px;padding:4px 9px;font-size:11px;cursor:pointer;margin-right:4px">открыть</button>'+
+      '<button onclick="delDeal('+d.id+')" style="border:1px solid var(--line);background:var(--card);color:var(--muted);border-radius:6px;padding:4px 9px;font-size:11px;cursor:pointer">×</button></td>'+
+      '<td>'+dt.toLocaleDateString('ru-RU')+'</td><td>'+esc(d.client)+'</td><td>'+esc(d.inn)+'</td><td>'+esc(d.item)+'</td><td>'+fmtRub(parseFloat(d.sum)||0)+'</td><td>'+advTxt+'</td><td>'+esc(d.term)+' мес.</td><td>'+esc(d.rate)+'</td><td>'+esc(d.pay)+'</td><td style="font-weight:600;color:var(--teal)">'+margTxt+'</td><td>'+kpTxt+'</td></tr>';}).join('');
+    if(ft)ft.innerHTML='<tr><td>Итого</td><td></td><td>'+a.length+' сд.</td><td></td><td></td><td>'+fmtRub(tSum)+'</td><td></td><td></td><td></td><td></td><td>'+fmtRub(tMarg)+'</td><td>'+nKp+' с КП</td></tr>';
   }
   function esc(s){return String(s===undefined||s===null?'':s).replace(/[<>&"]/g,function(c){return {'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c];});}
   // компактное состояние: сохраняем ТОЛЬКО отличия от базовых значений → короткая ссылка
@@ -1241,7 +1428,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     if(amp>=0){autoKP=/(^|&)kp=1(&|$)/.test(raw.slice(amp)); raw=raw.slice(0,amp);}
     try{var s=JSON.parse(unb64url(raw));
       var ok=(s&&s.v===1)?applyStateSlim(s):(setState(s),true);   // совместимость со старыми длинными ссылками
-      if(ok&&autoKP)setTimeout(function(){try{generateKP();}catch(e){}},600);
+      if(ok&&autoKP)setTimeout(function(){try{window.__kpAuto=1;generateKP();}finally{window.__kpAuto=0;}},600);
       return ok;
     }catch(e){return false;}
   }
@@ -1265,13 +1452,6 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
       msgDeal(n?('Восстановлено сделок: '+n):'Новых сделок нет — все уже есть в списке.');
     }catch(e){msgDeal('Это не резервная копия калькулятора. Загрузите файл, созданный кнопкой «Резервная копия».',true);}inp.value='';};
     r.readAsText(f);}
-  function exportCSV(){var a=dealsAll();if(!a.length){msgDeal('Нет сохранённых сделок.',true);return;}
-    var rows=[['Дата','Клиент','ИНН','Предмет','Цена клиенту','Аванс','Аванс, %','Срок, мес.','Ставка','Платёж','Итоговая маржа','Комментарий']];
-    a.forEach(function(d){rows.push([new Date(d.dt).toLocaleDateString('ru-RU'),d.client||'',d.inn||'',d.item||'',d.sum||'',(d.advSum||'').replace(/\u00A0/g,' '),d.advPct||'',d.term||'',(d.rate||'').replace(/\u00A0/g,' '),(d.pay||'').replace(/\u00A0/g,' '),(d.marg||'').replace(/\u00A0/g,' '),d.note||'']);});
-    var csv='\uFEFF'+rows.map(function(r){return r.map(function(c){return '"'+String(c).replace(/"/g,'""')+'"';}).join(';');}).join('\r\n');
-    dlBlob('lizing_deals_'+new Date().toISOString().slice(0,10)+'.csv',csv,'text/csv;charset=utf-8');msgDeal('CSV выгружен — открывается в Excel.');}
-
-  var KP={};
   function kpD(dt){return ('0'+dt.getDate()).slice(-2)+'.'+('0'+(dt.getMonth()+1)).slice(-2)+'.'+dt.getFullYear();}
   function generateKP(){
     if(!KP||!KP.rows){return;}
@@ -1321,6 +1501,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     var url=doc.output('bloburl');
     var w=window.open(url,'_blank');
     if(!w){var a=document.createElement('a'); a.href=url; a.target='_blank'; a.rel='noopener'; document.body.appendChild(a); a.click(); a.remove();}
+    if(!window.__kpAuto)kpLog('pdf');            // авто-запись в журнал (кроме автогенерации по ссылке у получателя)
   }
   function renderSupp(){var c=document.getElementById('suppRows');c.innerHTML='';supp.forEach(function(r,i){var d=document.createElement('div');d.className='srow';d.style.gridTemplateColumns='1fr 1fr 1.1fr auto';d.innerHTML='<div class="row"><input type="number" value="'+r.m+'" oninput="updSupp('+i+',\'m\',this.value)"><span class="unit">мес.</span></div><div class="row"><input type="number" value="'+r.s+'" oninput="updSupp('+i+',\'s\',this.value)"><span class="unit">%</span></div><div class="sval num" id="sv'+i+'">—</div><button onclick="delSupp('+i+')" title="удалить этап" style="border:none;background:transparent;color:var(--faint);font-size:16px;cursor:pointer;padding:0 4px">×</button>';c.appendChild(d);});}
   function addSupp(){supp.push({m:0,s:0});renderSupp();calc();}
