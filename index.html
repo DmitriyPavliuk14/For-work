@@ -556,7 +556,7 @@
         <button id="rpA" onclick="setPeriod('all')">Все</button>
       </div>
       <div class="grid g4 mb12">
-        <div class="metric big"><div class="lab">КП за период</div><div class="val num" id="rpCount">—</div><div class="hint" id="rpPendCount">—</div></div>
+        <div class="metric big"><div class="lab">Сделок за период</div><div class="val num" id="rpCount">—</div><div class="hint" id="rpPendCount">—</div></div>
         <div class="metric big"><div class="lab">Сумма техники</div><div class="val num" id="rpSum">—</div><div class="hint">цена клиенту, с НДС</div></div>
         <div class="metric big"><div class="lab">Средняя ставка</div><div class="val num" id="rpRate">—</div><div class="hint">лизинговый процент</div></div>
         <div class="metric big"><div class="lab">Суммарная маржа</div><div class="val num" id="rpMarg" style="color:var(--teal)">—</div><div class="hint">реальная маржа PV</div></div>
@@ -1107,7 +1107,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
       if(a.length>2000)a=a.slice(0,2000);
       dealsSave(a);
       try{renderDeals();}catch(e){}
-      try{renderReport();}catch(e){}
+      try{renderReport(a);}catch(e){}
     }catch(e){}
   }
   function setPeriod(p){rpPeriod=p;
@@ -1144,13 +1144,14 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
   function setDealFilter(f){dealFilter=f;
     [['all','fltAll'],['kp','fltKp'],['nokp','fltNo']].forEach(function(x){var b=document.getElementById(x[1]);if(b)b.className=(f===x[0])?'on':'';});
     renderDeals();}
-  function renderReport(){                        // показатели по КП за период (шапка вкладки «Мои сделки»)
-    var a=reportRows(), p=pendingRows();
-    var nSum=0,nMarg=0,rSum=0,rN=0;
-    a.forEach(function(x){nSum+=parseFloat(x.sum)||0;nMarg+=numOf(x.marg);var rr=rateOf(x.rate);if(rr){rSum+=rr;rN++;}});
+  function renderReport(list){                    // показатели по видимым сделкам за период
+    var a=(list&&list.length!==undefined)?list:dealsAll().filter(function(d){
+      var r=periodRange(), t=new Date((d.kp&&d.kp.dt)?d.kp.dt:d.dt);return t>=r.from&&t<r.to;});
+    var nSum=0,nMarg=0,rSum=0,rN=0,nKp=0;
+    a.forEach(function(x){nSum+=parseFloat(x.sum)||0;nMarg+=numOf(x.marg);var rr=rateOf(x.rate);if(rr){rSum+=rr;rN++;}if(x.kp&&x.kp.dt)nKp++;});
     var set=function(id,v){var e=document.getElementById(id);if(e)e.textContent=v;};
     set('rpCount',a.length);
-    set('rpPendCount',p.length?('без КП: '+p.length):'все с КП');
+    set('rpPendCount','из них с КП: '+nKp+(a.length-nKp?' · без КП: '+(a.length-nKp):''));
     set('rpSum',fmtRub(nSum));
     set('rpRate',rN?fmtPct(rSum/rN):'—');
     set('rpMarg',fmtRub(nMarg));
@@ -1316,15 +1317,17 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     a.unshift(Object.assign({id:Date.now(),dt:new Date().toISOString(),kp:null},s));
     if(dealsSave(a)){renderDeals();renderReport();msgDeal('Сделка сохранена: '+s.client);}
   }
-  function openDeal(id){var d=dealsAll().filter(function(x){return x.id===id;})[0];if(!d)return;
-    setState(d.st);
-    document.getElementById('dlClient').value=d.client||'';document.getElementById('dlInn').value=d.inn||'';
-    document.getElementById('dlItem').value=d.item||'';document.getElementById('dlNote').value=d.note||'';
-    // зеркалим в поля «Калькулятора» (для КП)
-    if(d.client)document.getElementById('client').value=d.client;
-    if(d.inn)document.getElementById('inn').value=d.inn;
-    if(d.item)document.getElementById('item').value=d.item;
-    msgDeal('Открыта сделка: '+(d.client||''));tab(0);}
+  function openDeal(id){
+    var d=dealsAll().filter(function(x){return String(x.id)===String(id);})[0];
+    if(!d){msgDeal('Сделка не найдена.',true);return;}
+    try{ if(d.st)setState(d.st); }catch(e){}
+    var set=function(elId,val){var e=document.getElementById(elId);if(e&&val!==undefined&&val!==null)e.value=val;};
+    set('client',d.client||''); set('inn',d.inn||''); set('item',d.item||''); set('dlNote',d.note||'');
+    try{calc();}catch(e){}
+    msgDeal('Открыта сделка: '+(d.client||''));
+    tab(0);
+    try{window.scrollTo(0,0);}catch(e){}
+  }
   function delDeal(id){if(!confirm('Удалить сделку?'))return;dealsSave(dealsAll().filter(function(x){return x.id!==id;}));renderDeals();}
   function renderDeals(){
     var q=((document.getElementById('dlSearch')||{}).value||'').toLowerCase();
