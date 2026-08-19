@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Лизинговый калькулятор</title>
+<title>Лизинг недвижимости — калькулятор</title>
 <style>
   :root{--paper:#FAFAF7;--card:#FFFFFF;--ink:#18181B;--muted:#6B7280;--faint:#9CA3AF;--line:#E7E5E0;--teal:#0F766E;--tealSoft:#ECFDF5;--amber:#B45309;--amberSoft:#FEF3E2;--blue:#1E3A5F;--red:#B91C1C}
   *{box-sizing:border-box;margin:0;padding:0}
@@ -97,20 +97,21 @@
 <div class="wrap">
   <div class="head" style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px">
     <div>
-      <div class="eyebrow">Финансовая аренда</div>
-      <h1>Лизинговый калькулятор для клиента</h1>
+      <div class="eyebrow">Финансовая аренда · недвижимость</div>
+      <h1>Калькулятор лизинга недвижимости</h1>
     </div>
-    <button onclick="resetToBase()" title="Вернуть ВСЕ параметры калькулятора к базовым" style="flex:none;padding:8px 14px;border:1px solid var(--line);background:var(--card);color:var(--muted);border-radius:8px;font-size:12.5px;font-weight:600;cursor:pointer;white-space:nowrap">↺ Сброс всего</button>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end">
+      <button onclick="resetToBase()" title="Вернуть ВСЕ параметры калькулятора к базовым" style="flex:none;padding:8px 14px;border:1px solid var(--line);background:var(--card);color:var(--muted);border-radius:8px;font-size:12.5px;font-weight:600;cursor:pointer;white-space:nowrap">↺ Сброс всего</button>
+    </div>
   </div>
   <div class="tabs">
     <button id="b0" class="on" onclick="tab(0)">Калькулятор</button>
     <button id="b1" onclick="tab(1)">График клиента</button>
     <button id="b10" onclick="tab(10)">Развёрнутый график</button>
-    <button id="b2" onclick="tab(2)">Отсрочка + кредит (ДДС)</button>
-    <button id="b9" onclick="tab(9)">Полная отсрочка Импортёра</button>
-    <button id="b6" onclick="tab(6)">Банковская гарантия</button>
+    <button id="b13" onclick="tab(13)">Банковское кредитование</button>
+    <button id="b2" onclick="tab(2)">Движение денежных средств</button>
     <button id="b7" onclick="tab(7)">Доп. расходы</button>
-    <button id="b8" onclick="tab(8)">КАСКО</button>
+    <button id="b8" onclick="tab(8)">Страхование</button>
     <button id="b3" onclick="tab(3)">Маржа и прибыль</button>
     <button id="b11" onclick="tab(11)">Мои сделки</button>
     <button id="b4" onclick="tab(4)">Методология</button>
@@ -118,12 +119,13 @@
 
   <!-- ===== TAB 0: КАЛЬКУЛЯТОР ===== -->
   <div id="t0">
-    <div id="fdefBanner" style="display:none;background:var(--tealSoft);border:1px solid var(--teal);border-left:4px solid var(--teal);border-radius:9px;padding:11px 14px;margin-bottom:14px;font-size:13px;font-weight:600;color:var(--teal)">⚑ Используются параметры из вкладки «Полная отсрочка Импортёра». Поле фондирования заблокировано (его заменяет «% за отсрочку»); спред и аванс редактируются. Кредит заменён отсрочкой Импортёра.</div>
+    <div id="bankBanner" style="display:none;background:var(--tealSoft);border:1px solid var(--teal);border-left:4px solid var(--teal);border-radius:9px;padding:11px 14px;margin-bottom:14px;font-size:13px;font-weight:600;color:var(--teal)">🏦 Классическая схема: обычный банковский кредит. Цена одна (наценки нет), поставщику 100% в мес. 0. Отсрочка, полная отсрочка и банковская гарантия отключены.</div>
+    <div id="fdefBanner" style="display:none;background:var(--tealSoft);border:1px solid var(--teal);border-left:4px solid var(--teal);border-radius:9px;padding:11px 14px;margin-bottom:14px;font-size:13px;font-weight:600;color:var(--teal)">⚑ Используются параметры из вкладки «Полная отсрочка Поставщика». Поле фондирования заблокировано (его заменяет «% за отсрочку»); спред и аванс редактируются. Кредит заменён отсрочкой Поставщика.</div>
     <div class="tabresetRow"><button class="tabreset" onclick="resetTab('t0')" title="Сбросить параметры этой вкладки к базовым">↺ Сброс вкладки</button></div>
     <h2>Основные условия</h2>
-    <div class="grid g3 mb12">
-      <div><label class="lbl">Цена для клиента</label><input id="price" type="number" value="8500000"></div>
-      <div><label class="lbl">Цена для дилера</label><input id="priceD" type="number" value="7500000"></div>
+    <div class="grid g2 mb12">
+      <div><label class="lbl">Стоимость объекта (с НДС)</label><input id="price" type="number" value="23584000"></div>
+      <div style="display:none"><label class="lbl">Цена для дилера</label><input id="priceD" type="number" value="23584000"></div>
       <div><label class="lbl">НДС, %</label><input id="vat" type="number" value="22"></div>
     </div>
     <div class="toggle mb16">
@@ -133,8 +135,34 @@
     <div class="grid g4 mb12">
       <div><label class="lbl">Фондирование, % (в т.ч. НДС)</label><input id="fund" type="number" step="0.1" value="17.5"></div>
       <div><label class="lbl">Спред, % (в т.ч. НДС)</label><input id="spread" type="number" step="0.5" value="6"></div>
-      <div><label class="lbl">Аванс клиента, %</label><input id="adv" type="number" value="10"></div>
-      <div><label class="lbl">Срок лизинга, мес.</label><input id="term" type="number" value="36"></div>
+      <div><label class="lbl">Аванс клиента, %</label><input id="adv" type="number" value="49"></div>
+      <div><label class="lbl">Срок лизинга, мес.</label><input id="term" type="number" value="12"></div>
+    </div>
+    <div class="grid g21 mb22" style="align-items:end">
+      <div>
+        <label class="lbl">График платежей клиенту</label>
+        <div class="toggle" style="flex-wrap:wrap">
+          <button id="pmAnn" class="on" onclick="setPayMode('ann')">Аннуитет</button>
+          <button id="pmL" onclick="setPayMode('light')">Лёгкое ускорение</button>
+          <button id="pmM" onclick="setPayMode('mid')">Умеренное ускорение</button>
+          <button id="pmH" onclick="setPayMode('high')">Максимальное ускорение</button>
+        </div>
+      </div>
+      <div>
+        <label class="lbl">Технические платежи в конце</label>
+        <label style="display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:600;cursor:pointer;padding-top:6px"><input type="checkbox" id="techOn" onchange="calc()">включить</label>
+      </div>
+      <div id="techBox" style="display:none">
+        <label class="lbl">Кол-во / сумма, ₽</label>
+        <div class="row" style="gap:6px">
+          <input id="techN" type="number" value="6" style="max-width:70px">
+          <input id="techAmt" type="number" value="1500">
+        </div>
+      </div>
+      <div id="accRatioBox" style="display:none">
+        <label class="lbl">Первый платёж / последний</label>
+        <input id="accRatio" type="number" step="0.05" value="1.5">
+      </div>
     </div>
     <div class="grid g4 mb22">
       <div><label class="lbl">Дата договора / аванса</label><input id="cdate" type="date" value="2026-06-17"></div>
@@ -143,7 +171,7 @@
       <div><label class="lbl">Налог на прибыль, %</label><input id="ptax" type="number" value="25"></div>
     </div>
     <div class="grid g3 mb12">
-      <div><label class="lbl">Предмет лизинга (для КП)</label><input id="item" type="text" value="Грузовая техника"></div>
+      <div><label class="lbl">Предмет лизинга (для КП)</label><input id="item" type="text" value="Офисное помещение"></div>
       <div><label class="lbl">Клиент / лизингополучатель (для КП)</label><input id="client" type="text" value=""></div>
       <div><label class="lbl">ИНН клиента</label><input id="inn" type="text" value="" placeholder="7700000000"></div>
     </div>
@@ -181,22 +209,24 @@
 
     <div class="marg mb22">
       <div class="mt" id="margTitle">Реальная маржа (приведено к дате договора)</div>
-      <div class="grid g3">
-        <div class="bare"><div class="lab">Затраты, PV</div><div class="val num" id="oCost">—</div><div class="hint" id="oCostH">Импортеру + % по кредиту</div></div>
+      <div class="grid g4">
+        <div class="bare"><div class="lab">Затраты, PV</div><div class="val num" id="oCost">—</div><div class="hint" id="oCostH">все выплаты</div></div>
         <div class="bare"><div class="lab">Выручка, PV</div><div class="val num" id="oRev">—</div><div class="hint" id="oRevH">от клиента</div></div>
-        <div class="bare"><div class="lab">Маржа</div><div class="val num" id="oMarg">—</div><div class="hint" id="oMargH">—</div></div>
+        <div class="bare"><div class="lab">Экономическая маржа</div><div class="val num" id="oMarg">—</div><div class="hint" id="oMargH">—</div></div>
+        <div class="bare"><div class="lab">Прибыль за срок</div><div class="val num" id="oProfit">—</div><div class="hint" id="oProfitH">после налога, факт</div></div>
       </div>
       <div style="margin-top:10px;font-size:11.5px;color:var(--muted)" id="margVat">—</div>
+      <div style="margin-top:6px;font-size:11.5px;color:var(--muted)">Экономическая маржа = NPV всех фактических потоков (включая НДС и лаг возврата), приведённых к дате договора по ставке фондирования. Проценты по кредиту отдельно не вычитаются — стоимость денег уже заложена в ставку дисконтирования. «Прибыль за срок» — фактический финансовый результат после налога.</div>
     </div>
 
     <div class="edu">
       <h3>Как читать эту вкладку</h3>
-      <p><b>Две цены.</b> <b>Цена клиента</b> — база лизинга, графика и КП (на неё считаются тело, платёж, удорожание). <b>Цена дилера</b> — наша закупка у Импортера; на неё считаются платежи Импортеру, отсрочка, гарантия, входной НДС и кредит. Разница цен — наценка на технике, она попадает в маржу и прибыль.</p>
+      <p><b>Две цены.</b> <b>Цена клиента</b> — база лизинга, графика и КП (на неё считаются тело, платёж, удорожание). <b>Цена дилера</b> — наша закупка у Поставщика; на неё считаются платежи Поставщику, отсрочка, гарантия, входной НДС и кредит. Разница цен — наценка на технике, она попадает в маржу и прибыль.</p>
       <p><b>Фондирование «в т.ч. НДС».</b> Банковский процент НДС не облагается (ст. 149 НК), но по вашему ценовому правилу ставка фондирования и спред задаются «с НДС», чтобы вывести лизинговый процент.</p>
       <p><b>Лизинговый процент</b> = <code>(фондирование + спред) / 1,22</code> — ставка без НДС, применяется к графику клиента. Сейчас это <span id="eRate">—</span>.</p>
       <p><b>Платёж/аванс/сумма договора</b> показаны с НДС (в подписи — без НДС). Тело лизинга и проценты считаются на сумму без НДС, НДС начисляется на платёж сверху и возмещается клиентом.</p>
       <p><b>Удорожание</b> = (все платежи − цена) / цена / срок в годах. Это метрика, которой клиент мыслит вместо ставки.</p>
-      <p><b>Реальная маржа (PV)</b> — быстрый экономический срез: выручка от клиента минус платежи Импортеру, проценты по кредиту, отсрочка, гарантия и доп. расходы, приведённые к дате договора по фактической ставке фондирования. Детальная прибыль по годам — на вкладке «Маржа и прибыль».</p>
+      <p><b>Реальная маржа (PV)</b> — быстрый экономический срез: выручка от клиента минус платежи Поставщику, проценты по кредиту, отсрочка, гарантия и доп. расходы, приведённые к дате договора по фактической ставке фондирования. Детальная прибыль по годам — на вкладке «Маржа и прибыль».</p>
     </div>
   </div>
 
@@ -208,8 +238,9 @@
       <div><span class="rl">Тело (без НДС)</span><span class="rv num" id="r1body">—</span></div>
       <div><span class="rl">Срок</span><span class="rv num" id="r1term">—</span></div>
     </div>
+    <div style="display:flex;justify-content:flex-end;margin-bottom:8px"><button onclick="tableToXLS('tblCli','График клиента','График_клиента')" style="padding:8px 14px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;font-size:12.5px;font-weight:600;cursor:pointer">📊 Выгрузить в Excel</button></div>
     <div class="tableWrap">
-      <table>
+      <table id="tblCli">
         <thead><tr><th>№</th><th>Платёж с НДС</th><th>в т.ч. НДС</th><th>Платёж без НДС</th><th>Проценты</th><th>Осн. долг</th><th>Остаток без НДС</th><th>Остаток с НДС</th></tr></thead>
         <tbody id="cliBody"></tbody>
         <tfoot id="cliFoot"></tfoot>
@@ -228,10 +259,11 @@
   <!-- ===== TAB 10: РАЗВЁРНУТЫЙ ГРАФИК ===== -->
   <div id="t10" style="display:none">
     <h2>Развёрнутый график платежей клиента</h2>
-    <p style="font-size:12.5px;color:var(--muted);margin-bottom:14px">Лизинговый платёж разложен на составляющие. Осн. долг + Проценты + Доп. услуги + КАСКО = Платёж без НДС. Столбцы, которые не включены в график клиента (через чек-боксы «включить в график платежей клиенту»), показаны нулями.</p>
+    <p style="font-size:12.5px;color:var(--muted);margin-bottom:14px">Лизинговый платёж разложен на составляющие. Осн. долг + Проценты + Доп. услуги + Страхование = Платёж без НДС. Столбцы, которые не включены в график клиента (через чек-боксы «включить в график платежей клиенту»), показаны нулями.</p>
+    <div style="display:flex;justify-content:flex-end;margin-bottom:8px"><button onclick="tableToXLS('tblExp','Развёрнутый график','Развернутый_график')" style="padding:8px 14px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;font-size:12.5px;font-weight:600;cursor:pointer">📊 Выгрузить в Excel</button></div>
     <div class="tableWrap">
-      <table>
-        <thead><tr><th>№</th><th>Дата</th><th>Осн. долг</th><th>Проценты</th><th>Доп. услуги (абонпл.)</th><th>КАСКО</th><th>Платёж без НДС</th><th>НДС</th><th>Платёж с НДС</th><th>Остаток тела</th></tr></thead>
+      <table id="tblExp">
+        <thead><tr><th>№</th><th>Дата</th><th>Осн. долг</th><th>Проценты</th><th>Доп. услуги (абонпл.)</th><th>Страхование</th><th>Платёж без НДС</th><th>НДС</th><th>Платёж с НДС</th><th>Остаток тела</th></tr></thead>
         <tbody id="expBody"></tbody>
         <tfoot id="expFoot"></tfoot>
       </table>
@@ -240,23 +272,26 @@
       <h3>Как читать</h3>
       <p><b>Осн. долг + Проценты</b> — тело аннуитета (без НДС). Проценты месяца = остаток тела × (лиз. процент / 12); доля процентов убывает, доля тела растёт.</p>
       <p><b>Доп. услуги (абонпл.)</b> — ежемесячная абонплата (напр. телематика), если включена в график клиента; надбавка к платежу без процентов.</p>
-      <p><b>КАСКО</b> — в платёж клиента попадает только при способе оплаты «в ежемесячный платёж» (вариант 2, пока не реализован); при варианте 1 = 0.</p>
+      <p><b>Страхование</b> — в платёж клиента попадает только при способе оплаты «в ежемесячный платёж» (вариант 2, пока не реализован); при варианте 1 = 0.</p>
       <p style="color:var(--muted)"><b>Важно:</b> разовые доп. расходы, отсрочка и гарантия, если они «включены в график клиента», финансируются в тело лизинга — поэтому они уже зашиты в столбцах «Осн. долг» и «Проценты», а не показаны отдельной статьёй.</p>
     </div>
   </div>
 
   <!-- ===== TAB 2: ОТСРОЧКА + КРЕДИТ (ДДС) ===== -->
   <div id="t2" style="display:none">
+    <h2>Движение денежных средств</h2>
+    <p style="font-size:12.5px;color:var(--muted);margin-bottom:14px">Помесячное движение средств лизинговой компании: поступления от клиента и возврат НДС, оплата поставщику, уплата НДС в бюджет, проценты и комиссия банка, выборка и погашение кредита. Данные собираются со всех вкладок.</p>
+    <div style="display:none">
     <div class="tabresetRow"><button class="tabreset" onclick="resetTab('t2')" title="Сбросить параметры этой вкладки к базовым">↺ Сброс вкладки</button></div>
-    <label class="offbox"><input type="checkbox" id="suppOff" onchange="calc()">Не применять отсрочку — исключить её из всех расчётов</label>
+    <label class="offbox"><input type="checkbox" id="suppOff" onchange="calc()" checked>Не применять отсрочку — исключить её из всех расчётов</label>
     <label style="display:flex;align-items:center;gap:9px;font-size:13px;font-weight:600;cursor:pointer;margin-bottom:16px"><input type="checkbox" id="suppGLP" onchange="calc()">Включить в график платежей клиенту (финансируется в тело лизинга)</label>
-    <h2>Отсрочка платежа Импортеру</h2>
+    <h2>Рассрочка оплаты Поставщику</h2>
     <div class="grid g2 mb22">
       <div><label class="lbl">Ставка за отсрочку, % годовых</label><input id="suppRate" type="number" step="0.5" value="6"></div>
     </div>
     <div class="grid g3 mb22">
-      <div class="metric big"><div class="lab">Переплата за отсрочку</div><div class="val num" id="spInt" style="color:var(--amber)">—</div><div class="hint">проценты Импортеру</div></div>
-      <div class="metric big"><div class="lab">Итого к оплате Импортеру</div><div class="val num" id="spTotal">—</div><div class="hint">тело + проценты, с НДС</div></div>
+      <div class="metric big"><div class="lab">Переплата за отсрочку</div><div class="val num" id="spInt" style="color:var(--amber)">—</div><div class="hint">проценты Поставщику</div></div>
+      <div class="metric big"><div class="lab">Итого к оплате Поставщику</div><div class="val num" id="spTotal">—</div><div class="hint">тело + проценты, с НДС</div></div>
       <div class="metric big"><div class="lab">Удорожание от отсрочки</div><div class="val num" id="spUdor">—</div><div class="hint">% от стоимости техники</div></div>
     </div>
     <div class="tableWrap">
@@ -268,19 +303,19 @@
     </div>
     <div class="edu">
       <h3>Как считается</h3>
-      <p><b>Принцип — как в кредите: процент на остаток долга (по цене дилера).</b> Импортер начисляет ставку (по умолчанию 6% годовых, помесячно ставка / 12) на непогашенный остаток задолженности за технику.</p>
-      <p>Аванс (платёж в дату договора) процентов не несёт. Проценты копятся на остаток за каждый период, но <b>вся переплата оплачивается одной суммой в последний платёж (мес. 12) вместе с 50% остатка</b> — отдельной строкой в графике Импортеру.</p>
-      <p><b>Переплата за отсрочку</b> — сумма всех процентов Импортеру за срок рассрочки. Это реальная стоимость товарного кредита Импортера.</p>
+      <p><b>Принцип — как в кредите: процент на остаток долга (по цене дилера).</b> Поставщик начисляет ставку (по умолчанию 6% годовых, помесячно ставка / 12) на непогашенный остаток задолженности за технику.</p>
+      <p>Аванс (платёж в дату договора) процентов не несёт. Проценты копятся на остаток за каждый период, но <b>вся переплата оплачивается одной суммой в последний платёж (мес. 12) вместе с 50% остатка</b> — отдельной строкой в графике Поставщику.</p>
+      <p><b>Переплата за отсрочку</b> — сумма всех процентов Поставщику за срок рассрочки. Это реальная стоимость товарного кредита Поставщика.</p>
       <p style="color:var(--muted)">Проценты за отсрочку <b>зашиты в тело кредита</b> (платятся в мес. 12 → увеличивают пик и проценты по нему) и в маржу/прибыль (отдельные строки в P&amp;L и денежном потоке). НДС на проценты по коммерческому кредиту отдельно не начисляется (спорный вопрос).</p>
     </div>
     <div style="border-top:2px solid var(--line);margin:26px 0 4px;padding-top:8px"><span style="font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--teal);font-weight:600">Кредит и казначейство (ДДС)</span></div>
-    <h2>График платежей Импортеру</h2>
+    <h2>График платежей Поставщику</h2>
     <div class="panel mb16">
       <div class="pt"><div class="ptt">Доли и суммы (с НДС, цена дилера)</div><div class="num" id="suppSum">—</div></div>
       <div id="suppRows"></div>
       <button onclick="addSupp()" style="margin-top:4px;padding:6px 12px;border:1px dashed var(--line);background:var(--card);color:var(--teal);border-radius:8px;font-size:12.5px;font-weight:600;cursor:pointer">+ добавить этап</button>
       <div id="suppDefRow" style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--line);margin-top:8px;padding-top:8px;font-size:13px"><span style="color:var(--amber)">+ Проценты за отсрочку (в мес. <span id="defM">12</span>, с 50%)</span><span class="num" id="defVal" style="font-weight:600">—</span></div>
-      <div style="display:flex;justify-content:space-between;margin-top:6px;font-weight:700;font-size:13px"><span>Итого Импортеру</span><span class="num" id="suppTotalAll">—</span></div>
+      <div style="display:flex;justify-content:space-between;margin-top:6px;font-weight:700;font-size:13px"><span>Итого Поставщику</span><span class="num" id="suppTotalAll">—</span></div>
     </div>
 
     <h2>Итог: потребность в кредите</h2>
@@ -316,6 +351,7 @@
       <p>Каждая <b>выборка</b> кредитной линии — отдельная колонка «Погашение выб. N (мес. M)»: видно, сколько гасится по каждой выборке в каждом месяце (порядок гашения — от старых к новым, FIFO). <b>«в т.ч. сумма %»</b> — проценты, начисленные за месяц. <b>«Итого за месяц»</b> (справа) = сумма погашений всех выборок за месяц. Строка <b>«Итого»</b> внизу: всего выборок, всего процентов, всего погашено (= выборки + проценты).</p>
     </div>
 
+    </div>
     <h2>Сводка по НДС</h2>
     <div class="grid g4 mb22">
       <div class="metric"><div class="lab">Входящий НДС (вычет)</div><div class="val num" id="ndsIn" style="color:var(--teal)">—</div><div class="hint">техника + доп. расходы</div></div>
@@ -325,23 +361,24 @@
     </div>
 
     <h2>Казначейский расчёт (помесячно)</h2>
+    <div style="display:flex;justify-content:flex-end;margin-bottom:8px"><button onclick="tableToXLS('tblDDS','ДДС','Движение_денежных_средств')" style="padding:8px 14px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;font-size:12.5px;font-weight:600;cursor:pointer">📊 Выгрузить в Excel</button></div>
     <div class="tableWrap">
-      <table>
-        <thead><tr><th>Мес. / дата</th><th>Клиент (приток)</th><th>Возврат НДС</th><th>Импортер (база)</th><th>Отсрочка %</th><th>Гарантия</th><th>Доп. расходы</th><th>НДС в бюджет</th><th>% кредита</th><th>Выборка</th><th>Погашение</th><th>Долг по кредиту</th><th>Дельта прихода/ухода</th></tr></thead>
+      <table id="tblDDS">
+        <thead><tr><th>Мес. / дата</th><th>Клиент (приток)</th><th>Возврат НДС</th><th>Поставщик (база)</th><th>Отсрочка %</th><th>Гарантия</th><th>Доп. расходы</th><th>НДС в бюджет</th><th>% кредита</th><th>Выборка</th><th>Погашение</th><th>Долг по кредиту</th><th>Дельта прихода/ухода</th></tr></thead>
         <tbody id="trBody"></tbody>
         <tfoot id="trFoot"></tfoot>
       </table>
     </div>
     <div class="edu">
       <h3>Как считается потребность в кредите</h3>
-      <p><b>Принцип:</b> кредит берём не на весь график Импортеру, а только на кассовый разрыв. Поступления клиента и возврат НДС из бюджета сначала накапливаются и гасят обязательства перед Импортером; кредитом добираем нехватку.</p>
-      <p><b>0-й платёж Импортеру</b> (аванс 10%) закрываем авансом клиента — без кредита.</p>
+      <p><b>Принцип:</b> кредит берём не на весь график Поставщику, а только на кассовый разрыв. Поступления клиента и возврат НДС из бюджета сначала накапливаются и гасят обязательства перед Поставщиком; кредитом добираем нехватку.</p>
+      <p><b>0-й платёж Поставщику</b> (аванс 10%) закрываем авансом клиента — без кредита.</p>
       <p><b>Возврат входящего НДС:</b> со стоимости имущества <code id="eInVat">—</code> к вычету в квартале принятия к учёту (счёт-фактура сразу на всю сумму; оплата для вычета не требуется). В этом квартале вычет сначала зачитывается против исходящего НДС, превышение возвращается на счёт через <span id="eLag">3</span> мес. после конца квартала (общий порядок камералки).</p>
       <p><b>Исходящий НДС:</b> начисляется и с аванса клиента (в квартале получения, зачитывается против входящего вычета), и с каждого лизингового платежа (22/122). НДС в бюджет платится 1/3 в каждом из 3 месяцев после квартала (порядок с 2023 г.).</p>
-      <p><b>Кредит</b> — невозобновляемая линия с выборкой под каждый платёж Импортеру. Проценты (по фактической ставке фондирования, без деления на 1,22) капают только на выбранный остаток. <b>Сумма кредита (пик)</b> = задолженность на конец выборки — она одинакова при любом типе погашения, т.к. задаётся графиком Импортера. Различаются проценты, срок и платёж.</p>
+      <p><b>Кредит</b> — невозобновляемая линия с выборкой под каждый платёж Поставщику. Проценты (по фактической ставке фондирования, без деления на 1,22) капают только на выбранный остаток. <b>Сумма кредита (пик)</b> = задолженность на конец выборки — она одинакова при любом типе погашения, т.к. задаётся графиком Поставщика. Различаются проценты, срок и платёж.</p>
       <p><b>Тип погашения:</b> <b>Cash-sweep</b> — гасим всем свободным остатком от платежей клиента (досрочно), минимум процентов; платёж плавающий (показан средний). <b>Аннуитет</b> — равный ежемесячный платёж (тело+%) за заданный срок погашения; процентов больше, излишек не гасит долг досрочно. <b>Дифференцированный</b> — равные доли тела + убывающие проценты; платёж убывает, процентов меньше, чем при аннуитете. Точные суммы по месяцам — в столбце «Погашение».</p>
-      <p><b>Зашиты в потребность в кредите:</b> проценты за отсрочку Импортеру (вся переплата — одной суммой в последний платёж Импортеру, мес. 12; столбец «Отсрочка %») и комиссия за банковскую гарантию (разово в мес. 0, до поступлений от клиента; столбец «Гарантия»). Доп. расходы (оплата провайдеру) — столбец «Доп. расходы». Все эти оттоки увеличивают кассовый разрыв, а значит пик кредита и проценты по нему. Параметры — на вкладках «Отсрочка Импортера», «Банковская гарантия» и «Доп. расходы».</p>
-      <p style="color:var(--muted)"><b>Упрощения:</b> входящий НДС учтён по дате принятия имущества (без отдельного авансового счёта-фактуры Импортеру); страхование и налог на прибыль в кассовый разрыв не включены (налог считается на вкладке «Маржа и прибыль»).</p>
+      <p><b>Зашиты в потребность в кредите:</b> проценты за отсрочку Поставщику (вся переплата — одной суммой в последний платёж Поставщику, мес. 12; столбец «Отсрочка %») и комиссия за банковскую гарантию (разово в мес. 0, до поступлений от клиента; столбец «Гарантия»). Доп. расходы (оплата провайдеру) — столбец «Доп. расходы». Все эти оттоки увеличивают кассовый разрыв, а значит пик кредита и проценты по нему. Параметры — на вкладках «Отсрочка Поставщика», «Банковская гарантия» и «Доп. расходы».</p>
+      <p style="color:var(--muted)"><b>Упрощения:</b> входящий НДС учтён по дате принятия имущества (без отдельного авансового счёта-фактуры Поставщику); страхование и налог на прибыль в кассовый разрыв не включены (налог считается на вкладке «Маржа и прибыль»).</p>
     </div>
   </div>
 
@@ -350,7 +387,7 @@
     <h2>Реальная маржа (PV, к дате договора)</h2>
     <div class="marg mb22">
       <div class="grid g3">
-        <div class="bare"><div class="lab">Затраты, PV</div><div class="val num" id="m3cost">—</div><div class="hint">Импортер + % кредита</div></div>
+        <div class="bare"><div class="lab">Затраты, PV</div><div class="val num" id="m3cost">—</div><div class="hint">Поставщик + % кредита</div></div>
         <div class="bare"><div class="lab">Выручка, PV</div><div class="val num" id="m3rev">—</div><div class="hint">платежи клиента</div></div>
         <div class="bare"><div class="lab">Маржа</div><div class="val num" id="m3marg">—</div><div class="hint" id="m3margH">—</div></div>
       </div>
@@ -375,12 +412,12 @@
 
     <div class="edu">
       <h3>Что означает каждый расчёт</h3>
-      <p><b>1. Реальная маржа (PV).</b> Экономический результат сделки одной цифрой: <code>PV(выручка от клиента) − PV(Импортеру + % по кредиту + отсрочка + гарантия + доп. расходы)</code>, всё приведено к дате договора по ставке фондирования. Отвечает на вопрос «сколько сделка стоит сегодня».</p>
-      <p><b>2. Бухгалтерская прибыль (P&amp;L), метод начисления.</b> Под ФСБУ 25/2018 лизингодатель признаёт <b>процентный (финансовый) доход</b> на чистую инвестицию в аренду — это «Проценты» из графика клиента; плюс <b>наценка на технике и доп. расходах</b> (равномерно по сроку). Расходы — проценты по привлечённому кредиту, комиссия за кредит, проценты за отсрочку Импортеру, банковская гарантия и доп. расходы (если не в ГЛП). Формула по году:</p>
+      <p><b>1. Реальная маржа (PV).</b> Экономический результат сделки одной цифрой: <code>PV(выручка от клиента) − PV(Поставщику + % по кредиту + отсрочка + гарантия + доп. расходы)</code>, всё приведено к дате договора по ставке фондирования. Отвечает на вопрос «сколько сделка стоит сегодня».</p>
+      <p><b>2. Бухгалтерская прибыль (P&amp;L), метод начисления.</b> Под ФСБУ 25/2018 лизингодатель признаёт <b>процентный (финансовый) доход</b> на чистую инвестицию в аренду — это «Проценты» из графика клиента; плюс <b>наценка на технике и доп. расходах</b> (равномерно по сроку). Расходы — проценты по привлечённому кредиту, комиссия за кредит, проценты за отсрочку Поставщику, банковская гарантия и доп. расходы (если не в ГЛП). Формула по году:</p>
       <p><code>Прибыль до налога = лиз. % доход + наценка − % по кредиту − комиссия − отсрочка − гарантия − доп. расходы</code><br><code>Налог на прибыль = 25% × max(0; прибыль до налога)</code><br><code>Чистая прибыль = прибыль до налога − налог</code></p>
       <p>Возврат основного долга (тела) в доход <b>не</b> входит — это возврат вложенных денег, а не прибыль. НДС в P&amp;L не участвует (он транзитный).</p>
-      <p><b>3. Денежный поток (cash), кассовый метод.</b> Живые деньги по годам: <code>притоки (платежи клиента с НДС + возврат НДС) − оттоки (Импортеру + НДС в бюджет + проценты и комиссия по кредиту + отсрочка + гарантия + доп. расходы + налог на прибыль)</code>. Выборка/погашение тела кредита здесь исключены — это финансирование, а не результат.</p>
-      <p><b>Почему P&amp;L и cash различаются:</b> прибыль начисляется равномерно по сроку, а деньги приходят неравномерно (крупные платежи Импортеру в первый год, возврат НДС с лагом, гашение кредита). Поэтому 1-й год по cash может быть слабее, чем по P&amp;L, а позже — наоборот.</p>
+      <p><b>3. Денежный поток (cash), кассовый метод.</b> Живые деньги по годам: <code>притоки (платежи клиента с НДС + возврат НДС) − оттоки (Поставщику + НДС в бюджет + проценты и комиссия по кредиту + отсрочка + гарантия + доп. расходы + налог на прибыль)</code>. Выборка/погашение тела кредита здесь исключены — это финансирование, а не результат.</p>
+      <p><b>Почему P&amp;L и cash различаются:</b> прибыль начисляется равномерно по сроку, а деньги приходят неравномерно (крупные платежи Поставщику в первый год, возврат НДС с лагом, гашение кредита). Поэтому 1-й год по cash может быть слабее, чем по P&amp;L, а позже — наоборот.</p>
     </div>
   </div>
 
@@ -413,40 +450,40 @@
   <div id="t7" style="display:none">
     <div class="tabresetRow"><button class="tabreset" onclick="resetTab('t7')" title="Сбросить параметры этой вкладки к базовым">↺ Сброс вкладки</button></div>
     <h2>Дополнительные расходы</h2>
-    <p style="font-size:12.5px;color:var(--muted);margin-bottom:16px">У каждой статьи две цены: <b>для ЛК</b> (платим провайдеру — идёт в «Импортер и кредит») и <b>для клиента</b> (берём с клиента, если включено в график). Разница — наценка. Оплата провайдерам в мес. 1. «Не применять» исключает статью из всех расчётов и блокирует включение в график.</p>
+    <p style="font-size:12.5px;color:var(--muted);margin-bottom:16px">Две цены: <b>для ЛК</b> (наш расход, оплата в мес. 1) и <b>для клиента</b> (берём с клиента, если включено в график). Разница — наценка. «Не применять» исключает статью из всех расчётов.</p>
 
-    <div class="panel mb12" id="aeP1">
+    <div class="panel mb12" id="aeP1" style="display:none">
       <div style="font-weight:600;margin-bottom:9px">1. Комиссия дилера <span style="font-size:11px;color:var(--muted);font-weight:400">— разово, мес. 1</span></div>
       <div class="grid g2 mb12">
-        <div><label class="lbl">Цена для ЛК (с НДС)</label><input id="ae1_lk" type="number" value="200000"></div>
-        <div><label class="lbl">Цена для клиента (с НДС)</label><input id="ae1_cli" type="number" value="200000"></div>
+        <div><label class="lbl">Цена для ЛК (с НДС)</label><input id="ae1_lk" type="number" value="0"></div>
+        <div><label class="lbl">Цена для клиента (с НДС)</label><input id="ae1_cli" type="number" value="0"></div>
       </div>
-      <label class="offbox" style="margin-bottom:9px"><input type="checkbox" id="ae1_off" onchange="calc()">Не применять — исключить из всех расчётов</label>
+      <label class="offbox" style="margin-bottom:9px"><input type="checkbox" id="ae1_off" onchange="calc()" checked>Не применять — исключить из всех расчётов</label>
       <label style="display:flex;align-items:center;gap:9px;font-size:13px;font-weight:600;cursor:pointer"><input type="checkbox" id="ae1_glp" onchange="calc()">Включить в график платежей клиенту</label>
     </div>
 
-    <div class="panel mb12" id="aeP2">
+    <div class="panel mb12" id="aeP2" style="display:none">
       <div style="font-weight:600;margin-bottom:9px">2. Телематика — оборудование <span style="font-size:11px;color:var(--muted);font-weight:400">— разово, мес. 1</span></div>
       <div class="grid g2 mb12">
-        <div><label class="lbl">Цена для ЛК (с НДС)</label><input id="ae2_lk" type="number" value="20000"></div>
-        <div><label class="lbl">Цена для клиента (с НДС)</label><input id="ae2_cli" type="number" value="20000"></div>
+        <div><label class="lbl">Цена для ЛК (с НДС)</label><input id="ae2_lk" type="number" value="0"></div>
+        <div><label class="lbl">Цена для клиента (с НДС)</label><input id="ae2_cli" type="number" value="0"></div>
       </div>
-      <label class="offbox" style="margin-bottom:9px"><input type="checkbox" id="ae2_off" onchange="calc()">Не применять — исключить из всех расчётов</label>
+      <label class="offbox" style="margin-bottom:9px"><input type="checkbox" id="ae2_off" onchange="calc()" checked>Не применять — исключить из всех расчётов</label>
       <label style="display:flex;align-items:center;gap:9px;font-size:13px;font-weight:600;cursor:pointer"><input type="checkbox" id="ae2_glp" onchange="calc()">Включить в график платежей клиенту</label>
     </div>
 
-    <div class="panel mb12" id="aeP3">
+    <div class="panel mb12" id="aeP3" style="display:none">
       <div style="font-weight:600;margin-bottom:9px">3. Телематика — абонентская плата <span style="font-size:11px;color:var(--amber);font-weight:400">— ежемесячно, без процентов</span></div>
       <div class="grid g2 mb12">
-        <div><label class="lbl">Цена для ЛК (с НДС), в мес.</label><input id="ae3_lk" type="number" value="1000"></div>
-        <div><label class="lbl">Цена для клиента (с НДС), в мес.</label><input id="ae3_cli" type="number" value="1000"></div>
+        <div><label class="lbl">Цена для ЛК (с НДС), в мес.</label><input id="ae3_lk" type="number" value="0"></div>
+        <div><label class="lbl">Цена для клиента (с НДС), в мес.</label><input id="ae3_cli" type="number" value="0"></div>
       </div>
-      <label class="offbox" style="margin-bottom:9px"><input type="checkbox" id="ae3_off" onchange="calc()">Не применять — исключить из всех расчётов</label>
+      <label class="offbox" style="margin-bottom:9px"><input type="checkbox" id="ae3_off" onchange="calc()" checked>Не применять — исключить из всех расчётов</label>
       <label style="display:flex;align-items:center;gap:9px;font-size:13px;font-weight:600;cursor:pointer"><input type="checkbox" id="ae3_glp" onchange="calc()">Включить в график платежей клиенту (+сумма к каждому платежу)</label>
     </div>
 
     <div class="panel mb16" id="aeP4">
-      <div style="font-weight:600;margin-bottom:9px">4. Доп. расходы (прочее) <span style="font-size:11px;color:var(--muted);font-weight:400">— разово, мес. 1</span></div>
+      <div style="font-weight:600;margin-bottom:9px">Доп. расходы <span style="font-size:11px;color:var(--muted);font-weight:400">— разово, мес. 1</span></div>
       <div class="grid g2 mb12">
         <div><label class="lbl">Цена для ЛК (с НДС)</label><input id="ae4_lk" type="number" value="0"></div>
         <div><label class="lbl">Цена для клиента (с НДС)</label><input id="ae4_cli" type="number" value="0"></div>
@@ -472,13 +509,13 @@
     </div>
   </div>
 
-  <!-- ===== TAB 8: КАСКО ===== -->
+  <!-- ===== TAB 8: Страхование ===== -->
   <div id="t8" style="display:none">
     <div class="tabresetRow"><button class="tabreset" onclick="resetTab('t8')" title="Сбросить параметры этой вкладки к базовым">↺ Сброс вкладки</button></div>
-    <h2>КАСКО</h2>
+    <h2>Страхование</h2>
     <div class="grid g3 mb16">
       <div><label class="lbl">Срок полиса, лет</label><input id="kaskoTerm" type="number" value="3" oninput="kaskoTermEdited=true;renderKasko();calc()"></div>
-      <div><label class="lbl">Название СК</label>
+      <div><label class="lbl">Страховая компания</label>
         <select id="kaskoSK" style="width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:8px;font-size:15px;background:var(--card);color:var(--ink)">
           <option value="">— выберите —</option>
           <option>СОГАЗ</option><option>Ингосстрах</option><option>АльфаСтрахование</option><option>РЕСО-Гарантия</option><option>Росгосстрах</option><option>ВСК</option><option>СберСтрахование</option><option>Совкомбанк Страхование</option><option>Т-Страхование (Тинькофф)</option><option>Согласие</option><option>Ренессанс Страхование</option><option>Зетта Страхование</option><option>Югория</option><option>Абсолют Страхование</option><option>Энергогарант</option><option>МАКС</option><option>Пари</option><option>Гелиос</option><option>Астро-Волга</option><option>ВТБ Страхование</option>
@@ -513,23 +550,23 @@
   <!-- ===== TAB 9: ПОЛНАЯ ОТСРОЧКА ИМПОРТЁРА ===== -->
   <div id="t9" style="display:none">
     <div class="tabresetRow"><button class="tabreset" onclick="resetTab('t9')" title="Сбросить параметры этой вкладки к базовым">↺ Сброс вкладки</button></div>
-    <label class="offbox" style="background:var(--tealSoft);border-color:var(--teal);color:var(--teal)"><input type="checkbox" id="fdefOn" onchange="calc()">Применить данные параметры к финмодели (вместо банковского кредита — полная отсрочка Импортёра)</label>
-    <h2>Полная отсрочка Импортёра</h2>
-    <p style="font-size:12.5px;color:var(--muted);margin-bottom:16px">Модель без банковского кредита: Импортёр даёт отсрочку под % на весь срок лизинга. Аванс клиента = аванс Импортёру. С 1-го платежа по графику клиента гасим Импортёру (основной долг + % за отсрочку) из поступающих лизинговых платежей. Кассовый разрыв закрываем собственными средствами.</p>
+    <label class="offbox" style="background:var(--tealSoft);border-color:var(--teal);color:var(--teal)"><input type="checkbox" id="fdefOn" onchange="calc()">Применить данные параметры к финмодели (вместо банковского кредита — полная отсрочка Поставщика)</label>
+    <h2>Полная отсрочка Поставщика</h2>
+    <p style="font-size:12.5px;color:var(--muted);margin-bottom:16px">Модель без банковского кредита: Поставщик даёт отсрочку под % на весь срок лизинга. Аванс клиента = аванс Поставщику. С 1-го платежа по графику клиента гасим Поставщику (основной долг + % за отсрочку) из поступающих лизинговых платежей. Кассовый разрыв закрываем собственными средствами.</p>
     <div class="grid g3 mb22">
       <div><label class="lbl">% за отсрочку (аналог фондирования)</label><input id="fdefRate" type="number" step="0.1" value="6"></div>
       <div><label class="lbl">Срок отсрочки, мес. (= срок лизинга)</label><input id="fdefTerm" type="number" value="36" oninput="syncFdef('term',this.value)"></div>
       <div><label class="lbl">Спред, % (= спред)</label><input id="fdefSpread" type="number" step="0.5" value="6" oninput="syncFdef('spread',this.value)"></div>
     </div>
     <div class="grid g4 mb22">
-      <div class="metric big"><div class="lab">Долг Импортёру (после аванса)</div><div class="val num" id="fdDebt">—</div><div class="hint">цена дилера − аванс</div></div>
-      <div class="metric big"><div class="lab">Платёж Импортёру (аннуитет)</div><div class="val num" id="fdAnn">—</div><div class="hint" id="fdAnnH">осн. долг + %</div></div>
+      <div class="metric big"><div class="lab">Долг Поставщику (после аванса)</div><div class="val num" id="fdDebt">—</div><div class="hint">цена дилера − аванс</div></div>
+      <div class="metric big"><div class="lab">Платёж Поставщику (аннуитет)</div><div class="val num" id="fdAnn">—</div><div class="hint" id="fdAnnH">осн. долг + %</div></div>
       <div class="metric big"><div class="lab">Переплата за отсрочку</div><div class="val num" id="fdInt" style="color:var(--amber)">—</div><div class="hint">% за весь срок</div></div>
       <div class="metric big"><div class="lab">Пик собственных средств</div><div class="val num" id="fdOwn" style="color:var(--blue)">—</div><div class="hint">макс. отвлечение</div></div>
     </div>
     <div class="tableWrap">
       <table>
-        <thead><tr><th>Мес. / дата</th><th>Платёж Импортёру</th><th>в т.ч. осн. долг</th><th>в т.ч. проценты</th><th>Остаток долга</th></tr></thead>
+        <thead><tr><th>Мес. / дата</th><th>Платёж Поставщику</th><th>в т.ч. осн. долг</th><th>в т.ч. проценты</th><th>Остаток долга</th></tr></thead>
         <tbody id="fdBody"></tbody>
         <tfoot id="fdFoot"></tfoot>
       </table>
@@ -537,9 +574,9 @@
     <div class="edu">
       <h3>Как работает</h3>
       <p><b>Ставка клиенту</b> = (% за отсрочку + спред) / 1,22 — «% за отсрочку» встаёт на место фондирования. При включении на вкладке «Калькулятор» появляется предупреждение и блокируются поля фондирования, спреда и аванса.</p>
-      <p><b>Погашение Импортёру</b> — аннуитет (основной долг + проценты за отсрочку) на весь срок лизинга. Проценты за отсрочку (коммерческий кредит) НДС не облагаются (ст. 823 ГК, пп. 15 п. 3 ст. 149 НК).</p>
-      <p><b>Без банковского кредита.</b> Аванс клиента идёт в аванс Импортёру; кассовый разрыв (гарантия в мес. 0, доп. расходы в мес. 1, разница НДС) закрываем собственными средствами — процент на них не начисляется. Комиссия за кредит = 0. Отсрочка на вкладке «Отсрочка Импортера» автоматически отключается (её заменяет эта модель).</p>
-      <p><b>НДС.</b> Входной НДС с цены дилера — к вычету в квартале постановки на учёт (в мес. 0), несмотря на то что Импортёру платим весь срок.</p>
+      <p><b>Погашение Поставщику</b> — аннуитет (основной долг + проценты за отсрочку) на весь срок лизинга. Проценты за отсрочку (коммерческий кредит) НДС не облагаются (ст. 823 ГК, пп. 15 п. 3 ст. 149 НК).</p>
+      <p><b>Без банковского кредита.</b> Аванс клиента идёт в аванс Поставщику; кассовый разрыв (гарантия в мес. 0, доп. расходы в мес. 1, разница НДС) закрываем собственными средствами — процент на них не начисляется. Комиссия за кредит = 0. Отсрочка на вкладке «Отсрочка Поставщика» автоматически отключается (её заменяет эта модель).</p>
+      <p><b>НДС.</b> Входной НДС с цены дилера — к вычету в квартале постановки на учёт (в мес. 0), несмотря на то что Поставщику платим весь срок.</p>
     </div>
   </div>
 
@@ -601,35 +638,76 @@
     </div>
   </div>
 
+  <!-- ===== TAB 13: БАНКОВСКОЕ КРЕДИТОВАНИЕ ===== -->
+  <div id="t13" style="display:none">
+    <label class="offbox" style="background:var(--tealSoft);border-color:var(--teal);color:var(--teal)"><input type="checkbox" id="bankOn" onchange="applyScheme(this.checked?'classic':'captive')">Использовать обычный банковский кредит — классическая схема лизинга</label>
+    <h2>Банковское кредитование</h2>
+    <p style="font-size:12.5px;color:var(--muted);margin-bottom:16px">Классическая схема: лизингополучатель — предмет лизинга — поставщик — лизинговая компания — банк. ЛК покупает предмет у поставщика (100% оплата в мес. 0), передаёт клиенту в лизинг и финансирует покупку обычным банковским кредитом. Рассрочка поставщика, отсрочка Поставщика и банковская гарантия в этом режиме не применяются.</p>
+    <div class="mb16">
+      <label class="lbl">Тип погашения кредита</label>
+      <div class="toggle" style="max-width:520px">
+        <button id="bkSweep" onclick="setRT('sweep')">Cash-sweep</button>
+        <button id="bkAnn" class="on" onclick="setRT('annuity')">Аннуитет</button>
+        <button id="bkDiff" onclick="setRT('diff')">Дифференц.</button>
+      </div>
+    </div>
+    <div class="grid g3 mb22">
+      <div><label class="lbl">Ставка кредита, % годовых</label><input id="bankRate" type="number" step="0.1" value="17.5" oninput="syncBank('fund',this.value)"></div>
+      <div><label class="lbl">Срок кредита, мес.</label><input id="bankTerm" type="number" value="36" oninput="bankTermEdited=true;calc()"></div>
+      <div><label class="lbl">Комиссия банка, %</label><input id="bankComm" type="number" step="0.1" value="1" oninput="syncBank('comm',this.value)"></div>
+    </div>
+    <div class="grid g4 mb22">
+      <div class="metric big"><div class="lab">Сумма кредита</div><div class="val num" id="bkAmt">—</div><div class="hint">выборка по кредиту</div></div>
+      <div class="metric big"><div class="lab">Платёж банку</div><div class="val num" id="bkPay">—</div><div class="hint" id="bkPayH">—</div></div>
+      <div class="metric big"><div class="lab">Проценты по кредиту</div><div class="val num" id="bkInt" style="color:var(--amber)">—</div><div class="hint">за весь срок</div></div>
+      <div class="metric big"><div class="lab">Комиссия банка</div><div class="val num" id="bkComm">—</div><div class="hint">разово в мес. 0</div></div>
+    </div>
+    <div class="tableWrap">
+      <table>
+        <thead><tr><th>Мес. / дата</th><th>Выборка</th><th>Платёж банку</th><th>в т.ч. проценты</th><th>в т.ч. основной долг</th><th>Остаток долга</th></tr></thead>
+        <tbody id="bkBody"></tbody>
+        <tfoot id="bkFoot"></tfoot>
+      </table>
+    </div>
+    <div class="edu">
+      <h3>Как работает</h3>
+      <p><b>Переключение схемы</b> — кнопки «Кэптивная / Классическая» в шапке калькулятора. В классической схеме вкладки «Отсрочка + кредит (ДДС)», «Полная отсрочка Поставщика» и «Банковская гарантия» скрываются, в кэптивной скрывается эта вкладка. Тип погашения кредита выбирается здесь же.</p><p><b>Схема.</b> ЛК платит поставщику 100% стоимости в мес. 0. Аванс лизингополучателя уменьшает потребность в финансировании, остальное закрывается кредитом банка одним траншем. Цена одна — наценки на предмете нет, доход ЛК формируется процентом (спред) и доп. услугами.</p>
+      <p><b>Ставка клиенту</b> = (ставка кредита + спред) / 1,22. Ставка кредита — то же поле, что «Фондирование» на вкладке «Калькулятор»: меняется в любом месте, синхронизируется.</p>
+      <p><b>Срок кредита</b> по умолчанию равен сроку лизинга; можно задать свой. Тип погашения (cash-sweep / аннуитет / дифференцированный) выбирается на вкладке «Отсрочка + кредит (ДДС)» и действует и здесь.</p>
+      <p><b>Комиссия банка</b> считается от суммы выборки (цена с НДС − аванс) и <b>зашивается в тело лизинга</b>: клиент возвращает её платежами с начислением лизингового процента, поэтому расходом периода она не является.</p><p><b>Доп. расходы</b> в классической схеме по умолчанию отключены (галки «не применять») — их нечем покрывать без наценки. При необходимости включите их и перевыставьте клиенту через «включить в график платежей».</p><p><b>Что отключается</b> при включённой галке: рассрочка поставщику (становится 100% в мес. 0), отсрочка Поставщика, полная отсрочка, банковская гарантия. <b>Продолжают работать:</b> НДС с лагом возврата, Страхование, доп. расходы, ускоренные графики платежей клиенту, расчёт маржи, P&amp;L и ДДС.</p>
+    </div>
+  </div>
+
   <!-- ===== TAB 4: МЕТОДОЛОГИЯ ===== -->
   <div id="t4" style="display:none">
     <div class="edu" style="border-left-color:var(--blue)">
       <h3>Общая логика калькулятора</h3>
-      <p>Калькулятор моделирует сделку, где <b>лизингодатель</b> покупает технику у Импортера с рассрочкой, передаёт её клиенту в финансовый лизинг на 36 мес. и финансирует кассовый разрыв банковским кредитом. Считаются четыре вещи: <b>ставка и платёж клиенту</b>, <b>потребность в кредите</b>, <b>прибыль</b> и <b>денежный поток</b>.</p>
+      <p>Калькулятор моделирует сделку, где <b>лизингодатель</b> покупает технику у Поставщика с рассрочкой, передаёт её клиенту в финансовый лизинг на 36 мес. и финансирует кассовый разрыв банковским кредитом. Считаются четыре вещи: <b>ставка и платёж клиенту</b>, <b>потребность в кредите</b>, <b>прибыль</b> и <b>денежный поток</b>.</p>
     </div>
     <div class="edu">
       <h3>1. Ценообразование и две цены</h3>
-      <p><b>Цена клиента</b> (база лизинга/КП) и <b>цена дилера</b> (закупка у Импортера). Разница — <b>наценка на технике</b>; в прибыли признаётся <b>равномерно по сроку лизинга</b> (как финансовый доход, ближе к ФСБУ 25 и налоговому учёту), в реальной марже PV учитывается автоматически.</p>
-      <p>Ставка фондирования и спред задаются «в т.ч. НДС». Лизинговый процент без НДС = <code>(фонд. + спред)/1,22</code> и применяется к телу без НДС (на базе цены клиента). Платёж — аннуитет; НДС 22% сверху. Аванс 10% от цены клиента уменьшает тело; Импортеру в мес. 0 платим долю от цены дилера.</p>
+      <p><b>Цена клиента</b> (база лизинга/КП) и <b>цена дилера</b> (закупка у Поставщика). Разница — <b>наценка на технике</b>; в прибыли признаётся <b>равномерно по сроку лизинга</b> (как финансовый доход, ближе к ФСБУ 25 и налоговому учёту), в реальной марже PV учитывается автоматически.</p>
+      <p>Ставка фондирования и спред задаются «в т.ч. НДС». Лизинговый процент без НДС = <code>(фонд. + спред)/1,22</code> и применяется к телу без НДС (на базе цены клиента). Платёж — аннуитет; НДС 22% сверху. Аванс 10% от цены клиента уменьшает тело; Поставщику в мес. 0 платим долю от цены дилера.</p>
+      <p><b>График платежей клиенту.</b> Кроме аннуитета доступны три ускоренных (дигрессивных) варианта: <b>лёгкое</b> (первый платёж больше последнего в 1,2 раза), <b>умеренное</b> (1,5) и <b>максимальное</b> (2,0); коэффициент можно задать вручную. Платежи убывают геометрически, а их размер подобран так, чтобы приведённая стоимость всех платежей равнялась телу лизинга по той же ставке — поэтому лизинговый процент и эффективная ставка не меняются. Клиент быстрее гасит тело, значит процентов начисляется меньше: <b>сумма договора и удорожание снижаются</b>. Поступления приходят раньше, поэтому кассовый разрыв закрывается быстрее и проценты по кредиту тоже меньше. Условия и график расчётов с кредиторами (Поставщик, банк) при этом не меняются. Абонплата и доп. услуги в графике клиента остаются равномерными.</p>
       <p><b>Эффективная ставка</b> (карточка на «Калькуляторе») — годовая эффективная по IRR потока платежей клиента без НДС: приравнивает профинансированное тело к дисконтированным лизинговым платежам. Метрика для сравнения сделок.</p>
     </div>
     <div class="edu">
       <h3>2. Налоги</h3>
-      <p><b>НДС 22%</b> с 01.01.2026 (ФЗ № 425-ФЗ). Входящий НДС — с <b>цены дилера</b> (что платим Импортеру), к вычету в квартале принятия к учёту; исходящий — с лизинговых платежей клиента (база — цена клиента), 1/3 помесячно после квартала. Превышение вычета возвращается из бюджета с лагом.</p>
+      <p><b>НДС 22%</b> с 01.01.2026 (ФЗ № 425-ФЗ). Входящий НДС — с <b>цены дилера</b> (что платим Поставщику), к вычету в квартале принятия к учёту; исходящий — с лизинговых платежей клиента (база — цена клиента), 1/3 помесячно после квартала. Превышение вычета возвращается из бюджета с лагом.</p>
       <p><b>Налог на имущество = 0:</b> движимое имущество не облагается с 2019 г. (действует в 2026 г.).</p>
       <p><b>Транспортный налог:</b> по технике, регистрируемой как ТС/самоходная машина, платит тот, на кого зарегистрировано. В этой сделке регистрация <b>на клиента</b> → налог платит клиент сам, в график лизинга он не входит.</p>
       <p><b>Налог на прибыль 25%</b> (с 2025 г.) — на бухгалтерскую прибыль лизингодателя.</p>
     </div>
     <div class="edu">
       <h3>3. Кредит и казначейство</h3>
-      <p>Невозобновляемая линия с выборкой под график Импортеру за вычетом поступлений клиента и возврата НДС. Проценты — по фактической ставке фондирования. Сумма кредита = пик задолженности, срок = до полного погашения за счёт платежей клиента.</p>
-      <p>В кассовый разрыв (а значит в кредит) зашиты: <b>проценты за отсрочку Импортеру</b> — на остаток долга, платятся в даты платежей Импортеру; <b>комиссия за банковскую гарантию</b> — разово в мес. 0 (за 2 дня до договора). Оба увеличивают пик кредита и проценты по нему.</p>
-      <p><b>Этапы оплаты Импортеру</b> редактируются (кнопка «+ добавить этап», удаление строки); доли вводятся вручную, сумма ≠ 100% подсвечивается. Вся модель пересчитывается автоматически.</p>
+      <p>Невозобновляемая линия с выборкой под график Поставщику за вычетом поступлений клиента и возврата НДС. Проценты — по фактической ставке фондирования. Сумма кредита = пик задолженности, срок = до полного погашения за счёт платежей клиента.</p>
+      <p>В кассовый разрыв (а значит в кредит) зашиты: <b>проценты за отсрочку Поставщику</b> — на остаток долга, платятся в даты платежей Поставщику; <b>комиссия за банковскую гарантию</b> — разово в мес. 0 (за 2 дня до договора). Оба увеличивают пик кредита и проценты по нему.</p>
+      <p><b>Этапы оплаты Поставщику</b> редактируются (кнопка «+ добавить этап», удаление строки); доли вводятся вручную, сумма ≠ 100% подсвечивается. Вся модель пересчитывается автоматически.</p>
     </div>
     <div class="edu">
       <h3>4. Банковская гарантия</h3>
       <p>Стоимость = ставка (по умолчанию 3% годовых) × база × срок/12. База = 90% от цены дилера с НДС. Срок 12 мес. Оплата единовременно за 2 дня до заключения договоров (в модели — мес. 0). Учтена в потребности в кредите и в марже/прибыли (строка «Банковская гарантия»).</p>
-      <p><b>«Включить в график платежей клиенту».</b> На вкладках «Отсрочка Импортера» и «Банковская гарантия» есть чек-бокс: при включении стоимость (переплата за отсрочку / комиссия гарантии) финансируется в тело лизинга и возвращается клиентом аннуитетом по лизинговому проценту (наценки нет). Тогда эти статьи перестают быть расходом ЛК и приносят процентный доход. По умолчанию выключено — статья остаётся расходом лизингодателя.</p>
+      <p><b>«Включить в график платежей клиенту».</b> На вкладках «Отсрочка Поставщика» и «Банковская гарантия» есть чек-бокс: при включении стоимость (переплата за отсрочку / комиссия гарантии) финансируется в тело лизинга и возвращается клиентом аннуитетом по лизинговому проценту (наценки нет). Тогда эти статьи перестают быть расходом ЛК и приносят процентный доход. По умолчанию выключено — статья остаётся расходом лизингодателя.</p>
     </div>
     <div class="edu">
       <h3>5. Дополнительные расходы</h3>
@@ -638,18 +716,23 @@
       <p><b>Если в ГЛП</b> — наценка по статье признаётся в прибыли (равномерно для разовой, помесячно для абонплаты), а оплата провайдеру финансируется как обычный отток. <b>Если не в ГЛП</b> — статья целиком наш расход и уменьшает маржу. В любом случае оплата провайдеру зашита в кассовый разрыв (а значит в кредит), входной НДС по ней — к вычету.</p>
     </div>
     <div class="edu">
-      <h3>6. КАСКО</h3>
+      <h3>6. Страхование</h3>
       <p>Срок полиса (базово = сроку лизинга), комиссия (базово 30%) и цена полиса по годам (без НДС). <b>Комиссия</b> по каждому году = цена × комиссия% — это доход лизинговой компании (агентское вознаграждение, без НДС).</p>
       <p><b>Вариант 1 (единовременно за год по счёту):</b> в график клиента ничего не добавляется — клиент платит полис страховщику сам; в финмодель идёт доход = комиссия за каждый год (в P&amp;L по году полиса, в денежный поток — в год оплаты, в маржу PV — приведённо). <b>Вариант 2 (в ежемесячный платёж)</b> — пока не реализован.</p>
     </div>
     <div class="edu">
-      <h3>7. Полная отсрочка Импортёра</h3>
-      <p>Альтернативная модель финансирования <b>без банковского кредита</b>: Импортёр даёт отсрочку под % на весь срок лизинга. Включается чек-боксом на одноимённой вкладке.</p>
-      <p>При включении: ставка клиенту = <code>(% за отсрочку + спред)/1,22</code> (% за отсрочку встаёт на место фондирования); на «Калькуляторе» появляется предупреждение, блокируются фондирование, спред и аванс; отсрочка на вкладке «Отсрочка Импортера» автоматически отключается; комиссия за кредит = 0.</p>
-      <p><b>Механика:</b> аванс клиента = аванс Импортёру (равный %); с 1-го платежа гасим Импортёру аннуитетом (основной долг + % за отсрочку) из лизинговых платежей клиента. Проценты за отсрочку (коммерческий кредит, ст. 823 ГК) НДС не облагаются (пп. 15 п. 3 ст. 149 НК). Кассовый разрыв (гарантия в мес. 0, доп. расходы в мес. 1, разница НДС) закрывается <b>собственными средствами</b> — процент на них не начисляется; показан «пик собственных средств». Входной НДС — к вычету в мес. 0, несмотря на оплату Импортёру весь срок.</p>
+      <h3>7. Полная отсрочка Поставщика</h3>
+      <p>Альтернативная модель финансирования <b>без банковского кредита</b>: Поставщик даёт отсрочку под % на весь срок лизинга. Включается чек-боксом на одноимённой вкладке.</p>
+      <p>При включении: ставка клиенту = <code>(% за отсрочку + спред)/1,22</code> (% за отсрочку встаёт на место фондирования); на «Калькуляторе» появляется предупреждение, блокируются фондирование, спред и аванс; отсрочка на вкладке «Отсрочка Поставщика» автоматически отключается; комиссия за кредит = 0.</p>
+      <p><b>Механика:</b> аванс клиента = аванс Поставщику (равный %); с 1-го платежа гасим Поставщику аннуитетом (основной долг + % за отсрочку) из лизинговых платежей клиента. Проценты за отсрочку (коммерческий кредит, ст. 823 ГК) НДС не облагаются (пп. 15 п. 3 ст. 149 НК). Кассовый разрыв (гарантия в мес. 0, доп. расходы в мес. 1, разница НДС) закрывается <b>собственными средствами</b> — процент на них не начисляется; показан «пик собственных средств». Входной НДС — к вычету в мес. 0, несмотря на оплату Поставщику весь срок.</p>
     </div>
     <div class="edu">
-      <h3>8. Результат</h3>
+      <h3>8. Экономическая маржа и прибыль</h3>
+      <p><b>Экономическая маржа</b> — NPV всех фактических денежных потоков сделки (платежи клиента, выплаты Поставщику, отсрочка, гарантия, доп. расходы, НДС с учётом лага возврата, комиссия банка, комиссия Страхование), приведённых к дате договора по ставке фондирования. Проценты по кредиту отдельной строкой не вычитаются: стоимость денег во времени уже заложена в ставку дисконтирования, иначе она считалась бы дважды.</p>
+      <p><b>Прибыль за срок</b> — фактический финансовый результат после налога, совпадает с итогом P&amp;L и с чистым денежным потоком. Это ответ на вопрос «сколько заработали на сделке».</p>
+      <p>Показатели отвечают на разные вопросы: маржа — сколько сделка стоит сегодня с учётом времени; прибыль — сколько денег останется по факту. Экономическая маржа не зависит от типа погашения кредита, прибыль — зависит (разные проценты банку).</p>
+      <p><b>Признание наценки.</b> Наценка на технике признаётся не равномерно, а пропорционально чистой инвестиции в аренду — как проценты, убывающим потоком (ФСБУ 25 / МСФО 16). За весь срок сумма та же, но распределение по годам корректное.</p>
+      <h3>9. Результат</h3>
       <p>Прибыль показана двумя методами: начисления (P&amp;L, процентный доход и наценки минус стоимость кредита, отсрочки, гарантии, доп. расходов и налог) и кассовым (живые деньги по годам). Реальная маржа (PV) — экономический итог, приведённый к дате договора, со всеми затратами.</p>
       <p style="color:var(--muted)"><b>Допущения:</b> аннуитет; выкупная символическая; страхование не учтено; входящий НДС — по дате принятия имущества; комиссия за кредит — разовая от пиковой суммы; проценты за отсрочку, гарантия и доп. расходы зашиты в кредит и маржу.</p>
     </div>
@@ -1035,9 +1118,69 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
 <script>
   var withVat=true;
   var repayType='annuity';
-  var supp=[{m:0,s:10},{m:6,s:10},{m:9,s:30},{m:12,s:50}];
+  var supp=[{m:0,s:100}];
   var kasko=[0,0,0];
   var kaskoTermEdited=false;
+  var scheme='classic';
+  var SCHEME_HIDE={classic:[],captive:['b13']};   // какие вкладки прячем
+  var capSaved=null;                       // снимок кэптивных параметров перед уходом в классику
+  function applyScheme(s,skipCalc){
+    var prev=scheme;
+    scheme=(s==='classic')?'classic':'captive';
+    var pd=document.getElementById('priceD'), so=document.getElementById('suppOff'), go=document.getElementById('guarOff');
+    if(scheme==='classic'){
+      if(prev!=='classic'){                                                     // запоминаем всё, что перетрёт классика
+        var rp=document.getElementById('repterm');
+        var aeOffs={}; ['ae1_off','ae2_off','ae3_off','ae4_off'].forEach(function(id){var e=document.getElementById(id);if(e)aeOffs[id]=e.checked;});
+        capSaved={priceD:pd?pd.value:null, supp:JSON.parse(JSON.stringify(supp)),
+                  suppOff:so?so.checked:false, guarOff:go?go.checked:false,
+                  repterm:rp?rp.value:null, aeOffs:aeOffs};
+      }
+      ['ae1_off','ae2_off','ae3_off','ae4_off'].forEach(function(id){var e=document.getElementById(id);if(e)e.checked=true;});  // в классике доп. расходы базово не применяются
+    } else if(capSaved){                                                        // возвращаем кэптивные параметры
+      if(pd&&capSaved.priceD!==null)pd.value=capSaved.priceD;
+      if(capSaved.supp&&capSaved.supp.length)supp=JSON.parse(JSON.stringify(capSaved.supp));
+      if(so)so.checked=capSaved.suppOff;
+      if(go)go.checked=capSaved.guarOff;
+      var rp2=document.getElementById('repterm');
+      if(rp2&&capSaved.repterm!==null)rp2.value=capSaved.repterm;
+      if(capSaved.aeOffs)Object.keys(capSaved.aeOffs).forEach(function(id){var e=document.getElementById(id);if(e)e.checked=capSaved.aeOffs[id];});
+      capSaved=null;
+      try{renderSupp();}catch(e){}
+    }
+    var cap=document.getElementById('schCap'), cls=document.getElementById('schCls');
+    if(cap)cap.className=(scheme==='captive')?'on':'';
+    if(cls)cls.className=(scheme==='classic')?'on':'';
+    ['b2','b9','b6','b13'].forEach(function(id){var b=document.getElementById(id);if(b)b.style.display='';});
+    (SCHEME_HIDE[scheme]||[]).forEach(function(id){var b=document.getElementById(id);if(b)b.style.display='none';});
+    var bo=document.getElementById('bankOn');
+    if(bo)bo.checked=(scheme==='classic');
+    if(scheme==='classic'){                       // если открыта скрытая вкладка — вернёмся на Калькулятор
+      var hidden=SCHEME_HIDE.classic.map(function(x){return 't'+x.slice(1);});
+      for(var i=0;i<hidden.length;i++){var t=document.getElementById(hidden[i]);if(t&&t.style.display==='block'){tab(0);break;}}
+    } else {
+      var t13=document.getElementById('t13'); if(t13&&t13.style.display==='block')tab(0);
+    }
+    if(!skipCalc)calc();
+  }
+  function setScheme(s){applyScheme(s);}
+  var bankTermEdited=false;
+  function syncBank(target,v){var el=document.getElementById(target);if(el)el.value=v;calc();}
+  var payMode='ann';                    // ann | light | mid | high
+  var ACC_RATIO={light:1.2,mid:1.5,high:2.0};   // отношение первого платежа к последнему
+  function applyPayMode(m){payMode=m||'ann';
+    [['ann','pmAnn'],['light','pmL'],['mid','pmM'],['high','pmH']].forEach(function(x){
+      var b=document.getElementById(x[1]);if(b)b.className=(payMode===x[0])?'on':'';});
+    var box=document.getElementById('accRatioBox');
+    if(box)box.style.display=(payMode==='ann')?'none':'block';}
+  function setPayMode(m){payMode=m;
+    [['ann','pmAnn'],['light','pmL'],['mid','pmM'],['high','pmH']].forEach(function(x){
+      var b=document.getElementById(x[1]);if(b)b.className=(m===x[0])?'on':'';});
+    var box=document.getElementById('accRatioBox');
+    if(box)box.style.display=(m==='ann')?'none':'block';
+    var r=document.getElementById('accRatio');
+    if(r&&m!=='ann')r.value=ACC_RATIO[m];
+    calc();}
 
   function fmtRub(n){if(!isFinite(n))n=0;return new Intl.NumberFormat('ru-RU',{maximumFractionDigits:0}).format(Math.round(n))+' \u20BD';}
   function fmtPct(n,d){d=(d===undefined)?1:d;return (isFinite(n)?n:0).toLocaleString('ru-RU',{minimumFractionDigits:d,maximumFractionDigits:d})+' %';}
@@ -1064,8 +1207,9 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     document.getElementById('rtSweep').className='';
     document.getElementById('rtAnn').className='on';
     document.getElementById('rtDiff').className='';
-    supp=[{m:0,s:10},{m:6,s:10},{m:9,s:30},{m:12,s:50}];
-    kasko=[0,0,0]; kaskoTermEdited=false;
+    supp=[{m:0,s:100}];
+    kasko=[0,0,0]; kaskoTermEdited=false; bankTermEdited=false;
+    applyPayMode('ann'); applyScheme('classic',true);
     renderSupp();renderKasko();
     calc();
   }
@@ -1073,12 +1217,12 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     var d=document.getElementById(divId); if(!d)return;
     d.querySelectorAll('input').forEach(function(el){ if(el.type==='checkbox')el.checked=el.defaultChecked; else el.value=el.defaultValue; });
     d.querySelectorAll('select').forEach(function(el){ el.selectedIndex=0; });
-    if(divId==='t0'){ withVat=true; document.getElementById('vatYes').className='on'; document.getElementById('vatNo').className=''; }
-    if(divId==='t2'){ supp=[{m:0,s:10},{m:6,s:10},{m:9,s:30},{m:12,s:50}]; repayType='annuity'; document.getElementById('rtSweep').className=''; document.getElementById('rtAnn').className='on'; document.getElementById('rtDiff').className=''; renderSupp(); }
+    if(divId==='t0'){ withVat=true; applyPayMode('ann'); document.getElementById('vatYes').className='on'; document.getElementById('vatNo').className=''; }
+    if(divId==='t2'){ supp=[{m:0,s:100}]; repayType='annuity'; document.getElementById('rtSweep').className=''; document.getElementById('rtAnn').className='on'; document.getElementById('rtDiff').className=''; renderSupp(); }
     if(divId==='t8'){ kasko=[0,0,0]; kaskoTermEdited=false; renderKasko(); }
     calc();
   }
-  function tab(i){for(var j=0;j<13;j++){var t=document.getElementById('t'+j),b=document.getElementById('b'+j);if(t)t.style.display=(j===i)?'block':'none';if(b)b.className=(j===i)?'on':'';}}
+  function tab(i){for(var j=0;j<14;j++){var t=document.getElementById('t'+j),b=document.getElementById('b'+j);if(t)t.style.display=(j===i)?'block':'none';if(b)b.className=(j===i)?'on':'';}}
   function setVat(v){
     if(v!==withVat){
       var k=1+(val('vat')||0)/100;
@@ -1089,7 +1233,10 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     document.getElementById('vatNo').className=v?'':'on';
     calc();
   }
-  function setRT(v){repayType=v;document.getElementById('rtSweep').className=v==='sweep'?'on':'';document.getElementById('rtAnn').className=v==='annuity'?'on':'';document.getElementById('rtDiff').className=v==='diff'?'on':'';calc();}
+  function setRT(v){repayType=v;
+    [['rtSweep','sweep'],['rtAnn','annuity'],['rtDiff','diff'],['bkSweep','sweep'],['bkAnn','annuity'],['bkDiff','diff']].forEach(function(x){
+      var b=document.getElementById(x[0]);if(b)b.className=(v===x[1])?'on':'';});
+    calc();}
   function syncFdef(target,v){var el=document.getElementById(target);if(el){el.value=v;}calc();}
 
   // ================= ЖУРНАЛ КП И ОТЧЁТ =================
@@ -1259,10 +1406,10 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
   }
 
   // ================= СДЕЛКИ: состояние, сохранение, ссылка, экспорт =================
-  var DEAL_IDS=['price','priceD','vat','fund','spread','adv','term','cdate','vatlag','comm','ptax','item','client','inn','suppOff','suppGLP','suppRate','repterm','guarOff','guarGLP','guarRate','guarBase','guarTerm','ae1_lk','ae1_cli','ae1_off','ae1_glp','ae2_lk','ae2_cli','ae2_off','ae2_glp','ae3_lk','ae3_cli','ae3_off','ae3_glp','ae4_lk','ae4_cli','ae4_off','ae4_glp','kaskoTerm','kaskoComm','fdefOn','fdefRate','fdefTerm','fdefSpread'];
+  var DEAL_IDS=['price','priceD','vat','fund','spread','adv','term','cdate','vatlag','comm','ptax','item','client','inn','accRatio','techOn','techN','techAmt','bankOn','bankTerm','suppOff','suppGLP','suppRate','repterm','guarOff','guarGLP','guarRate','guarBase','guarTerm','ae1_lk','ae1_cli','ae1_off','ae1_glp','ae2_lk','ae2_cli','ae2_off','ae2_glp','ae3_lk','ae3_cli','ae3_off','ae3_glp','ae4_lk','ae4_cli','ae4_off','ae4_glp','kaskoTerm','kaskoComm','fdefOn','fdefRate','fdefTerm','fdefSpread'];
   var DEAL_SELECTS=['kaskoSK','kaskoPay'];
   function getState(){
-    var s={f:{},c:{},s:{},supp:supp,kasko:kasko,kte:kaskoTermEdited,wv:withVat,rt:repayType};
+    var s={f:{},c:{},s:{},supp:supp,kasko:kasko,kte:kaskoTermEdited,wv:withVat,rt:repayType,pm:payMode,sch:scheme};
     DEAL_IDS.forEach(function(id){var e=document.getElementById(id);if(!e)return;if(e.type==='checkbox')s.c[id]=e.checked?1:0;else s.f[id]=e.value;});
     DEAL_SELECTS.forEach(function(id){var e=document.getElementById(id);if(e)s.s[id]=e.value;});
     return s;
@@ -1285,6 +1432,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     document.getElementById('rtSweep').className=repayType==='sweep'?'on':'';
     document.getElementById('rtAnn').className=repayType==='annuity'?'on':'';
     document.getElementById('rtDiff').className=repayType==='diff'?'on':'';
+    applyPayMode(s.pm||'ann');
+    applyScheme(s.sch||'captive',true);
     renderSupp();renderKasko();calc();
   }
   function dealsAll(){try{return JSON.parse(localStorage.getItem('lizingDeals')||'[]');}catch(e){return [];}}
@@ -1379,6 +1528,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     if(kaskoTermEdited)s.kte=1;
     if(!withVat)s.wv=0;
     if(repayType!=='annuity')s.rt=repayType;
+    if(payMode!=='ann')s.pm=payMode;
+    if(scheme!=='captive')s.sch=scheme;
     return s;
   }
   function applyStateSlim(s){
@@ -1400,6 +1551,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     document.getElementById('rtSweep').className=repayType==='sweep'?'on':'';
     document.getElementById('rtAnn').className=repayType==='annuity'?'on':'';
     document.getElementById('rtDiff').className=repayType==='diff'?'on':'';
+    applyPayMode(s.pm||'ann');
+    applyScheme(s.sch||'captive',true);
     renderSupp();renderKasko();calc();
     return true;
   }
@@ -1434,6 +1587,34 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
       if(ok&&autoKP)setTimeout(function(){try{window.__kpAuto=1;generateKP();}finally{window.__kpAuto=0;}},600);
       return ok;
     }catch(e){return false;}
+  }
+  // --- экспорт любой таблицы в Excel ---
+  function xlEsc(s){return String(s===undefined||s===null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+  function tableToXLS(tblId,sheetName,fileName){
+    var t=document.getElementById(tblId); if(!t){alert('Таблица не найдена');return;}
+    var out=[];
+    ['thead','tbody','tfoot'].forEach(function(part){
+      var sec=t.getElementsByTagName(part)[0]; if(!sec)return;
+      var trs=sec.getElementsByTagName('tr');
+      for(var i=0;i<trs.length;i++){
+        var cells=trs[i].children, row=[];
+        for(var j=0;j<cells.length;j++){
+          var txt=(cells[j].textContent||'').replace(/\u00A0/g,' ').replace(/\s+/g,' ').trim();
+          var num=txt.replace(/[^0-9,.\-−]/g,'').replace(/−/g,'-').replace(/\s/g,'').replace(',','.');
+          var isNum=/^-?\d+(\.\d+)?$/.test(num)&&/[0-9]/.test(txt)&&!/[а-яА-Я]/.test(txt);
+          row.push(isNum?{n:parseFloat(num)}:{s:txt});
+        }
+        if(row.length)out.push(row);
+      }
+    });
+    if(!out.length){alert('Нет данных для выгрузки');return;}
+    var body=out.map(function(r){return '<Row>'+r.map(function(c){
+      return c.n!==undefined?'<Cell><Data ss:Type="Number">'+c.n+'</Data></Cell>'
+                            :'<Cell><Data ss:Type="String">'+xlEsc(c.s)+'</Data></Cell>';}).join('')+'</Row>';}).join('');
+    var xml='<?xml version="1.0" encoding="UTF-8"?>\n<?mso-application progid="Excel.Sheet"?>\n'+
+      '<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">'+
+      '<Worksheet ss:Name="'+xlEsc(sheetName)+'"><Table>'+body+'</Table></Worksheet></Workbook>';
+    dlBlob(fileName+'_'+new Date().toISOString().slice(0,10)+'.xls',xml,'application/vnd.ms-excel');
   }
   function dlBlob(name,text,type){
     var blob=new Blob([text],{type:type||'application/json'});var u=URL.createObjectURL(blob);
@@ -1475,7 +1656,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     doc.text('Предлагаем приобретение техники в финансовый лизинг на следующих условиях:', Mg, y); y+=18;
     var terms=[['Предмет лизинга',KP.item],['Стоимость техники (с НДС '+KP.vat+'%)',fmtRub(KP.priceVat)],
      ['Авансовый платёж ('+KP.adv+'%)',fmtRub(KP.advGross)],['Срок лизинга',KP.N+' мес.'],
-     ['Ежемесячный лизинговый платёж (с НДС)',fmtRub(KP.annGross)],['Удорожание',fmtPct(KP.udorYear)+'/год (за срок '+fmtPct(KP.udorTotal)+')'],
+     [KP.acc?'Лизинговый платёж (с НДС), 1-й → последний':'Ежемесячный лизинговый платёж (с НДС)',KP.acc?(fmtRub(KP.annGross)+' → '+fmtRub(KP.payLast)):fmtRub(KP.annGross)],['Удорожание',fmtPct(KP.udorYear)+'/год (за срок '+fmtPct(KP.udorTotal)+')'],
      ['Общая сумма договора лизинга (с НДС)',fmtRub(KP.sumGross)],['Удорожание в рублях (переплата)',fmtRub(KP.overpay)]];
     doc.setFontSize(10);
     terms.forEach(function(r){
@@ -1536,7 +1717,23 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     var priceDNet=priceDVat/k;
     var inputVat=priceDVat-priceDNet;          // входной НДС — с цены дилера
     var markupNet=priceNet-priceDNet;          // наценка на технике (без НДС)
-    var fdefOn=chk('fdefOn');                   // полная отсрочка Импортёра
+    var bankOn=chk('bankOn');                   // классическая схема: обычный банковский кредит
+    if(bankOn){
+      var pdEl=document.getElementById('priceD'), pEl=document.getElementById('price');
+      if(pdEl&&pEl&&pdEl.value!==pEl.value)pdEl.value=pEl.value;      // одна цена: наценки нет
+      priceDVat=priceVat; priceDNet=priceNet;
+      inputVat=priceDVat-priceDNet; markupNet=0;                     // одна цена → наценки нет
+      supp=[{m:0,s:100}];                                            // поставщику 100% в мес. 0
+      var so=document.getElementById('suppOff'); if(so&&!so.checked)so.checked=true;   // отсрочка не применяется
+      var go=document.getElementById('guarOff'); if(go&&!go.checked)go.checked=true;   // гарантия не применяется
+      var fo=document.getElementById('fdefOn'); if(fo&&fo.checked)fo.checked=false;    // полная отсрочка выключена
+      var nTerm=Math.max(1,Math.round(val('term')));                                  // срок лизинга (N объявляется ниже)
+      var btEl=document.getElementById('bankTerm');
+      if(btEl&&!bankTermEdited&&Math.round(parseFloat(btEl.value)||0)!==nTerm)btEl.value=nTerm;  // срок кредита = сроку лизинга
+      var rtEl=document.getElementById('repterm');
+      if(rtEl&&btEl)rtEl.value=Math.max(1,Math.round(parseFloat(btEl.value)||nTerm));  // срок погашения = сроку кредита
+    }
+    var fdefOn=chk('fdefOn');                   // полная отсрочка Поставщика
     var fundEff=fdefOn?val('fdefRate'):fund;    // при полной отсрочке «фондирование» = % за отсрочку
     var leaseRate=(fundEff+spread)/k;           // лиз. процент без НДС, % год
     var iLease=leaseRate/100/12, iFund=fund/100/12;
@@ -1562,7 +1759,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     function aeCliAt(t){var s=0;ae.forEach(function(e){if(!e.applied||!e.inGLP||e.type!=='monthly')return;if(t>=1&&t<=N)s+=e.cliVat;});return s;}
     function aeInVatAt(t){var s=0;ae.forEach(function(e){if(!e.applied)return;if(e.type==='once'){if(t===1)s+=e.lkVat*rVat;}else if(t>=1&&t<=N)s+=e.lkVat*rVat;});return s;}
     var subGross=aeCliAt(1);
-    // --- отсрочка Импортеру: проценты на остаток долга дилеру; вся сумма платится в последний платёж ---
+    // --- отсрочка Поставщику: проценты на остаток долга дилеру; вся сумма платится в последний платёж ---
     var iSupp=(chk('suppOff')||fdefOn)?0:val('suppRate')/100/12;
     var sp2=supp.map(function(r){return {m:Math.round(r.m),base:priceDVat*((Number(r.s)||0)/100)};}).sort(function(a,b){return a.m-b.m;});
     var lastSuppM=0; sp2.forEach(function(p){if(p.m>lastSuppM)lastSuppM=p.m;});
@@ -1581,25 +1778,73 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     // --- «включить в график клиента»: стоимость финансируется в тело лизинга (без НДС, наценка 0) ---
     var suppGLP=(!chk('suppOff'))&&chk('suppGLP');
     var guarGLP=(!chk('guarOff'))&&chk('guarGLP');
-    var body=priceNet-advNet+aeBodyNet+(suppGLP?sTotInt:0)+(guarGLP?guarCost:0);
-    var markupYear={};
-    for(var mt=1;mt<=N;mt++){var myr=yOf(mt); markupYear[myr]=(markupYear[myr]||0)+markupNet/N;}
-    var annNet=iLease===0?body/N:body*iLease/(1-Math.pow(1+iLease,-N));
-    var annGross=annNet*k;
+    // Классика: комиссия банка считается от суммы выборки (цена с НДС − аванс) и зашивается
+    // в тело лизинга — клиент возвращает её платежами с начислением лизингового процента.
+    var commInBody=bankOn?(comm/100*Math.max(0,priceDVat-advGross)):0;
+    var body=priceNet-advNet+aeBodyNet+(suppGLP?sTotInt:0)+(guarGLP?guarCost:0)+commInBody;
+    var markupYear={};   // заполняется ниже — пропорционально чистой инвестиции (ФСБУ 25)
+
+    // --- график платежей клиенту: аннуитет либо ускоренный (геометрическое убывание) ---
+    var accOn=(payMode!=='ann');
+    var accR=accOn?Math.max(1.01,parseFloat((document.getElementById('accRatio')||{}).value)||ACC_RATIO[payMode]||1.5):1;
+    var payNet=[];                       // payNet[t] — платёж без НДС, t = 1..N
+    var annNet;                          // базовый аннуитет (для сравнения и совместимости)
+    annNet=iLease===0?body/N:body*iLease/(1-Math.pow(1+iLease,-N));
+    // --- технический хвост: последние techN платежей по фиксированной сумме (с НДС) ---
+    var techOn=chk('techOn');
+    var techN=techOn?Math.max(0,Math.min(N-1,Math.round(val('techN')))):0;
+    var techAmtG=techOn?Math.max(0,val('techAmt')):0;      // с НДС
+    var techAmtN=techAmtG/k;                               // без НДС
+    var NR=N-techN;                                        // число «рабочих» платежей
+    var techPV=0; for(var tt=NR+1;tt<=N;tt++)techPV+=techAmtN/Math.pow(1+iLease,tt);
+    var bodyR=Math.max(0,body-techPV);                     // тело, которое гасят рабочие платежи
+    if(techOn&&NR>0){
+      var annR=iLease===0?bodyR/NR:bodyR*iLease/(1-Math.pow(1+iLease,-NR));
+      if(!accOn||NR<2){ for(var pt=1;pt<=NR;pt++)payNet[pt]=annR; }
+      else {
+        var qT=Math.pow(1/accR,1/(NR-1)), xT=qT/(1+iLease);
+        var sT=(Math.abs(xT-1)<1e-12)?NR:(1-Math.pow(xT,NR))/(1-xT);
+        var p1T=bodyR*(1+iLease)/sT;
+        for(var pt=1;pt<=NR;pt++)payNet[pt]=p1T*Math.pow(qT,pt-1);
+      }
+      for(var pt=NR+1;pt<=N;pt++)payNet[pt]=techAmtN;
+      annNet=payNet[1];
+    }
+    else if(!accOn||N<2){
+      for(var pt=1;pt<=N;pt++)payNet[pt]=annNet;
+    } else {
+      var qA=Math.pow(1/accR,1/(N-1));                    // коэффициент убывания платежа
+      var xA=qA/(1+iLease);
+      var sA=(Math.abs(xA-1)<1e-12)?N:(1-Math.pow(xA,N))/(1-xA);
+      var p1=body*(1+iLease)/sA;                          // первый платёж: PV всех платежей = тело
+      for(var pt=1;pt<=N;pt++)payNet[pt]=p1*Math.pow(qA,pt-1);
+    }
+    function payNetAt(t){return (t>=1&&t<=N)?payNet[t]:0;}
+    var annGross=payNet[1]*k;            // платёж 1-го месяца с НДС (для карточек и КП)
 
     // --- график клиента (аннуитет на тело без НДС) ---
     var cli=[],bal=body,sIntCli=0,yIncome={};
     for(var t=1;t<=N;t++){
-      var intr=bal*iLease, pr=annNet-intr; bal-=pr; if(bal<0.5)bal=0; sIntCli+=intr;
+      var pNet=payNetAt(t);
+      var intr=bal*iLease, pr=pNet-intr; bal-=pr; if(bal<0.5)bal=0; sIntCli+=intr;
       var yr=yOf(t); yIncome[yr]=(yIncome[yr]||0)+intr;
-      cli.push({t:t,payG:annGross,vat:annNet*(vat/100),payN:annNet,intr:intr,pr:pr,balN:bal,balG:bal*k});
+      cli.push({t:t,payG:pNet*k,vat:pNet*(vat/100),payN:pNet,intr:intr,pr:pr,balN:bal,balG:bal*k});
     }
-    var sumNet=advNet+annNet*N, sumGross=sumNet*k;
+    var payNetTot=0; for(var pt=1;pt<=N;pt++)payNetTot+=payNet[pt];
+    var sumNet=advNet+payNetTot, sumGross=sumNet*k;
+    // Признание наценки по ФСБУ 25 / МСФО 16: пропорционально чистой инвестиции в аренду,
+    // то есть в той же пропорции, что и начисленные проценты (убывающим потоком), а не равномерно.
+    var intByM=[], intSum=0;
+    (function(){var b2=body;for(var t=1;t<=N;t++){var i2=b2*iLease;intByM[t]=i2;intSum+=i2;b2-=payNetAt(t)-i2;if(b2<0)b2=0;}})();
+    for(var mt=1;mt<=N;mt++){var myr=Math.min(yOf(mt),Math.ceil(N/12));
+      var share=intSum>0?(intByM[mt]/intSum):(1/N);
+      markupYear[myr]=(markupYear[myr]||0)+markupNet*share;}
+
     var udorTotal=(sumNet-priceNet)/priceNet*100, udorYear=udorTotal/(N/12);
 
     // --- денежные потоки и НДС по кварталам ---
     function suppAt(t){var s=0;supp.forEach(function(r){if(Math.round(r.m)===t)s+=priceDVat*(r.s/100);});return s;}
-    function clientAt(t){if(t===0)return advGross;if(t>=1&&t<=N)return annGross+aeCliAt(t);return 0;}
+    function clientAt(t){if(t===0)return advGross;if(t>=1&&t<=N)return payNetAt(t)*k+aeCliAt(t);return 0;}
     function dateAt(t){return new Date(start.getFullYear(),start.getMonth()+t,start.getDate());}
     function qkey(d){return d.getFullYear()*4+Math.floor(d.getMonth()/3);}
     var MAXM=N+24, startQ=qkey(start), qOut={}, qIn={};
@@ -1650,7 +1895,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
       paidOff = lastPos<0 ? -1 : (lastPos>=MAXM ? -1 : lastPos+1);
       return {rows:rows,peak:peak,drawnTot:drawnTot,firstDraw:firstDraw,paidOff:paidOff,sInt:sInt,yInt:yInt,D0:D0,annPay:annPay,diffPrin:diffPrin,payList:payList,drawEnd:drawEnd,R:R,method:method,infeasible:infeasible,repEnd:repEnd};
     }
-    // --- полная отсрочка Импортёра: без банковского кредита, аннуитет Импортёру, разрыв — собственными средствами ---
+    // --- полная отсрочка Поставщика: без банковского кредита, аннуитет Поставщику, разрыв — собственными средствами ---
     function runDef(){
       var impAdv=priceDVat*adv/100, impP=priceDVat-impAdv, iDef=val('fdefRate')/100/12;
       var impAnn=iDef===0?impP/N:impP*iDef/(1-Math.pow(1+iDef,-N));
@@ -1668,26 +1913,35 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     }
     var p1,commCost,T;
     if(fdefOn){ T=runDef(); commCost=0; p1={peak:0,firstDraw:-1}; }
-    else { p1=run(0,-1,repayType,repTerm); commCost=comm/100*p1.peak; T=run(commCost, p1.firstDraw>=0?p1.firstDraw:0, repayType, repTerm); }
+    else { p1=run(0,-1,repayType,repTerm);
+      commCost=bankOn?commInBody:(comm/100*p1.peak);
+      T=run(commCost, p1.firstDraw>=0?p1.firstDraw:0, repayType, repTerm); }
 
     // --- реальная маржа PV (при полной отсрочке дисконтируем по ставке отсрочки) ---
     var discRate=fdefOn?T.iDef:iFund;
     var suppPVnet=0;
     if(fdefOn){T.rows.forEach(function(r){suppPVnet+=(r.oS/k)/Math.pow(1+discRate,r.t);});}
     else{supp.forEach(function(r){suppPVnet+=(priceDVat*(r.s/100)/k)/Math.pow(1+discRate,r.m);});}
-    var annPVnet=discRate===0?annNet*N:annNet*(1-Math.pow(1+discRate,-N))/discRate;
+    var annPVnet=0; for(var pt=1;pt<=N;pt++)annPVnet+=payNet[pt]/Math.pow(1+discRate,pt);
     var aeCliPV=0, aeLKPV=0;
     for(var t=1;t<=N;t++){aeCliPV+=(aeCliAt(t)/k)/Math.pow(1+discRate,t);}
     ae.forEach(function(e){if(!e.applied)return; if(e.type==='once'){aeLKPV+=e.lkNet/Math.pow(1+discRate,1);} else {for(var t=1;t<=N;t++)aeLKPV+=e.lkNet/Math.pow(1+discRate,t);}});
-    var cliPVnet=advNet+annPVnet+aeCliPV;
     var credPV=0; T.rows.forEach(function(r){credPV+=r.interest/Math.pow(1+discRate,r.t);});
-    var costPV=suppPVnet+credPV+sIntPV+guarCost+aeLKPV;
+    // ЭКОНОМИЧЕСКАЯ МАРЖА: NPV фактических операционных потоков по ставке фондирования.
+    // Проценты по кредиту НЕ вычитаем — стоимость денег уже заложена в ставку дисконтирования
+    // (иначе двойной счёт). Потоки берём как есть, с НДС и его лагом возврата.
+    var cliPVnet=0, costPV=0;
+    T.rows.forEach(function(r){
+      var d=Math.pow(1+discRate,r.t);
+      cliPVnet+=(r.inC+r.inV)/d;                                   // от клиента + возврат НДС
+      costPV  +=(r.oS+r.oDef+r.oGuar+r.oAE+r.oV+r.oC)/d;           // Поставщику, отсрочка, гарантия, доп., НДС в бюджет, комиссия
+    });
     var marginPV=cliPVnet-costPV;
 
     // --- число лет = срок лизинга (хвосты НДС/кредита сворачиваем в последний год) ---
     var YMAX=Math.ceil(N/12); if(YMAX<1)YMAX=1;
 
-    // --- КАСКО: комиссия по годам (вариант 1 — доход ЛК, без НДС) ---
+    // --- Страхование: комиссия по годам (вариант 1 — доход ЛК, без НДС) ---
     if(!kaskoTermEdited){var ktEl=document.getElementById('kaskoTerm');var want=Math.max(1,Math.ceil(N/12));if(ktEl&&Math.round(parseFloat(ktEl.value)||0)!==want){ktEl.value=want;renderKasko();}}
     var kaskoComm=val('kaskoComm'), kaskoPay=(document.getElementById('kaskoPay')||{}).value||'1';
     var kaskoCommYear={}, kaskoTotPrice=0, kaskoTotComm=0, kaskoPV=0, kaskoCommArr=[];
@@ -1704,19 +1958,23 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
       var income=yIncome[y]||0;
       var markup=markupYear[y]||0;
       var cred=T.yInt[y]||0;
-      var commY=(y===1)?commCost:0;
+      var commY=(bankOn?0:((y===1)?commCost:0));   // в классике комиссия зашита в тело и возмещается клиентом
       var before=income+markup+(aeNetYear[y]||0)+(kaskoCommYear[y]||0)-cred-commY-(suppGLP?0:(sIntYear[y]||0))-((!guarGLP&&y===1)?guarCost:0);
       var tax=ptax/100*Math.max(0,before);
       var net=before-tax;
       yProfit[y]=before;yTax[y]=tax;yNet[y]=net;
       totBefore+=before;totTax+=tax;totNet+=net;
     }
+    var pEl=document.getElementById('oProfit');
+    if(pEl){pEl.textContent=fmtRub(totNet);
+      var pH=document.getElementById('oProfitH');
+      if(pH)pH.textContent='после налога · '+fmtPct(totNet/priceNet*100)+' от цены';}
 
     // --- денежный поток по годам ---
     var cf={};
     for(var y=1;y<=YMAX;y++){cf[y]={inC:0,inV:0,oS:0,oV:0,fin:0,suppInt:0,guar:0,oAE:0,kasko:0};}
     T.rows.forEach(function(r){if(r.t>=1){var y=Math.min(yOf(r.t),YMAX);if(!cf[y])return;cf[y].inC+=r.inC;cf[y].inV+=r.inV;cf[y].oS+=r.oS;cf[y].oV+=r.oV;cf[y].fin+=r.interest;cf[y].oAE+=(r.oAE||0);}});
-    // месяц 0 (аванс+Импортер+возврат/уплата НДС в мес.0 при vatLag=0) отнесём к 1 году
+    // месяц 0 (аванс+Поставщик+возврат/уплата НДС в мес.0 при vatLag=0) отнесём к 1 году
     cf[1].inC+=clientAt(0);cf[1].oS+=(fdefOn?T.rows[0].oS:suppAt(0));cf[1].fin+=commCost;cf[1].guar=guarCost;
     cf[1].inV+=(vatIn[0]||0);cf[1].oV+=(vatOut[0]||0);cf[1].oAE+=aeLKAt(0);
     for(var y=1;y<=YMAX;y++){cf[y].ptax=yTax[y]||0;cf[y].suppInt=sIntYear[y]||0;cf[y].kasko=kaskoCommYear[y]||0;cf[y].net=cf[y].inC+cf[y].inV-cf[y].oS-cf[y].oV-cf[y].fin-cf[y].suppInt-cf[y].guar-cf[y].oAE+cf[y].kasko-cf[y].ptax;}
@@ -1750,14 +2008,15 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     document.getElementById('oRateSub').textContent='(фонд. '+fmtPct(fund)+' + спред '+fmtPct(spread)+') / 1,22';
     // Эффективная ставка (годовая, IRR потока клиента без НДС): финансируем body, клиент платит annNet + абонплату (нетто) N мес.
     var effFlows=[-body]; var subNet=subGross/k;
-    for(var ef=1;ef<=N;ef++)effFlows.push(annNet+subNet);
+    for(var ef=1;ef<=N;ef++)effFlows.push(payNetAt(ef)+subNet);
     var effM=irrMonthly(effFlows); var effY=isFinite(effM)?(Math.pow(1+effM,12)-1)*100:NaN;
     document.getElementById('oEff').textContent=isFinite(effY)?fmtPct(effY):'—';
     document.getElementById('oEffSub').textContent='IRR платежей клиента, без НДС · ном. '+fmtPct(isFinite(effM)?effM*12*100:0);
     document.getElementById('oUdor').innerHTML=fmtPct(udorYear)+'<span style="font-size:15px;font-weight:600">/год</span>';
     document.getElementById('oUdorSub').textContent='всего за срок '+fmtPct(udorTotal);
-    document.getElementById('oPay').textContent=fmtRub(annGross+subGross);
-    document.getElementById('oPayH').textContent=N+' мес.'+(subGross>0.5?' · вкл. абонплату '+fmtRub(subGross):'')+' · без НДС '+fmtRub(annNet+subGross/k);
+    var payLastG=payNetAt(N)*k;
+    document.getElementById('oPay').textContent=accOn?(fmtRub(annGross+subGross)+' → '+fmtRub(payLastG+subGross)):fmtRub(annGross+subGross);
+    document.getElementById('oPayH').textContent=(accOn?('ускоренный, 1-й → '+N+'-й мес.'):(N+' мес.'))+(subGross>0.5?' · вкл. абонплату '+fmtRub(subGross):'')+' · без НДС '+fmtRub(payNetAt(1)+subGross/k);
     document.getElementById('oAdv').textContent=fmtRub(advGross);
     document.getElementById('oAdvH').textContent=adv+'% · без НДС '+fmtRub(advNet);
     document.getElementById('oSum').textContent=fmtRub(sumGross);
@@ -1769,11 +2028,11 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     document.getElementById('oRev').textContent=fmtRub(cliPVnet);
     document.getElementById('oMarg').textContent=fmtRub(marginPV);
     document.getElementById('oMargH').textContent=fmtPct(marginPV/priceNet*100)+' от цены';
-    document.getElementById('margVat').textContent='Без НДС: затраты '+fmtRub(costPV)+' · выручка '+fmtRub(cliPVnet)+' · маржа '+fmtRub(marginPV)+'.  С НДС (×1,22): выручка '+fmtRub(cliPVnet*k)+'.';
+    document.getElementById('margVat').textContent='Потоки приведены к дате договора по ставке '+fmtPct(fund)+'. Затраты включают выплаты Поставщику, отсрочку, гарантию, доп. расходы, НДС в бюджет и комиссию банка; выручка — платежи клиента, возврат НДС и комиссию Страхование.';
 
     // tab1
     document.getElementById('r1rate').textContent=fmtPct(leaseRate);
-    document.getElementById('r1pay').textContent=fmtRub(annGross+subGross);
+    document.getElementById('r1pay').textContent=accOn?(fmtRub(annGross+subGross)+' → '+fmtRub(payLastG+subGross)):fmtRub(annGross+subGross);
     document.getElementById('r1body').textContent=fmtRub(body);
     document.getElementById('r1term').textContent=N+' мес.';
     var cb=document.getElementById('cliBody'),h='';
@@ -1783,7 +2042,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     document.getElementById('cliFoot').innerHTML='<tr><td>Итого</td><td>'+fmtRub(sumGross+subGross*N)+'</td><td>'+fmtRub((sumGross+subGross*N)-(sumNet+subGross/k*N))+'</td><td>'+fmtRub(sumNet+subGross/k*N)+'</td><td>'+fmtRub(sIntCli)+'</td><td>'+fmtRub(body+advNet)+'</td><td>—</td><td>—</td></tr>';
 
     // --- РАЗВЁРНУТЫЙ ГРАФИК (детализация платежа клиента) ---
-    var subNetM=subGross/k, kaskoInPay=0;   // КАСКО в платёж входит только в варианте 2 (не реализован)
+    var subNetM=subGross/k, kaskoInPay=0;   // Страхование в платёж входит только в варианте 2 (не реализован)
     var eb='', tPr=0,tInt=0,tSub=0,tKas=0,tNet=0,tVat=0,tGross=0;
     cli.forEach(function(r){
       var pr=r.pr, intr=r.intr, sub=subNetM, kas=kaskoInPay;
@@ -1793,8 +2052,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     });
     document.getElementById('expBody').innerHTML=eb;
     document.getElementById('expFoot').innerHTML='<tr><td>Итого</td><td>—</td><td>'+fmtRub(tPr)+'</td><td>'+fmtRub(tInt)+'</td><td>'+fmtRub(tSub)+'</td><td>'+fmtRub(tKas)+'</td><td>'+fmtRub(tNet)+'</td><td>'+fmtRub(tVat)+'</td><td>'+fmtRub(tGross)+'</td><td>—</td></tr>';
-    KP={item:(document.getElementById('item').value||'Грузовая техника'),client:document.getElementById('client').value||'',inn:(document.getElementById('inn')||{}).value||'',
-        priceVat:priceVat,adv:adv,advGross:advGross,annGross:annGross+subGross,annNet:annNet,sumGross:sumGross+subGross*N,sumNet:sumNet,sub:subGross,
+    KP={item:(document.getElementById('item').value||'Офисное помещение'),client:document.getElementById('client').value||'',inn:(document.getElementById('inn')||{}).value||'',
+        priceVat:priceVat,adv:adv,advGross:advGross,annGross:annGross+subGross,annNet:annNet,sumGross:sumGross+subGross*N,sumNet:sumNet,sub:subGross,acc:accOn,payLast:payLastG+subGross,accR:accR,
         overpay:(sumGross+subGross*N)-priceVat,udorYear:udorYear,udorTotal:udorTotal,N:N,vat:vat,k:k,leaseRate:leaseRate,
         start:{y:start.getFullYear(),m:start.getMonth(),d:start.getDate()},rows:cli};
     document.getElementById('transportNote').textContent='Налог на имущество = 0 (движимое имущество не облагается). Транспортный налог — техника регистрируется на клиента, поэтому он платит его сам; в график лизинга не входит.'+(subGross>0.5?' Платёж включает абонплату телематики '+fmtRub(subGross)+' с НДС (без процентов).':'');
@@ -1813,7 +2072,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
       document.getElementById('oPeak').textContent=fmtRub(T.ownPeak);
       document.getElementById('oCredInt').textContent=fmtRub(T.sInt);
       document.getElementById('oCredPay').textContent=fmtRub(T.impAnn);
-      document.getElementById('oCredPayH').textContent='аннуитет Импортёру, '+N+' мес.';
+      document.getElementById('oCredPayH').textContent='аннуитет Поставщику, '+N+' мес.';
       document.getElementById('oCredTerm').textContent=N+' мес.';
       document.getElementById('oCredTermH').textContent='весь срок лизинга';
       document.getElementById('credWarn').style.display='none';
@@ -1904,7 +2163,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     document.getElementById('m3rev').textContent=fmtRub(cliPVnet);
     document.getElementById('m3marg').textContent=fmtRub(marginPV);
     document.getElementById('m3margH').textContent=fmtPct(marginPV/priceNet*100)+' от цены';
-    document.getElementById('m3vat').textContent='Суммы без НДС. С НДС (×1,22): выручка '+fmtRub(cliPVnet*k)+' · затраты Импортеру '+fmtRub(suppPVnet*k)+'.';
+    document.getElementById('m3vat').textContent='Суммы без НДС. С НДС (×1,22): выручка '+fmtRub(cliPVnet*k)+' · затраты Поставщику '+fmtRub(suppPVnet*k)+'.';
     var yHdr='<tr><th>Показатель</th>';for(var y=1;y<=YMAX;y++)yHdr+='<th>'+y+'-й год</th>';yHdr+='<th>Итого</th></tr>';
     document.getElementById('plHead').innerHTML=yHdr;
     document.getElementById('cfHead').innerHTML=yHdr;
@@ -1913,12 +2172,12 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     document.getElementById('plBody').innerHTML=
       plRow('Лизинговый % доход',function(y){return yIncome[y]||0;},sIntCli)+
       plRow('Наценка на технике',function(y){return markupYear[y]||0;},markupNet)+
-      plRow(fdefOn?'Проценты Импортёру (отсрочка)':'Проценты по кредиту',function(y){return -(T.yInt[y]||0);},-(T.sInt))+
-      plRow('Комиссия за кредит',function(y){return y===1?-commCost:0;},-commCost)+
-      plRow('Отсрочка Импортера (%)',function(y){return -(suppGLP?0:(sIntYear[y]||0));},-(suppGLP?0:sTotInt))+
+      plRow(fdefOn?'Проценты Поставщику (отсрочка)':'Проценты по кредиту',function(y){return -(T.yInt[y]||0);},-(T.sInt))+
+      plRow('Комиссия за кредит'+(bankOn?' (в тело клиенту)':''),function(y){return (bankOn||y!==1)?0:-commCost;},bankOn?0:-commCost)+
+      plRow('Отсрочка Поставщика (%)',function(y){return -(suppGLP?0:(sIntYear[y]||0));},-(suppGLP?0:sTotInt))+
       plRow('Банковская гарантия',function(y){return (!guarGLP&&y===1)?-guarCost:0;},-(guarGLP?0:guarCost))+
       plRow('Доп. расходы (нетто)',function(y){return aeNetYear[y]||0;},aeNetTot)+
-      plRow('КАСКО (комиссия)',function(y){return kaskoCommYear[y]||0;},kaskoPnLTot)+
+      plRow('Страхование (комиссия)',function(y){return kaskoCommYear[y]||0;},kaskoPnLTot)+
       plRow('= Прибыль до налога',function(y){return yProfit[y]||0;},totBefore,true)+
       plRow('Налог на прибыль '+ptax+'%',function(y){return -(yTax[y]||0);},-totTax)+
       plRow('= Чистая прибыль',function(y){return yNet[y]||0;},totNet,true);
@@ -1926,24 +2185,24 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     document.getElementById('cfBody').innerHTML=
       cfRow('Приток от клиента','inC',1)+
       cfRow('Возврат НДС','inV',1)+
-      cfRow('Импортеру','oS',-1)+
+      cfRow('Поставщику','oS',-1)+
       cfRow('НДС в бюджет','oV',-1)+
-      cfRow(fdefOn?'Проценты Импортёру (отсрочка)':'Проценты+комиссия','fin',-1)+
-      cfRow('Отсрочка Импортера (%)','suppInt',-1)+
+      cfRow(fdefOn?'Проценты Поставщику (отсрочка)':'Проценты+комиссия','fin',-1)+
+      cfRow('Отсрочка Поставщика (%)','suppInt',-1)+
       cfRow('Банковская гарантия','guar',-1)+
       cfRow('Доп. расходы (ЛК)','oAE',-1)+
-      cfRow('КАСКО (комиссия)','kasko',1)+
+      cfRow('Страхование (комиссия)','kasko',1)+
       cfRow('Налог на прибыль','ptax',-1)+
       cfRow('= Чистый поток','net',1,true);
 
-    // --- рендер вкладки «КАСКО» ---
+    // --- рендер вкладки «Страхование» ---
     kaskoCommArr.forEach(function(cm,i){var e=document.getElementById('kaskoC'+i);if(e)e.textContent=fmtRub(cm);});
     var ktp=document.getElementById('kaskoTotPrice'); if(ktp)ktp.textContent=fmtRub(kaskoTotPrice);
     var ktc=document.getElementById('kaskoTotComm'); if(ktc)ktc.textContent=fmtRub(kaskoTotComm);
     var kw=document.getElementById('kaskoWarn');
     if(kw){if(kaskoPay==='2'&&kaskoTotComm>0.5){kw.style.display='block';kw.textContent='Вариант 2 (в ежемесячный платёж) пока не реализован — комиссия в финмодель не включена. Выберите вариант 1.';}else{kw.style.display='none';}}
 
-    // --- рендер вкладки «Отсрочка Импортера» (расчёт выше; вся переплата платится в мес.12) ---
+    // --- рендер вкладки «Отсрочка Поставщика» (расчёт выше; вся переплата платится в мес.12) ---
     document.getElementById('spInt').textContent=fmtRub(sTotInt);
     document.getElementById('spTotal').textContent=fmtRub(sTotPaid);
     document.getElementById('spUdor').textContent=fmtPct(priceDVat>0?sTotInt/priceDVat*100:0);
@@ -1974,7 +2233,40 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     var sg=document.getElementById('suppGLP'); if(sg){sg.disabled=chk('suppOff'); sg.parentNode.style.opacity=sg.disabled?'0.45':'1';}
     var gg=document.getElementById('guarGLP'); if(gg){gg.disabled=chk('guarOff'); gg.parentNode.style.opacity=gg.disabled?'0.45':'1';}
 
-    // --- вкладка «Полная отсрочка Импортёра» ---
+    // --- вкладка «Банковское кредитование» ---
+    document.getElementById('bankRate').value=fund;
+    document.getElementById('bankComm').value=comm;
+    if(bankOn){
+      document.getElementById('bkAmt').textContent=fmtRub(T.drawnTot);
+      document.getElementById('bkInt').textContent=fmtRub(T.sInt);
+      document.getElementById('bkComm').textContent=fmtRub(commCost);
+      var bkPayEl=document.getElementById('bkPay'), bkPayH=document.getElementById('bkPayH');
+      if(repayType==='annuity'){bkPayEl.textContent=fmtRub(T.annPay);bkPayH.textContent='аннуитет, '+T.R+' мес.';}
+      else if(repayType==='diff'){var bf=T.payList.length?T.payList[0]:0,bl=T.payList.length?T.payList[T.payList.length-1]:0;
+        bkPayEl.textContent=fmtRub(bf);bkPayH.textContent='убывает до '+fmtRub(bl)+', '+T.R+' мес.';}
+      else {var bcm=(T.paidOff>=0&&T.firstDraw>=0)?(T.paidOff-T.firstDraw):0;
+        bkPayEl.textContent=bcm>0?fmtRub((T.drawnTot+T.sInt)/bcm):'—';bkPayH.textContent=bcm>0?('cash-sweep, средн. за '+bcm+' мес.'):'—';}
+      var bkH='', bkTotDraw=0,bkTotPay=0,bkTotInt=0,bkTotPr=0;
+      T.rows.forEach(function(r){
+        var pay=r.repaid, ip=r.interest, dr=r.drawn, pr=pay-ip;
+        if(dr<=0.5&&pay<=0.5&&r.debt<=0.5)return;
+        bkTotDraw+=dr;bkTotPay+=pay;bkTotInt+=ip;bkTotPr+=pr;
+        bkH+='<tr><td>'+r.t+' · '+dateAt(r.t).toLocaleDateString('ru-RU',{month:'short',year:'2-digit'})+'</td><td>'+(dr>0.5?fmtRub(dr):'—')+'</td><td>'+(pay>0.5?fmtRub(pay):'—')+'</td><td>'+(ip>0.5?fmtRub(ip):'—')+'</td><td>'+(Math.abs(pr)>0.5?fmtRub(pr):'—')+'</td><td>'+fmtRub(r.debt)+'</td></tr>';
+      });
+      document.getElementById('bkBody').innerHTML=bkH||'<tr><td colspan="6" style="color:var(--muted)">Кредит не требуется — аванс покрывает стоимость.</td></tr>';
+      document.getElementById('bkFoot').innerHTML='<tr><td>Итого</td><td>'+fmtRub(bkTotDraw)+'</td><td>'+fmtRub(bkTotPay)+'</td><td>'+fmtRub(bkTotInt)+'</td><td>'+fmtRub(bkTotPr)+'</td><td>—</td></tr>';
+    } else {
+      ['bkAmt','bkPay','bkInt','bkComm'].forEach(function(id){document.getElementById(id).textContent='—';});
+      document.getElementById('bkPayH').textContent='—';
+      document.getElementById('bkBody').innerHTML='<tr><td colspan="6" style="color:var(--muted)">Включите чек-бокс сверху, чтобы применить классическую схему с банковским кредитом.</td></tr>';
+      document.getElementById('bkFoot').innerHTML='';
+    }
+    var bankBanner=document.getElementById('bankBanner');
+    if(bankBanner)bankBanner.style.display=bankOn?'block':'none';
+    var pdBox=document.getElementById('priceD');
+    if(pdBox){pdBox.disabled=bankOn;pdBox.style.opacity=bankOn?'0.5':'1';}
+
+    // --- вкладка «Полная отсрочка Поставщика» ---
     document.getElementById('fdefTerm').value=N;                 // зеркалим срок и спред с Калькулятора
     document.getElementById('fdefSpread').value=spread;
     if(fdefOn){
@@ -1991,7 +2283,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
       document.getElementById('fdFoot').innerHTML='<tr><td>Итого</td><td>'+fmtRub(priceDVat+T.sInt)+'</td><td>'+fmtRub(priceDVat)+'</td><td>'+fmtRub(T.sInt)+'</td><td>—</td></tr>';
     } else {
       ['fdDebt','fdAnn','fdInt','fdOwn'].forEach(function(id){document.getElementById(id).textContent='—';});
-      document.getElementById('fdBody').innerHTML='<tr><td colspan="5" style="color:var(--muted)">Включите чек-бокс сверху, чтобы применить полную отсрочку Импортёра.</td></tr>';
+      document.getElementById('fdBody').innerHTML='<tr><td colspan="5" style="color:var(--muted)">Включите чек-бокс сверху, чтобы применить полную отсрочку Поставщика.</td></tr>';
       document.getElementById('fdFoot').innerHTML='';
     }
     // баннер и блокировка полей на Калькуляторе
@@ -2005,7 +2297,10 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
   }
 
   document.querySelectorAll('input').forEach(function(el){el.addEventListener('input',calc);});
-  renderSupp();renderKasko();calc();
+  (function(){var t=document.getElementById('techOn');if(t)t.addEventListener('change',function(){var b=document.getElementById('techBox');if(b)b.style.display=t.checked?'block':'none';});})();
+  renderSupp();renderKasko();
+  try{applyScheme('classic',true);}catch(e){}
+  calc();
   try{initFieldSync();}catch(e){}
   try{loadFromHash();}catch(e){}
   try{renderDeals();}catch(e){}
