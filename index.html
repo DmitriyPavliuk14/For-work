@@ -167,6 +167,21 @@
       <div><label class="lbl">Аванс клиента, %</label><input id="adv" type="number" value="49"></div>
       <div><label class="lbl">Срок лизинга, мес.</label><input id="term" type="number" value="12"></div>
     </div>
+    <div class="grid g4 mb12">
+      <div>
+        <label class="lbl">Выкупной платёж</label>
+        <div class="row" style="gap:6px">
+          <input id="buyout" type="number" value="1000" style="flex:1">
+          <select id="buyoutMode" onchange="calc()" style="width:64px;padding:9px 6px;border:1px solid var(--line);border-radius:8px;font-size:14px;background:var(--card);color:var(--ink)">
+            <option value="rub" selected>₽</option>
+            <option value="pct">%</option>
+          </select>
+        </div>
+      </div>
+      <div><label class="lbl">Амортизационная группа</label><input id="amGroup" type="number" min="1" max="10" step="1" value="10"></div>
+      <div><label class="lbl">Коэфф. ускорения (авто)</label><input id="amCoef" type="number" readonly style="background:var(--paper);color:var(--muted)"></div>
+      <div><label class="lbl">СПИ, мес. (авто по группе)</label><input id="spiM" type="number" readonly style="background:var(--paper);color:var(--muted)"></div>
+    </div>
     <div class="grid g21 mb22" style="align-items:end">
       <div>
         <label class="lbl">График платежей клиенту</label>
@@ -264,6 +279,8 @@
       <p><b>Платёж, аванс и сумма договора</b> показаны с НДС (в подписи — без НДС). Стоимость и проценты считаются на суммы без НДС, НДС 22% начисляется на платёж сверху и возмещается клиентом.</p>
       <p><b>График платежей клиенту</b> — аннуитет или три варианта ускоренного (дигрессивного): платежи убывают, приведённая стоимость равна стоимости объекта, поэтому ставка не меняется, а общая переплата снижается.</p>
       <p><b>Технические платежи</b> — последние N платежей фиксированной суммой (обычно 1 500 ₽): основное погашение перераспределяется на предыдущие платежи, ставка и итог не меняются.</p>
+      <p><b>Выкупной платёж</b> — сумма, зарезервированная в теле сделки и не гасимая обычными платежами; вносится клиентом вместе с последним платежом графика. Ежемесячный платёж и итоговая сумма договора пересчитываются по классической формуле аннуитета с остаточным (балунным) платежом: PV(платежи 1…N) + PV(выкуп на мес. N) = тело сделки. Проценты продолжают начисляться на полный остаток (включая зарезервированную под выкуп часть) весь срок.</p>
+      <p><b>Амортизационная группа</b> задаёт диапазон СПИ по Классификации ОС (Пост. Правительства №1). Коэффициент ускорения — 3× для групп 4–10, 1× для групп 1–3 (для них ускорение запрещено, ст. 259.3 НК). СПИ авто-подставляется по нижней границе диапазона группы — это ускоряет списание убытка по п. 3 ст. 268 НК при выкупе, если остаточная стоимость выше цены выкупа.</p>
       <p><b>Эффективная ставка</b> — годовая по IRR потока платежей клиента без НДС.</p>
       <p style="color:var(--muted)"><b>Справочный блок</b> ниже показывает налог на имущество, расходы на регистрацию и налог на прибыль. Первые две статьи — транзитные: они перевыставляются клиенту и не уменьшают маржу ЛК.</p>
     </div>
@@ -319,12 +336,6 @@
   <div id="t2" style="display:none">
     <h2>Движение денежных средств</h2>
     <div class="grid g2 mb16" style="max-width:640px">
-      <div><label class="lbl">Уплата НДС в бюджет</label>
-        <select id="vatMode" onchange="calc()" style="width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:8px;font-size:15px;background:var(--card);color:var(--ink)">
-          <option value="third">1/3 помесячно (по НК РФ)</option>
-          <option value="once">Единовременно в квартале уплаты</option>
-        </select>
-      </div>
       <div><label class="lbl">Возврат НДС, мес. после квартала</label><div class="val num" id="vatLagInfo" style="padding-top:6px">—</div></div>
     </div>
     <p style="font-size:12.5px;color:var(--muted);margin-bottom:14px">Помесячное движение средств лизинговой компании: поступления от клиента и возврат НДС, оплата поставщику, уплата НДС в бюджет, проценты и комиссия банка, выборка и погашение кредита. Данные собираются со всех вкладок.</p>
@@ -408,11 +419,12 @@
     <div style="display:flex;justify-content:flex-end;margin-bottom:8px"><button onclick="tableToXLS('tblDDS','ДДС','Движение_денежных_средств')" style="padding:8px 14px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;font-size:12.5px;font-weight:600;cursor:pointer">📊 Выгрузить в Excel</button></div>
     <div class="tableWrap">
       <table id="tblDDS">
-        <thead><tr><th>Мес. / дата</th><th>Клиент (приток)</th><th>Возврат НДС</th><th>Поставщик (база)</th><th>Отсрочка %</th><th>Гарантия</th><th>Доп. расходы</th><th>НДС в бюджет</th><th>% кредита</th><th>Выборка</th><th>Погашение</th><th>Долг по кредиту</th><th>Дельта прихода/ухода</th></tr></thead>
+        <thead><tr><th>Мес. / дата</th><th>Клиент (приток)</th><th>Компенсация клиента</th><th>Возврат НДС</th><th>Поставщик</th><th>Доп. расходы</th><th>Налог на имущество</th><th>Регистрация</th><th>НДС в бюджет</th><th>% кредита</th><th>Выборка</th><th>Погашение</th><th>Долг по кредиту</th><th>Дельта</th></tr></thead>
         <tbody id="trBody"></tbody>
         <tfoot id="trFoot"></tfoot>
       </table>
     </div>
+    <div id="compNote" style="margin-top:10px;font-size:12px;color:var(--muted);line-height:1.5"></div>
     <div class="edu">
       <h3>Как читать движение денежных средств</h3>
       <p><b>Принцип:</b> кредит берём не на весь график Поставщику, а только на кассовый разрыв. Поступления клиента и возврат НДС из бюджета сначала накапливаются и гасят обязательства перед Поставщиком; кредитом добираем нехватку.</p>
@@ -434,19 +446,23 @@
       <div class="pt"><div class="ptt">Налоговый учёт (налог на прибыль)</div><div class="num" id="taxAccSum">—</div></div>
       <label style="display:flex;align-items:center;gap:9px;font-size:13px;font-weight:600;cursor:pointer;margin-bottom:10px"><input type="checkbox" id="taxAcc" onchange="calc()" checked>Считать налог по налоговой базе (амортизация предмета + списание остаточной стоимости при выкупе)</label>
       <div class="grid g4 mb12">
-        <div><label class="lbl">СПИ, мес.</label><input id="spiM" type="number" value="360"></div>
-        <div><label class="lbl">Коэффициент ускорения</label><input id="amCoef" type="number" step="0.1" value="1"></div>
+        <div><label class="lbl">СПИ / коэфф. (см. «Калькулятор»)</label><div class="val num" id="amSpiCoefRef" style="padding-top:6px">—</div></div>
         <div><label class="lbl">Амортизация в месяц</label><div class="val num" id="amMon" style="padding-top:6px">—</div></div>
-        <div><label class="lbl">Остаточная стоимость к выкупу</label><div class="val num" id="amLeftOut" style="padding-top:6px">—</div></div>
+        <div><label class="lbl">Остаточная стоимость на дату выкупа</label><div class="val num" id="amLeftOut" style="padding-top:6px">—</div></div>
+        <div><label class="lbl">Результат от реализации (выкуп − остаточная)</label><div class="val num" id="amSaleRes" style="padding-top:6px">—</div></div>
+      </div>
+      <div class="grid g2 mb12" id="amLossBox" style="display:none">
+        <div><label class="lbl">Убыток к переносу (п. 3 ст. 268 НК)</label><div class="val num" id="amLossTot" style="padding-top:6px">—</div></div>
+        <div><label class="lbl">Списывается равными долями, мес. / в мес.</label><div class="val num" id="amLossPer" style="padding-top:6px">—</div></div>
       </div>
       <div class="tableWrap">
         <table>
-          <thead><tr><th>Год</th><th>Налоговый доход</th><th>Амортизация</th><th>Проценты + комиссия</th><th>Прочие расходы</th><th>Остаточная при выкупе</th><th>База</th><th>Налог</th></tr></thead>
+          <thead><tr><th>Год</th><th>Налоговый доход</th><th>Амортизация</th><th>Проценты + комиссия</th><th>Прочие расходы</th><th>Доход от реализации</th><th>База</th><th>Налог</th></tr></thead>
           <tbody id="taxBody"></tbody>
           <tfoot id="taxFoot"></tfoot>
         </table>
       </div>
-      <div style="margin-top:8px;font-size:11.5px;color:var(--muted)">Налоговый доход — вся сумма лизинговых платежей без НДС (включая возврат стоимости), аванс признаётся равномерно. Расходы — амортизация предмета, проценты по кредиту, комиссия банка, налог на имущество, регистрация и прочие. В год выкупа списывается остаточная стоимость предмета. Убыток переносится на будущее с ограничением 50% базы (ст. 283 НК). Коэффициент ускорения до 3 не применяется к 1–3 амортизационным группам.</div>
+      <div style="margin-top:8px;font-size:11.5px;color:var(--muted)">Налоговый доход — вся сумма лизинговых платежей без НДС (включая возврат стоимости), аванс признаётся равномерно. Расходы — амортизация предмета, проценты по кредиту, комиссия банка, налог на имущество, регистрация и прочие. В год выкупа сравнивается цена выкупа (без НДС) с остаточной налоговой стоимостью: если цена выше — разница сразу в доход; если ниже — убыток списывается равными долями в течение СПИ (с учётом коэффициента) минус фактический срок эксплуатации (п. 3 ст. 268 НК), то есть в основном ЗА пределами срока лизинга — этот разрыв показан отдельно ниже. Убыток текущего года переносится на будущее с ограничением 50% базы (ст. 283 НК). Коэффициент ускорения до 3 не применяется к 1–3 амортизационным группам.</div>
     </div>
     <h2>Реальная маржа (PV, к дате договора)</h2>
     <div class="marg mb22">
@@ -479,7 +495,7 @@
       <p><b>Экономическая маржа (PV)</b> — приведённая к дате договора стоимость всех фактических потоков сделки по ставке фондирования: поступления от клиента и возврат НДС минус оплата поставщику, НДС в бюджет, комиссия банка и прочие расходы. Проценты по кредиту отдельно не вычитаются — стоимость денег уже заложена в ставку дисконтирования.</p>
       <p><b>Прибыль за срок</b> — фактический результат после налога, совпадает с итогом P&amp;L и чистым денежным потоком. Это ответ на вопрос «сколько заработали».</p>
       <p><b>P&amp;L по годам.</b> Доход — лизинговый процент; расходы — проценты по кредиту, комиссия банка и доп. расходы. Амортизации предмета в бухучёте лизингодателя нет: по ФСБУ 25 признаётся чистая инвестиция в аренду и процентный доход.</p>
-      <p><b>Налоговый учёт</b> (блок выше) считает налог на прибыль по налоговой базе: весь лизинговый доход без НДС минус амортизация предмета, проценты, комиссия и прочие расходы. В год выкупа списывается остаточная стоимость объекта — без этого налог был бы завышен в разы.</p>
+      <p><b>Налоговый учёт</b> (блок выше) считает налог на прибыль по налоговой базе: весь лизинговый доход без НДС минус амортизация предмета, проценты, комиссия и прочие расходы. В год выкупа результат реализации (цена выкупа минус остаточная стоимость) признаётся доходом сразу либо убытком, который списывается равными долями за пределами срока лизинга (п. 3 ст. 268 НК) — без этого учёта налог был бы завышен в разы.</p>
       <p style="color:var(--muted)">Налог на имущество и расходы на регистрацию в P&amp;L показаны нулями: они транзитом перевыставляются клиенту.</p>
     </div>
 
@@ -516,7 +532,9 @@
     <div class="panel mb12">
       <div class="pt"><div class="ptt">Налог на имущество</div><div class="num" id="ptSum">—</div></div>
       <div class="grid g3 mb12">
-        <div><label class="lbl">Кадастровая стоимость</label><input id="cadVal" type="number" value="23584000"></div>
+        <div><label class="lbl">Кадастровая стоимость</label><input id="cadVal" type="number" value="23584000" oninput="cadEdited=true;calc()">
+          <div id="cadHint" style="margin-top:6px;font-size:11px;color:var(--muted)">—</div>
+        </div>
         <div><label class="lbl">Ставка, % в год</label><input id="propRate" type="number" step="0.1" value="2"></div>
         <div><label class="lbl">Как учитывать</label>
           <select id="propMode" onchange="calc()" style="width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:8px;font-size:15px;background:var(--card);color:var(--ink)">
@@ -530,7 +548,9 @@
     <div class="panel mb12">
       <div class="pt"><div class="ptt">Расходы на регистрацию</div><div class="num" id="regSum">—</div></div>
       <div class="grid g3 mb12">
-        <div><label class="lbl">Госпошлина (расчётная)</label><input id="regFee" type="number" value="0"></div>
+        <div><label class="lbl">Госпошлина (расчётная)</label><input id="regFee" type="number" value="0">
+          <div id="regFormula" style="margin-top:6px;font-size:11px;color:var(--muted);line-height:1.45">—</div>
+        </div>
         <div><label class="lbl">Прочие расходы на оформление</label><input id="regExtra" type="number" value="0"></div>
         <div><label class="lbl">Как учитывать</label>
           <select id="regMode" onchange="calc()" style="width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:8px;font-size:15px;background:var(--card);color:var(--ink)">
@@ -818,7 +838,7 @@
       <p>Объект недвижимости облагается налогом на имущество: база — кадастровая стоимость, ставка 2% (свыше 300 млн — 2,5%, жилые помещения — региональная). Платит лизингодатель, авансами поквартально. Госпошлина за регистрацию: 44 000 ₽ при кадастре до 22 млн, свыше — 0,2% (не более 1 млн), плюс 44 000 ₽ за договор.</p>
       <p>Обе статьи <b>транзитные</b>: перевыставляются клиенту по счёту либо включаются в график с начислением лизингового процента, поэтому маржу и прибыль ЛК не уменьшают.</p>
       <h3>Налоговый учёт и амортизация</h3>
-      <p>В бухучёте лизингодателя предмет не амортизируется (ФСБУ 25 — чистая инвестиция в аренду). В налоговом учёте предмет амортизирует лизингодатель: налоговая база = все лизинговые платежи без НДС − амортизация − проценты − прочие расходы. В год выкупа списывается остаточная стоимость объекта. Коэффициент ускорения до 3 не применяется к 1–3 амортизационным группам.</p>
+      <p>В бухучёте лизингодателя предмет не амортизируется (ФСБУ 25 — чистая инвестиция в аренду). В налоговом учёте предмет амортизирует лизингодатель: налоговая база = все лизинговые платежи без НДС − амортизация − проценты − прочие расходы. В год выкупа сравниваются цена выкупа и остаточная налоговая стоимость: превышение цены — доход сразу, превышение остаточной стоимости — убыток равными долями за пределами СПИ/коэфф. минус срок эксплуатации (п. 3 ст. 268 НК). Коэффициент ускорения до 3 не применяется к 1–3 амортизационным группам.</p>
       <h3>8. Экономическая маржа и прибыль</h3>
       <p><b>Экономическая маржа</b> — NPV всех фактических денежных потоков сделки (платежи клиента, выплаты Поставщику, отсрочка, гарантия, доп. расходы, НДС с учётом лага возврата, комиссия банка, комиссия Страхование), приведённых к дате договора по ставке фондирования. Проценты по кредиту отдельной строкой не вычитаются: стоимость денег во времени уже заложена в ставку дисконтирования, иначе она считалась бы дважды.</p>
       <p><b>Прибыль за срок</b> — фактический финансовый результат после налога, совпадает с итогом P&amp;L и с чистым денежным потоком. Это ответ на вопрос «сколько заработали на сделке».</p>
@@ -826,7 +846,7 @@
       <p><b>Признание дохода.</b> Лизинговый процент признаётся по фактической амортизации задолженности — убывающим потоком, как того требует ФСБУ 25 (доход по эффективной ставке на чистую инвестицию в аренду).</p>
       <h3>9. Результат</h3>
       <p>Прибыль показана двумя методами: начисления (P&amp;L, процентный доход и наценки минус стоимость кредита, отсрочки, гарантии, доп. расходов и налог) и кассовым (живые деньги по годам). Реальная маржа (PV) — экономический итог, приведённый к дате договора, со всеми затратами.</p>
-      <p style="color:var(--muted)"><b>Допущения:</b> аннуитет; выкупная символическая; страхование не учтено; входящий НДС — по дате принятия имущества; комиссия за кредит — разовая от пиковой суммы; проценты за отсрочку, гарантия и доп. расходы зашиты в кредит и маржу.</p>
+      <p style="color:var(--muted)"><b>Допущения:</b> аннуитет с остаточным (балунным) выкупным платежом на мес. N; страхование не учтено; входящий НДС — по дате принятия имущества; комиссия за кредит — разовая от пиковой суммы; проценты за отсрочку, гарантия и доп. расходы зашиты в кредит и маржу.</p>
     </div>
   </div>
 </div>
@@ -1257,6 +1277,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
   }
   function setScheme(s){applyScheme(s);}
   var bankTermEdited=false;
+  var cadEdited=false;   // кадастровая стоимость отредактирована вручную
   function syncBank(target,v){var el=document.getElementById(target);if(el)el.value=v;calc();}
   var payMode='ann';                    // ann | light | mid | high
   var ACC_RATIO={light:1.2,mid:1.5,high:2.0};   // отношение первого платежа к последнему
@@ -1300,7 +1321,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     document.getElementById('rtAnn').className='on';
     document.getElementById('rtDiff').className='';
     supp=[{m:0,s:100}];
-    kasko=[0,0,0]; kaskoTermEdited=false; bankTermEdited=false;
+    kasko=[0,0,0]; kaskoTermEdited=false; bankTermEdited=false; cadEdited=false;
     applyPayMode('ann'); applyScheme('classic',true);
     renderSupp();renderKasko();
     calc();
@@ -1498,8 +1519,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
   }
 
   // ================= СДЕЛКИ: состояние, сохранение, ссылка, экспорт =================
-  var DEAL_IDS=['price','priceD','vat','fund','spread','adv','term','cdate','vatlag','comm','ptax','item','client','inn','accRatio','vatMode','taxAcc','spiM','amCoef','cadVal','propRate','propOff','regFee','regExtra','regAuto','regOff','techOn','techN','techAmt','bankOn','bankTerm','suppOff','suppGLP','suppRate','repterm','guarOff','guarGLP','guarRate','guarBase','guarTerm','ae1_lk','ae1_cli','ae1_off','ae1_glp','ae2_lk','ae2_cli','ae2_off','ae2_glp','ae3_lk','ae3_cli','ae3_off','ae3_glp','ae4_lk','ae4_cli','ae4_off','ae4_glp','kaskoTerm','kaskoComm','fdefOn','fdefRate','fdefTerm','fdefSpread'];
-  var DEAL_SELECTS=['kaskoSK','kaskoPay'];
+  var DEAL_IDS=['price','priceD','vat','fund','spread','adv','term','cdate','vatlag','comm','ptax','item','client','inn','accRatio','vatMode','taxAcc','spiM','amCoef','amGroup','buyout','cadVal','propRate','propOff','regFee','regExtra','regAuto','regOff','techOn','techN','techAmt','bankOn','bankTerm','suppOff','suppGLP','suppRate','repterm','guarOff','guarGLP','guarRate','guarBase','guarTerm','ae1_lk','ae1_cli','ae1_off','ae1_glp','ae2_lk','ae2_cli','ae2_off','ae2_glp','ae3_lk','ae3_cli','ae3_off','ae3_glp','ae4_lk','ae4_cli','ae4_off','ae4_glp','kaskoTerm','kaskoComm','fdefOn','fdefRate','fdefTerm','fdefSpread'];
+  var DEAL_SELECTS=['kaskoSK','kaskoPay','buyoutMode'];
   function getState(){
     var s={f:{},c:{},s:{},supp:supp,kasko:kasko,kte:kaskoTermEdited,wv:withVat,rt:repayType,pm:payMode,sch:scheme};
     DEAL_IDS.forEach(function(id){var e=document.getElementById(id);if(!e)return;if(e.type==='checkbox')s.c[id]=e.checked?1:0;else s.f[id]=e.value;});
@@ -1614,6 +1635,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     var s={v:1,d:out};
     if(document.getElementById('kaskoSK')&&document.getElementById('kaskoSK').value)s.sk=document.getElementById('kaskoSK').value;
     if(document.getElementById('kaskoPay')&&document.getElementById('kaskoPay').value!=='1')s.kp=document.getElementById('kaskoPay').value;
+    if(document.getElementById('buyoutMode')&&document.getElementById('buyoutMode').value==='pct')s.bm='pct';
     var baseSupp=JSON.stringify([{m:0,s:10},{m:6,s:10},{m:9,s:30},{m:12,s:50}]);
     if(JSON.stringify(supp)!==baseSupp)s.sp=supp.map(function(r){return [r.m,r.s];});
     if(kasko.some(function(x){return Number(x)!==0;}))s.ks=kasko;
@@ -1631,6 +1653,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
       if(e.type==='checkbox')e.checked=!!Number(s.d[id]); else e.value=s.d[id];});
     if(s.sk){var e1=document.getElementById('kaskoSK');if(e1)e1.value=s.sk;}
     if(s.kp){var e2=document.getElementById('kaskoPay');if(e2)e2.value=s.kp;}
+    if(s.bm){var e2b=document.getElementById('buyoutMode');if(e2b)e2b.value=s.bm;}
     if(s.sp)supp=s.sp.map(function(a){return {m:Number(a[0])||0,s:Number(a[1])||0};});
     if(s.ks){kasko=s.ks.map(function(x){return Number(x)||0;});
       var kt=document.getElementById('kaskoTerm');
@@ -1854,6 +1877,20 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     var iLease=leaseRate/100/12, iFund=fund/100/12;
     var advGross=priceVat*adv/100, advNet=advGross/k;
     var N=term;
+    // --- амортизационная группа → коэффициент ускорения и СПИ (автоматически, ст. 259.3 / Пост. №1) ---
+    var AM_GROUP_MIN_M=[13,25,37,61,85,121,181,241,301,361]; // мин. срок (мес.) по группам 1..10
+    var amGroup=Math.round(val('amGroup')); if(amGroup<1)amGroup=1; if(amGroup>10)amGroup=10;
+    var amCoefAuto=amGroup>=4?3:1;             // до 3х; запрещено для групп 1-3
+    var spiMAuto=AM_GROUP_MIN_M[amGroup-1];    // нижняя граница диапазона группы
+    (function(){var ce=document.getElementById('amCoef'),se=document.getElementById('spiM');
+      if(ce&&Math.round((parseFloat(ce.value)||0)*10)!==Math.round(amCoefAuto*10))ce.value=amCoefAuto;
+      if(se&&Math.round(parseFloat(se.value)||0)!==spiMAuto)se.value=spiMAuto;})();
+    // --- выкупной платёж: ввод в ₽ или в % от цены с НДС; платится вместе с последним платежом графика (мес. N) ---
+    var buyoutMode=(document.getElementById('buyoutMode')||{}).value||'rub';
+    var buyoutIn=val('buyout');
+    var buyoutGross=buyoutMode==='pct'?priceVat*buyoutIn/100:buyoutIn;
+    if(buyoutGross<0)buyoutGross=0; if(buyoutGross>priceVat)buyoutGross=priceVat;
+    var buyoutNet=buyoutGross/k;
     // --- дополнительные расходы (две цены, чек-боксы) ---
     var rVat=vat/(100+vat);
     var aeItems=[{lk:'ae1_lk',cli:'ae1_cli',off:'ae1_off',glp:'ae1_glp',type:'once'},
@@ -1893,11 +1930,28 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     // --- «включить в график клиента»: стоимость финансируется в тело лизинга (без НДС, наценка 0) ---
     // --- налог на имущество (кадастр × ставка), авансами поквартально ---
     var propOff=chk('propOff'), propMode=(document.getElementById('propMode')||{}).value||'out';
+    // кадастровая стоимость по умолчанию = стоимости объекта; после ручной правки не перетирается
+    (function(){var e=document.getElementById('cadVal');
+      if(e&&!cadEdited&&Math.round(parseFloat(e.value)||0)!==Math.round(priceVat))e.value=Math.round(priceVat);})();
     var cadVal=val('cadVal'), propRateP=val('propRate');
     var propYear=propOff?0:cadVal*propRateP/100;
     var propTot=propYear*(N/12);
     var propGLP=(!propOff)&&(propMode==='glp');
-    function propAt(t){ return (propOff||!propGLP||t<1||t>N)?0:((t%3===0)?propYear/4:0); }   // «по счёту» — клиент компенсирует в тот же момент, нетто-эффект 0
+    // Налог на имущество: авансы поквартально (28 числа месяца после квартала) + годовой платёж после срока
+    function propAt(t){
+      if(propOff||t<1)return 0;
+      // авансы за I–III кварталы года — 28 числа месяца после квартала;
+      // остаток за год (IV квартал) — до 28 февраля следующего года
+      if(t<=N && t%3===0 && t%12!==0) return propYear/4;
+      if(t>N && t<=N+3){                                  // доплата за незакрытые кварталы после окончания срока
+        var paid=0; for(var q=3;q<=N;q+=3){ if(q%12!==0) paid+=propYear/4; }
+        var due=propYear*(N/12);
+        return (t===N+2)?Math.max(0,due-paid):0;
+      }
+      return 0;
+    }
+    // Компенсация от клиента при оплате «по счёту» — приходит в том же месяце, что и расход
+    function compAt(t){ return (propGLP?0:propAt(t)) + (regGLP?0:regAt(t)); }
     // --- расходы на регистрацию: госпошлина по НК (юрлицо) + прочее ---
     var regOff=chk('regOff'), regAuto=chk('regAuto'), regMode=(document.getElementById('regMode')||{}).value||'out';
     var regCalc=0;
@@ -1910,16 +1964,42 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
       if(rf&&regAuto&&Math.round(parseFloat(rf.value)||0)!==Math.round(regCalc))rf.value=Math.round(regCalc);
     }
     var regFee=regOff?0:(regAuto?regCalc:val('regFee'));
+    (function(){
+      var ps=document.getElementById('ptSum');
+      if(ps)ps.textContent=propOff?'не применяется':(fmtRub(propYear)+' / год · '+fmtRub(propTot)+' за срок');
+      var rs=document.getElementById('regSum');
+      if(rs)rs.textContent=regOff?'не применяется':fmtRub(regTot);
+      var ch=document.getElementById('cadHint');
+      if(ch)ch.textContent=cadEdited?'задана вручную (не следует за стоимостью объекта)':'по умолчанию = стоимости объекта; измените, если кадастр отличается';
+      var el=document.getElementById('regFormula'); if(!el)return;
+      if(regOff){el.innerHTML='<span style="color:var(--faint)">Расходы на регистрацию не применяются.</span>';return;}
+      var kc=cadVal, deal=priceVat, per, txt;
+      if(kc<=22000000){ per=44000; txt='кадастровая стоимость '+fmtRub(kc)+' ≤ 22 млн → <b>44 000 ₽</b>'; }
+      else { var byCad=kc*0.002, byDeal=deal*0.002, base=Math.max(byCad,byDeal);
+        per=Math.min(1000000,base);
+        txt='кадастровая '+fmtRub(kc)+' &gt; 22 млн → 0,2% = '+fmtRub(byCad)+
+            (byDeal>byCad?(' (но не менее 0,2% цены сделки = '+fmtRub(byDeal)+')'):'')+
+            (base>1000000?' → ограничение 1 000 000 ₽':'')+' → <b>'+fmtRub(per)+'</b>'; }
+      el.innerHTML='<b>Переход права собственности:</b> '+txt+
+        '<br><b>Регистрация договора лизинга:</b> 44 000 ₽'+
+        '<br><b>Итого: '+fmtRub(per+44000)+'</b>'+
+        (regAuto?'':' <span style="color:var(--amber)">— автоподстановка выключена, используется значение из поля</span>')+
+        '<br><span style="color:var(--faint)">Основание: пп. 22 п. 1 ст. 333.33 НК РФ (ставки для организаций)</span>';
+    })();
     var regExtra=regOff?0:val('regExtra');
     var regTot=regFee+regExtra;
     var regGLP=(!regOff)&&(regMode==='glp');
-    function regAt(t){ return (regOff||!regGLP||t!==0)?0:regTot; }                          // «по счёту» — компенсация клиентом, нетто-эффект 0                          // платим при оформлении, мес.0
+    function regAt(t){ return (regOff||t!==0)?0:regTot; }                                  // пошлина уплачивается при подаче документов (мес. 0)                          // платим при оформлении, мес.0
     var suppGLP=(!chk('suppOff'))&&chk('suppGLP');
     var guarGLP=(!chk('guarOff'))&&chk('guarGLP');
     // Классика: комиссия банка считается от суммы выборки (цена с НДС − аванс) и зашивается
     // в тело лизинга — клиент возвращает её платежами с начислением лизингового процента.
     var commInBody=bankOn?(comm/100*Math.max(0,priceDVat-advGross)):0;
     var body=priceNet-advNet+aeBodyNet+(suppGLP?sTotInt:0)+(guarGLP?guarCost:0)+commInBody+(propGLP?propTot:0)+(regGLP?regTot:0);
+    // выкуп — балунный платёж на мес. N: тело, гасимое регулярными платежами, уменьшается на PV(выкупа);
+    // проценты продолжают начисляться на полный "body" (см. цикл графика клиента ниже) — как обычный кредит с остаточным платежом.
+    var buyoutPV=iLease===0?buyoutNet:buyoutNet/Math.pow(1+iLease,N);
+    var bodyEff=Math.max(0,body-buyoutPV);
     var markupYear={};   // заполняется ниже — пропорционально чистой инвестиции (ФСБУ 25)
 
     // --- график платежей клиенту: аннуитет либо ускоренный (геометрическое убывание) ---
@@ -1927,7 +2007,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     var accR=accOn?Math.max(1.01,parseFloat((document.getElementById('accRatio')||{}).value)||ACC_RATIO[payMode]||1.5):1;
     var payNet=[];                       // payNet[t] — платёж без НДС, t = 1..N
     var annNet;                          // базовый аннуитет (для сравнения и совместимости)
-    annNet=iLease===0?body/N:body*iLease/(1-Math.pow(1+iLease,-N));
+    annNet=iLease===0?bodyEff/N:bodyEff*iLease/(1-Math.pow(1+iLease,-N));
     // --- технический хвост: последние techN платежей по фиксированной сумме (с НДС) ---
     var techOn=chk('techOn');
     var techN=techOn?Math.max(0,Math.min(N-1,Math.round(val('techN')))):0;
@@ -1935,7 +2015,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     var techAmtN=techAmtG/k;                               // без НДС
     var NR=N-techN;                                        // число «рабочих» платежей
     var techPV=0; for(var tt=NR+1;tt<=N;tt++)techPV+=techAmtN/Math.pow(1+iLease,tt);
-    var bodyR=Math.max(0,body-techPV);                     // тело, которое гасят рабочие платежи
+    var bodyR=Math.max(0,bodyEff-techPV);                  // тело, которое гасят рабочие платежи
     if(techOn&&NR>0){
       var annR=iLease===0?bodyR/NR:bodyR*iLease/(1-Math.pow(1+iLease,-NR));
       if(!accOn||NR<2){ for(var pt=1;pt<=NR;pt++)payNet[pt]=annR; }
@@ -1954,22 +2034,27 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
       var qA=Math.pow(1/accR,1/(N-1));                    // коэффициент убывания платежа
       var xA=qA/(1+iLease);
       var sA=(Math.abs(xA-1)<1e-12)?N:(1-Math.pow(xA,N))/(1-xA);
-      var p1=body*(1+iLease)/sA;                          // первый платёж: PV всех платежей = тело
+      var p1=bodyEff*(1+iLease)/sA;                        // первый платёж: PV всех платежей = тело (без выкупа)
       for(var pt=1;pt<=N;pt++)payNet[pt]=p1*Math.pow(qA,pt-1);
     }
     function payNetAt(t){return (t>=1&&t<=N)?payNet[t]:0;}
     var annGross=payNet[1]*k;            // платёж 1-го месяца с НДС (для карточек и КП)
 
-    // --- график клиента (аннуитет на тело без НДС) ---
+    // --- график клиента (аннуитет на тело без НДС; выкуп сливается в платёж мес. N) ---
     var cli=[],bal=body,sIntCli=0,yIncome={};
     for(var t=1;t<=N;t++){
       var pNet=payNetAt(t);
-      var intr=bal*iLease, pr=pNet-intr; bal-=pr; if(bal<0.5)bal=0; sIntCli+=intr;
+      var intr=bal*iLease, pr=pNet-intr; bal-=pr;
+      var buyN=(t===N)?buyoutNet:0;
+      if(buyN>0){pr+=buyN; bal-=buyN;}
+      if(bal<0)bal=0;
+      sIntCli+=intr;
       var yr=yOf(t); yIncome[yr]=(yIncome[yr]||0)+intr;
-      cli.push({t:t,payG:pNet*k,vat:pNet*(vat/100),payN:pNet,intr:intr,pr:pr,balN:bal,balG:bal*k});
+      var payNRow=pNet+buyN, payGRow=payNRow*k;
+      cli.push({t:t,payG:payGRow,vat:payNRow*(vat/100),payN:payNRow,intr:intr,pr:pr,balN:bal,balG:bal*k,buyN:buyN});
     }
     var payNetTot=0; for(var pt=1;pt<=N;pt++)payNetTot+=payNet[pt];
-    var sumNet=advNet+payNetTot, sumGross=sumNet*k;
+    var sumNet=advNet+payNetTot+buyoutNet, sumGross=sumNet*k;
     // Признание наценки по ФСБУ 25 / МСФО 16: пропорционально чистой инвестиции в аренду,
     // то есть в той же пропорции, что и начисленные проценты (убывающим потоком), а не равномерно.
     var intByM=[], intSum=0;
@@ -1982,13 +2067,13 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
 
     // --- денежные потоки и НДС по кварталам ---
     function suppAt(t){var s=0;supp.forEach(function(r){if(Math.round(r.m)===t)s+=priceDVat*(r.s/100);});return s;}
-    function clientAt(t){if(t===0)return advGross;if(t>=1&&t<=N)return payNetAt(t)*k+aeCliAt(t);return 0;}
+    function clientAt(t){if(t===0)return advGross;if(t>=1&&t<=N)return payNetAt(t)*k+aeCliAt(t)+(t===N?buyoutGross:0);return 0;}
     function dateAt(t){return new Date(start.getFullYear(),start.getMonth()+t,start.getDate());}
     function qkey(d){return d.getFullYear()*4+Math.floor(d.getMonth()/3);}
     var MAXM=N+24, startQ=qkey(start), qOut={}, qIn={};
     qIn[startQ]=(qIn[startQ]||0)+inputVat;   // входной НДС с техники — в квартале постановки на учёт
     for(var t=0;t<=MAXM;t++){var d=dateAt(t);var q=qkey(d);qOut[q]=(qOut[q]||0)+clientAt(t)*(vat/(100+vat));qIn[q]=(qIn[q]||0)+aeInVatAt(t);}
-    var vatOnce=((document.getElementById('vatMode')||{}).value==='once');   // режим уплаты НДС
+    var vatOnce=false;   // НДС платится 1/3 помесячно (ст. 174 НК)
     var vatOut={},vatIn={},qseen={};
     for(var t=0;t<=MAXM;t++){qseen[qkey(dateAt(t))]=true;}
     Object.keys(qseen).forEach(function(qq){qq=parseInt(qq);var yr=Math.floor(qq/4),q0=qq%4;
@@ -2011,8 +2096,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
         var interest=debt*iFund; debt+=interest; sInt+=interest;
         var yr=Math.min(yOf(t),Math.ceil(N/12)); yInt[yr]=(yInt[yr]||0)+interest;
         var inC=clientAt(t), inV=vatIn[t]||0, oS=suppAt(t), oV=vatOut[t]||0, oC=(commIdx===t)?commCost:0;
-        var oDef=suppIntAt(t), oGuar=guarAt(t), oAE=aeLKAt(t)+propAt(t)+regAt(t), oExtra=oDef+oGuar+oAE;   // % отсрочки + гарантия + доп.расходы (в кредит)
-        var netCF=inC+inV-oS-oExtra-oV-oC; cash+=netCF;
+        var oDef=suppIntAt(t), oGuar=guarAt(t), oAE=aeLKAt(t), oProp=propAt(t), oReg=regAt(t), inComp=compAt(t), oExtra=oDef+oGuar+oAE+oProp+oReg;   // % отсрочки + гарантия + доп.расходы (в кредит)
+        var netCF=inC+inComp+inV-oS-oExtra-oV-oC; cash+=netCF;
         var drawn=0,repaid=0;
         if(cash<-0.5){drawn=-cash;debt+=drawn;drawnTot+=drawn;if(firstDraw<0)firstDraw=t;cash=0;}
         // фаза выборки (до drawEnd) — у всех методов гасим излишком; после — по выбранному методу
@@ -2032,7 +2117,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
         }
         if(debt>peak)peak=debt;
         if(debt>0.5)lastPos=t;
-        rows.push({t:t,inC:inC,inV:inV,oS:oS,oDef:oDef,oGuar:oGuar,oAE:oAE,oExtra:oExtra,oV:oV,oC:oC,interest:interest,netCF:netCF,drawn:drawn,repaid:repaid,debt:debt});
+        rows.push({t:t,inC:inC,inComp:inComp,inV:inV,oS:oS,oDef:oDef,oGuar:oGuar,oAE:oAE,oProp:oProp,oReg:oReg,oExtra:oExtra,oV:oV,oC:oC,interest:interest,netCF:netCF,drawn:drawn,repaid:repaid,debt:debt,vatAdv:(t===0?advGross*(vat/(100+vat)):0),vatPay:oV});
       }
       paidOff = lastPos<0 ? -1 : (lastPos>=MAXM ? -1 : lastPos+1);
       return {rows:rows,peak:peak,drawnTot:drawnTot,firstDraw:firstDraw,paidOff:paidOff,sInt:sInt,yInt:yInt,D0:D0,annPay:annPay,diffPrin:diffPrin,payList:payList,drawEnd:drawEnd,R:R,method:method,infeasible:infeasible,repEnd:repEnd};
@@ -2102,7 +2187,13 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     var amMonth=assetCost/(spiM/amCoef);
     var amYear={}, amLeft=assetCost;
     for(var am=1;am<=N;am++){var a=Math.min(amMonth,amLeft);amLeft-=a;var ay=Math.min(yOf(am),Math.ceil(N/12));amYear[ay]=(amYear[ay]||0)+a;}
-    var amResid=Math.max(0,amLeft);                           // остаточная стоимость -> в расход при выкупе
+    var amResid=Math.max(0,amLeft);                           // остаточная (налоговая) стоимость на дату выкупа
+    // --- п.3 ст.268 НК: реализация предмета при выкупе — отдельно от лизингового дохода ---
+    var saleResult=buyoutNet-amResid;                         // >=0 доход сразу в базу; <0 убыток к переносу
+    var taxGainAtSale=saleResult>0?saleResult:0;
+    var taxLossAtSale=saleResult<0?-saleResult:0;
+    var remSPI=Math.max(1,Math.round(spiM/amCoef)-N);         // остаток (СПИ/коэфф. − факт. срок эксплуатации), мес.
+    var lossPerMonth=taxLossAtSale>0?taxLossAtSale/remSPI:0;
     var yTaxIncome={};
     for(var ti=1;ti<=N;ti++){var tiy=Math.min(yOf(ti),Math.ceil(N/12));yTaxIncome[tiy]=(yTaxIncome[tiy]||0)+payNetAt(ti)+advNet/N;}
     var taxLoss=0, taxRows=[];
@@ -2122,12 +2213,12 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
         // при переносе в график клиент компенсирует через платежи: сумма попала в налоговый доход,
         // поэтому и расход должен быть в базе. При оплате по счёту обе стороны вне модели — нейтрально.
         var tOth=(aeCostYear[y]||0)+(propGLP?propYear:0)+((regGLP&&y===1)?regTot:0);
-        var tRes=(y===Math.ceil(N/12))?amResid:0;             // выкуп в последнем году
-        var tBase=tInc-tAm-tFin-tOth-tRes;
+        var tGainY=(y===Math.ceil(N/12))?taxGainAtSale:0;     // доход от реализации при выкупе, если цена выше остаточной
+        var tBase=tInc-tAm-tFin-tOth+tGainY;
         if(tBase>0){var use=Math.min(taxLoss,tBase*0.5);tBase-=use;taxLoss-=use;}
         else {taxLoss+=-tBase;tBase=0;}
         tax=ptax/100*tBase;
-        taxRows.push([y,tInc,tAm,tFin,tOth,tRes,tBase,tax]);
+        taxRows.push([y,tInc,tAm,tFin,tOth,tGainY,tBase,tax]);
       }
       var net=before-tax;
       yProfit[y]=before;yTax[y]=tax;yNet[y]=net;
@@ -2140,12 +2231,12 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
 
     // --- денежный поток по годам ---
     var cf={};
-    for(var y=1;y<=YMAX;y++){cf[y]={inC:0,inV:0,oS:0,oV:0,fin:0,suppInt:0,guar:0,oAE:0,kasko:0};}
-    T.rows.forEach(function(r){if(r.t>=1){var y=Math.min(yOf(r.t),YMAX);if(!cf[y])return;cf[y].inC+=r.inC;cf[y].inV+=r.inV;cf[y].oS+=r.oS;cf[y].oV+=r.oV;cf[y].fin+=r.interest;cf[y].oAE+=(r.oAE||0);}});
+    for(var y=1;y<=YMAX;y++){cf[y]={inC:0,inV:0,oS:0,oV:0,fin:0,suppInt:0,guar:0,oAE:0,kasko:0,comp:0,prop:0,reg:0};}
+    T.rows.forEach(function(r){if(r.t>=1){var y=Math.min(yOf(r.t),YMAX);if(!cf[y])return;cf[y].inC+=r.inC;cf[y].inV+=r.inV;cf[y].oS+=r.oS;cf[y].oV+=r.oV;cf[y].fin+=r.interest;cf[y].oAE+=(r.oAE||0);cf[y].comp+=(r.inComp||0);cf[y].prop+=(r.oProp||0);cf[y].reg+=(r.oReg||0);}});
     // месяц 0 (аванс+Поставщик+возврат/уплата НДС в мес.0 при vatLag=0) отнесём к 1 году
     cf[1].inC+=clientAt(0);cf[1].oS+=(fdefOn?T.rows[0].oS:suppAt(0));cf[1].fin+=commCost;cf[1].guar=guarCost;
-    cf[1].inV+=(vatIn[0]||0);cf[1].oV+=(vatOut[0]||0);cf[1].oAE+=aeLKAt(0)+regAt(0)+propAt(0);
-    for(var y=1;y<=YMAX;y++){cf[y].ptax=yTax[y]||0;cf[y].suppInt=sIntYear[y]||0;cf[y].kasko=kaskoCommYear[y]||0;cf[y].net=cf[y].inC+cf[y].inV-cf[y].oS-cf[y].oV-cf[y].fin-cf[y].suppInt-cf[y].guar-cf[y].oAE+cf[y].kasko-cf[y].ptax;}
+    cf[1].inV+=(vatIn[0]||0);cf[1].oV+=(vatOut[0]||0);cf[1].oAE+=aeLKAt(0);cf[1].reg+=regAt(0);cf[1].prop+=propAt(0);cf[1].comp+=compAt(0);
+    for(var y=1;y<=YMAX;y++){cf[y].ptax=yTax[y]||0;cf[y].suppInt=sIntYear[y]||0;cf[y].kasko=kaskoCommYear[y]||0;cf[y].net=cf[y].inC+cf[y].comp+cf[y].inV-cf[y].oS-cf[y].oV-cf[y].fin-cf[y].suppInt-cf[y].guar-cf[y].oAE-cf[y].prop-cf[y].reg+cf[y].kasko-cf[y].ptax;}
 
     // ===== график выборок и погашения кредита (тренчи, FIFO) =====
     var drawMs=[]; T.rows.forEach(function(r){if(r.drawn>0.5)drawMs.push(r.t);});
@@ -2182,8 +2273,9 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     document.getElementById('oEffSub').textContent='IRR платежей клиента, без НДС · ном. '+fmtPct(isFinite(effM)?effM*12*100:0);
     document.getElementById('oUdor').innerHTML=fmtPct(udorYear)+'<span style="font-size:15px;font-weight:600">/год</span>';
     document.getElementById('oUdorSub').textContent='всего за срок '+fmtPct(udorTotal);
-    var payLastG=payNetAt(N)*k;
-    document.getElementById('oPay').textContent=accOn?(fmtRub(annGross+subGross)+' → '+fmtRub(payLastG+subGross)):fmtRub(annGross+subGross);
+    var payLastG=payNetAt(N)*k+buyoutGross;
+    var showLastArrow=accOn||buyoutGross>0.5;
+    document.getElementById('oPay').textContent=showLastArrow?(fmtRub(annGross+subGross)+' → '+fmtRub(payLastG+subGross)):fmtRub(annGross+subGross);
     document.getElementById('oPayH').textContent=(accOn?('ускоренный, 1-й → '+N+'-й мес.'):(N+' мес.'))+(subGross>0.5?' · вкл. абонплату '+fmtRub(subGross):'')+' · без НДС '+fmtRub(payNetAt(1)+subGross/k);
     document.getElementById('oAdv').textContent=fmtRub(advGross);
     document.getElementById('oAdvH').textContent=adv+'% · без НДС '+fmtRub(advNet);
@@ -2193,8 +2285,16 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
 
     document.getElementById('margTitle').textContent='Реальная маржа (приведено к дате договора под '+fmtPct(fund)+')';
     (function(){
+      var eRef=document.getElementById('amSpiCoefRef'); if(eRef)eRef.textContent=spiM+' мес. × '+amCoef+'× (группа '+amGroup+')';
       var e=document.getElementById('amMon'); if(e)e.textContent=taxAcc?fmtRub(amMonth):'—';
       var e2=document.getElementById('amLeftOut'); if(e2)e2.textContent=taxAcc?fmtRub(amResid):'—';
+      var e4=document.getElementById('amSaleRes'); if(e4)e4.textContent=taxAcc?((saleResult>=0?'+':'−')+fmtRub(Math.abs(saleResult))+(saleResult>=0?' (доход)':' (убыток)')):'—';
+      var lb=document.getElementById('amLossBox');
+      if(lb)lb.style.display=(taxAcc&&taxLossAtSale>0.5)?'grid':'none';
+      if(taxAcc&&taxLossAtSale>0.5){
+        var e5=document.getElementById('amLossTot'); if(e5)e5.textContent=fmtRub(taxLossAtSale);
+        var e6=document.getElementById('amLossPer'); if(e6)e6.textContent=remSPI+' мес. / '+fmtRub(lossPerMonth)+' в мес.';
+      }
       var tb=document.getElementById('taxBody'), tf=document.getElementById('taxFoot');
       if(tb){ if(!taxAcc){tb.innerHTML='<tr><td colspan="8" style="color:var(--muted)">Включите чек-бокс, чтобы считать налог по налоговой базе.</td></tr>';if(tf)tf.innerHTML='';}
         else{ var s=[0,0,0,0,0,0,0]; 
@@ -2218,28 +2318,37 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
 
     // tab1
     document.getElementById('r1rate').textContent=fmtPct(leaseRate);
-    document.getElementById('r1pay').textContent=accOn?(fmtRub(annGross+subGross)+' → '+fmtRub(payLastG+subGross)):fmtRub(annGross+subGross);
+    document.getElementById('r1pay').textContent=showLastArrow?(fmtRub(annGross+subGross)+' → '+fmtRub(payLastG+subGross)):fmtRub(annGross+subGross);
     document.getElementById('r1body').textContent=fmtRub(body);
     document.getElementById('r1term').textContent=N+' мес.';
     var cb=document.getElementById('cliBody'),h='';
     h+='<tr class="special"><td>Аванс</td><td>'+fmtRub(advGross)+'</td><td>'+fmtRub(advNet*(vat/100))+'</td><td>'+fmtRub(advNet)+'</td><td>—</td><td>'+fmtRub(advNet)+'</td><td>'+fmtRub(body)+'</td><td>'+fmtRub(body*k)+'</td></tr>';
-    cli.forEach(function(r){var pg=r.payG+subGross,pn=pg/k,pv=pg-pn;h+='<tr><td>'+r.t+'</td><td>'+fmtRub(pg)+'</td><td>'+fmtRub(pv)+'</td><td>'+fmtRub(pn)+'</td><td>'+fmtRub(r.intr)+'</td><td>'+fmtRub(r.pr)+'</td><td>'+fmtRub(r.balN)+'</td><td>'+fmtRub(r.balG)+'</td></tr>';});
+    cli.forEach(function(r){var pg=r.payG+subGross,pn=pg/k,pv=pg-pn;var buyTag=r.buyN>0.5?' <span style="color:var(--teal);font-size:10px;font-weight:600">(вкл. выкуп '+fmtRub(r.buyN*k)+')</span>':'';h+='<tr'+(r.buyN>0.5?' style="background:var(--tealSoft)"':'')+'><td>'+r.t+'</td><td>'+fmtRub(pg)+buyTag+'</td><td>'+fmtRub(pv)+'</td><td>'+fmtRub(pn)+'</td><td>'+fmtRub(r.intr)+'</td><td>'+fmtRub(r.pr)+'</td><td>'+fmtRub(r.balN)+'</td><td>'+fmtRub(r.balG)+'</td></tr>';});
     cb.innerHTML=h;
     document.getElementById('cliFoot').innerHTML='<tr><td>Итого</td><td>'+fmtRub(sumGross+subGross*N)+'</td><td>'+fmtRub((sumGross+subGross*N)-(sumNet+subGross/k*N))+'</td><td>'+fmtRub(sumNet+subGross/k*N)+'</td><td>'+fmtRub(sIntCli)+'</td><td>'+fmtRub(body+advNet)+'</td><td>—</td><td>—</td></tr>';
 
     // --- РАЗВЁРНУТЫЙ ГРАФИК (детализация платежа клиента) ---
     var subNetM=subGross/k, kaskoInPay=0;   // Страхование в платёж входит только в варианте 2 (не реализован)
-    var eb='', tPr=0,tInt=0,tSub=0,tKas=0,tNet=0,tVat=0,tGross=0;
+    var eb='', tPr=0,tInt=0,tSub=0,tKas=0,tNet=0,tVat=0,tGross=0, cum=0;
+    (function(){                                   // авансовый платёж отдельной строкой
+      var aN=advNet, aV=advGross-advNet; cum+=advGross;
+      eb+='<tr style="background:var(--tealSoft)"><td>0</td><td>'+dateAt(0).toLocaleDateString('ru-RU',{month:'short',year:'2-digit'})+'</td>'+
+        '<td>'+fmtRub(aN)+'</td><td>—</td><td>—</td><td>—</td>'+
+        '<td>'+fmtRub(aN)+'</td><td>'+fmtRub(aV)+'</td><td style="font-weight:600">'+fmtRub(advGross)+'</td>'+
+        '<td>'+fmtRub(cum)+'</td><td>'+fmtRub(body)+'</td></tr>';
+      tPr+=aN; tNet+=aN; tVat+=aV; tGross+=advGross;
+    })();
     cli.forEach(function(r){
       var pr=r.pr, intr=r.intr, sub=subNetM, kas=kaskoInPay;
       var net=pr+intr+sub+kas, vt=net*(vat/100), gross=net+vt;
       tPr+=pr;tInt+=intr;tSub+=sub;tKas+=kas;tNet+=net;tVat+=vt;tGross+=gross;
-      eb+='<tr><td>'+r.t+'</td><td>'+dateAt(r.t).toLocaleDateString('ru-RU',{month:'short',year:'2-digit'})+'</td><td>'+fmtRub(pr)+'</td><td>'+fmtRub(intr)+'</td><td>'+fmtRub(sub)+'</td><td>'+fmtRub(kas)+'</td><td>'+fmtRub(net)+'</td><td>'+fmtRub(vt)+'</td><td>'+fmtRub(gross)+'</td><td>'+fmtRub(r.balN)+'</td></tr>';
+      cum+=gross;
+      eb+='<tr'+(r.buyN>0.5?' style="background:var(--tealSoft)"':'')+'><td>'+r.t+'</td><td>'+dateAt(r.t).toLocaleDateString('ru-RU',{month:'short',year:'2-digit'})+'</td><td>'+fmtRub(pr)+(r.buyN>0.5?' <span style="color:var(--teal);font-size:10px;font-weight:600">(вкл. выкуп '+fmtRub(r.buyN)+')</span>':'')+'</td><td>'+fmtRub(intr)+'</td><td>'+fmtRub(sub)+'</td><td>'+fmtRub(kas)+'</td><td>'+fmtRub(net)+'</td><td>'+fmtRub(vt)+'</td><td>'+fmtRub(gross)+'</td><td>'+fmtRub(cum)+'</td><td>'+fmtRub(r.balN)+'</td></tr>';
     });
     document.getElementById('expBody').innerHTML=eb;
-    document.getElementById('expFoot').innerHTML='<tr><td>Итого</td><td>—</td><td>'+fmtRub(tPr)+'</td><td>'+fmtRub(tInt)+'</td><td>'+fmtRub(tSub)+'</td><td>'+fmtRub(tKas)+'</td><td>'+fmtRub(tNet)+'</td><td>'+fmtRub(tVat)+'</td><td>'+fmtRub(tGross)+'</td><td>—</td></tr>';
+    document.getElementById('expFoot').innerHTML='<tr><td>Итого</td><td>—</td><td>'+fmtRub(tPr)+'</td><td>'+fmtRub(tInt)+'</td><td>'+fmtRub(tSub)+'</td><td>'+fmtRub(tKas)+'</td><td>'+fmtRub(tNet)+'</td><td>'+fmtRub(tVat)+'</td><td>'+fmtRub(tGross)+'</td><td>'+fmtRub(cum)+'</td><td>—</td></tr>';
     KP={item:(document.getElementById('item').value||'Офисное помещение'),client:document.getElementById('client').value||'',inn:(document.getElementById('inn')||{}).value||'',
-        priceVat:priceVat,adv:adv,advGross:advGross,annGross:annGross+subGross,annNet:annNet,sumGross:sumGross+subGross*N,sumNet:sumNet,sub:subGross,acc:accOn,payLast:payLastG+subGross,accR:accR,
+        priceVat:priceVat,adv:adv,advGross:advGross,annGross:annGross+subGross,annNet:annNet,sumGross:sumGross+subGross*N,sumNet:sumNet,sub:subGross,acc:showLastArrow,payLast:payLastG+subGross,accR:accR,
         overpay:(sumGross+subGross*N)-priceVat,udorYear:udorYear,udorTotal:udorTotal,N:N,vat:vat,k:k,leaseRate:leaseRate,
         start:{y:start.getFullYear(),m:start.getMonth(),d:start.getDate()},rows:cli};
 
@@ -2303,13 +2412,15 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
       var delta=r.netCF;
       var dstr=(delta>=0?'+':'−')+fmtRub(Math.abs(delta));
       var dcol=delta>=0?'var(--teal)':'var(--red)';
-      th+='<tr'+(r.drawn>0.5?' class="draw"':'')+'><td>'+r.t+' · '+dateAt(r.t).toLocaleDateString('ru-RU',{month:'short',year:'2-digit'})+'</td>'+
-        '<td>'+(r.inC>0.5?fmtRub(r.inC):'—')+'</td>'+
+      var buyHere=(r.t===N&&buyoutGross>0.5);
+      th+='<tr'+(r.drawn>0.5?' class="draw"':(buyHere?' style="background:var(--tealSoft)"':''))+'><td>'+r.t+' · '+dateAt(r.t).toLocaleDateString('ru-RU',{month:'short',year:'2-digit'})+'</td>'+
+        '<td>'+(r.inC>0.5?fmtRub(r.inC):'—')+(buyHere?' <span style="color:var(--teal);font-size:10px;font-weight:600">(вкл. выкуп '+fmtRub(buyoutGross)+')</span>':'')+'</td>'+
+        '<td>'+((r.inComp||0)>0.5?'<span style="color:var(--teal)">'+fmtRub(r.inComp)+'</span>':'—')+'</td>'+
         '<td>'+(r.inV>0.5?fmtRub(r.inV):'—')+'</td>'+
         '<td>'+(r.oS>0.5?fmtRub(r.oS):'—')+'</td>'+
-        '<td>'+(r.oDef>0.5?fmtRub(r.oDef):'—')+'</td>'+
-        '<td>'+(r.oGuar>0.5?fmtRub(r.oGuar):'—')+'</td>'+
-        '<td>'+(r.oAE>0.5?fmtRub(r.oAE):'—')+'</td>'+
+        '<td>'+((r.oAE+r.oDef+r.oGuar)>0.5?fmtRub(r.oAE+r.oDef+r.oGuar):'—')+'</td>'+
+        '<td>'+((r.oProp||0)>0.5?fmtRub(r.oProp):'—')+'</td>'+
+        '<td>'+((r.oReg||0)>0.5?fmtRub(r.oReg):'—')+'</td>'+
         '<td>'+(r.oV>0.5?fmtRub(r.oV):'—')+'</td>'+
         '<td>'+(r.interest>0.5?fmtRub(r.interest):'—')+'</td>'+
         '<td>'+(r.drawn>0.5?fmtRub(r.drawn):'—')+'</td>'+
@@ -2320,7 +2431,37 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     tb.innerHTML=th;
     // итоги по столбцам казначейства
     var dT=tot.netCF, dTs=(dT>=0?'+':'−')+fmtRub(Math.abs(dT));
-    document.getElementById('trFoot').innerHTML='<tr><td>Итого</td><td>'+fmtRub(tot.inC)+'</td><td>'+fmtRub(tot.inV)+'</td><td>'+fmtRub(tot.oS)+'</td><td>'+fmtRub(tot.oDef)+'</td><td>'+fmtRub(tot.oGuar)+'</td><td>'+fmtRub(tot.oAE)+'</td><td>'+fmtRub(tot.oV)+'</td><td>'+fmtRub(tot.interest)+'</td><td>'+fmtRub(tot.drawn)+'</td><td>'+fmtRub(tot.repaid)+'</td><td>—</td><td>'+dTs+'</td></tr>';
+    var tComp=0,tProp=0,tReg=0;T.rows.forEach(function(r){tComp+=(r.inComp||0);tProp+=(r.oProp||0);tReg+=(r.oReg||0);});
+    // расшифровка: как компенсируются транзитные статьи
+    (function(){
+      var el=document.getElementById('compNote'); if(!el)return;
+      var parts=[];
+      if(!propOff||!regOff){
+        var inGraph=(propGLP?propTot:0)+(regGLP?regTot:0);
+        var byBill =(propGLP?0:(propOff?0:propTot))+(regGLP?0:(regOff?0:regTot));
+        if(inGraph>0.5){
+          var inGraphNet=inGraph/k;
+          var iL=iLease, pv=inGraphNet, ret=0;
+          // возврат этой части через аннуитет: доля тела -> платежи с процентом
+          var annPart=(iL===0)?inGraphNet/N:inGraphNet*iL/(1-Math.pow(1+iL,-N));
+          ret=annPart*N;
+          parts.push('<b>Включено в график клиента:</b> '+fmtRub(inGraph)+' с НДС ('+
+            (propGLP&&!propOff?'налог на имущество '+fmtRub(propTot):'')+
+            ((propGLP&&!propOff)&&(regGLP&&!regOff)?' + ':'')+
+            (regGLP&&!regOff?'регистрация '+fmtRub(regTot):'')+
+            '). Финансируется в тело лизинга и возвращается платежами клиента: '+fmtRub(ret*k)+' с НДС за срок, в т.ч. процентный доход '+fmtRub((ret-inGraphNet)*k)+
+            '. В таблице эта сумма входит в колонку «Клиент (приток)» и отдельно не выделяется.');
+        }
+        if(byBill>0.5){
+          parts.push('<b>Перевыставляется по счёту:</b> '+fmtRub(byBill)+
+            ((propGLP||propOff)?'':' (налог на имущество '+fmtRub(propTot)+')')+
+            ((regGLP||regOff)?'':' (регистрация '+fmtRub(regTot)+')')+
+            '. Клиент компенсирует в том же месяце — видно в колонке «Компенсация клиента», нетто-эффект нулевой.');
+        }
+      }
+      el.innerHTML=parts.length?parts.join('<br><br>'):'';
+    })();
+    document.getElementById('trFoot').innerHTML='<tr><td>Итого</td><td>'+fmtRub(tot.inC)+'</td><td>'+fmtRub(tComp)+'</td><td>'+fmtRub(tot.inV)+'</td><td>'+fmtRub(tot.oS)+'</td><td>'+fmtRub(tot.oAE+tot.oDef+tot.oGuar)+'</td><td>'+fmtRub(tProp)+'</td><td>'+fmtRub(tReg)+'</td><td>'+fmtRub(tot.oV)+'</td><td>'+fmtRub(tot.interest)+'</td><td>'+fmtRub(tot.drawn)+'</td><td>'+fmtRub(tot.repaid)+'</td><td>—</td><td>'+dTs+'</td></tr>';
 
     // график выборок и погашения кредита
     var ch='<tr><th>Мес. / дата</th><th>Выборка</th>';
@@ -2378,6 +2519,9 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
       cfRow('Отсрочка Поставщика (%)','suppInt',-1)+
       cfRow('Банковская гарантия','guar',-1)+
       cfRow('Доп. расходы (ЛК)','oAE',-1)+
+      cfRow('Налог на имущество','prop',-1)+
+      cfRow('Расходы на регистрацию','reg',-1)+
+      cfRow('Компенсация от клиента','comp',1)+
       cfRow('Страхование (комиссия)','kasko',1)+
       cfRow('Налог на прибыль','ptax',-1)+
       cfRow('= Чистый поток','net',1,true);
