@@ -94,36 +94,34 @@
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%231E3A5F'/%3E%3Ctext x='32' y='43' font-family='Arial' font-size='36' font-weight='bold' fill='%23fff' text-anchor='middle'%3E%E2%82%BD%3C/text%3E%3C/svg%3E">
 </head>
 <body>
-<div id="kpView" style="display:none;max-width:720px;margin:40px auto;padding:0 20px">
-  <div class="head" style="display:block">
-    <div class="eyebrow">Коммерческое предложение</div>
-    <h1 style="margin-bottom:6px">Лизинг недвижимости</h1>
+<div id="kpView" style="display:none;max-width:760px;margin:28px auto;padding:0 18px">
+  <div style="background:#fff;color:#18181B;font-family:Arial,Helvetica,sans-serif;padding:34px 34px 28px;border:1px solid #E5E5E0;border-radius:10px">
+    <div style="text-align:right;font-size:11px;color:#666" id="kvValid">—</div>
+    <div style="font-size:19px;color:#1E3A5F;font-weight:700;margin-top:4px">Коммерческое предложение по финансовому лизингу</div>
+    <div style="height:3px;background:#1E3A5F;margin:10px 0 16px"></div>
+    <div id="kvKomu" style="font-size:13px;margin-bottom:10px;display:none"></div>
+    <div style="font-size:13px;margin-bottom:16px">Предлагаем приобретение объекта в финансовый лизинг на следующих условиях:</div>
+    <table style="width:100%;border-collapse:collapse;font-size:13px" id="kvTerms"></table>
+
+    <div style="font-size:15px;color:#1E3A5F;font-weight:700;margin:22px 0 6px">Дополнительные расходы</div>
+    <table style="width:100%;border-collapse:collapse;font-size:12.5px" id="kvEx"></table>
+
+    <div style="font-size:15px;color:#1E3A5F;font-weight:700;margin:22px 0 6px">График лизинговых платежей</div>
+    <table style="width:100%;border-collapse:collapse;font-size:11.5px">
+      <thead><tr style="background:#1E3A5F;color:#fff">
+        <th style="border:1px solid #DDD;padding:5px 8px;text-align:left;font-size:10px;text-transform:uppercase">№</th>
+        <th style="border:1px solid #DDD;padding:5px 8px;text-align:left;font-size:10px;text-transform:uppercase">Дата</th>
+        <th style="border:1px solid #DDD;padding:5px 8px;text-align:right;font-size:10px;text-transform:uppercase">Платёж с НДС</th>
+        <th style="border:1px solid #DDD;padding:5px 8px;text-align:right;font-size:10px;text-transform:uppercase">в т.ч. НДС</th>
+      </tr></thead>
+      <tbody id="kvBody"></tbody>
+    </table>
+
+    <div style="margin-top:18px;font-size:10px;color:#666">Настоящее предложение носит информационный характер и не является публичной офертой (ст. 437 ГК РФ). Расчёт предварительный.</div>
   </div>
-  <div class="marg mb22">
-    <div class="mt" id="kvTitle">Условия сделки</div>
-    <div class="grid g2">
-      <div class="bare"><div class="lab">Предмет лизинга</div><div class="val" id="kvItem" style="font-size:16px">—</div></div>
-      <div class="bare"><div class="lab">Клиент</div><div class="val" id="kvClient" style="font-size:16px">—</div></div>
-    </div>
-    <div class="grid g3" style="margin-top:14px">
-      <div class="bare"><div class="lab">Стоимость</div><div class="val num" id="kvPrice">—</div></div>
-      <div class="bare"><div class="lab">Аванс</div><div class="val num" id="kvAdv">—</div></div>
-      <div class="bare"><div class="lab">Срок</div><div class="val num" id="kvTerm">—</div></div>
-    </div>
-    <div class="grid g3" style="margin-top:14px">
-      <div class="bare"><div class="lab">Лизинговый платёж</div><div class="val num" id="kvPay" style="color:var(--teal)">—</div></div>
-      <div class="bare"><div class="lab">Удорожание</div><div class="val num" id="kvUdor">—</div></div>
-      <div class="bare"><div class="lab">Сумма договора</div><div class="val num" id="kvSum">—</div></div>
-    </div>
-  </div>
-  <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px">
+  <div style="display:flex;gap:10px;flex-wrap:wrap;margin:16px 0 8px">
     <button onclick="generateKP()" style="padding:12px 22px;background:var(--blue);color:#fff;border:none;border-radius:9px;font-size:15px;font-weight:600;cursor:pointer">📄 Скачать КП в PDF</button>
-    <button onclick="showCalc()" style="padding:12px 22px;background:var(--card);color:var(--muted);border:1px solid var(--line);border-radius:9px;font-size:15px;font-weight:600;cursor:pointer">Открыть расчёт</button>
   </div>
-  <div class="tableWrap">
-    <table><thead><tr><th>№</th><th>Дата</th><th>Платёж с НДС</th><th>в т.ч. НДС</th><th>Остаток с НДС</th></tr></thead><tbody id="kvBody"></tbody></table>
-  </div>
-  <div style="margin-top:14px;font-size:11.5px;color:var(--muted)">Предложение носит информационный характер и не является публичной офертой (ст. 437 ГК РФ). Расчёт предварительный.</div>
 </div>
 <div class="wrap">
   <div class="head" style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px">
@@ -152,6 +150,11 @@
   <div id="t0">
     <div class="tabresetRow"><button class="tabreset" onclick="resetTab('t0')" title="Сбросить параметры этой вкладки к базовым">↺ Сброс вкладки</button></div>
     <h2>Основные условия</h2>
+    <div class="grid g3 mb12">
+      <div><label class="lbl">Предмет лизинга (для КП)</label><input id="item" type="text" value="Офисное помещение"></div>
+      <div><label class="lbl">Клиент / лизингополучатель (для КП)</label><input id="client" type="text" value=""></div>
+      <div><label class="lbl">ИНН клиента</label><input id="inn" type="text" value="" placeholder="7700000000"></div>
+    </div>
     <div class="grid g2 mb12">
       <div><label class="lbl">Стоимость объекта (с НДС)</label><input id="price" type="number" value="23584000"></div>
       <div style="display:none"><label class="lbl">Цена для дилера</label><input id="priceD" type="number" value="23584000"></div>
@@ -167,6 +170,24 @@
       <div><label class="lbl">Аванс клиента, %</label><input id="adv" type="number" value="49"></div>
       <div><label class="lbl">Срок лизинга, мес.</label><input id="term" type="number" value="12"></div>
     </div>
+    <div class="panel mb12">
+      <div class="pt"><div class="ptt">Дополнительные расходы</div><div class="num" id="cdExTot">—</div></div>
+      <div class="grid g3 mb8">
+        <div><label class="lbl">Налог на имущество</label><div class="val num" id="cdProp" style="padding-top:4px;font-size:16px">—</div><div class="hint" id="cdPropH" style="font-size:11px;color:var(--muted);margin-top:2px">—</div></div>
+        <div><label class="lbl">Расходы на регистрацию</label><div class="val num" id="cdReg" style="padding-top:4px;font-size:16px">—</div><div class="hint" id="cdRegH" style="font-size:11px;color:var(--muted);margin-top:2px">—</div></div>
+        <div><label class="lbl">Прочие доп. расходы</label><div class="val num" id="cdAe" style="padding-top:4px;font-size:16px">—</div><div class="hint" id="cdAeH" style="font-size:11px;color:var(--muted);margin-top:2px">—</div></div>
+      </div>
+      <div style="font-size:11.5px;color:var(--muted);padding:7px 10px;background:var(--paper);border-radius:7px">Заполняется на вкладке «Доп. расходы» — здесь только сводка.</div>
+    </div>
+    <div class="panel mb12">
+      <div class="pt"><div class="ptt">Страхование</div><div class="num" id="cdInsTot">—</div></div>
+      <div class="grid g3 mb8">
+        <div><label class="lbl">Стоимость полиса в год</label><div class="val num" id="cdInsYear" style="padding-top:4px;font-size:16px">—</div><div class="hint" style="font-size:11px;color:var(--muted);margin-top:2px">1-й год полиса</div></div>
+        <div><label class="lbl">Включено в график клиенту</label><div class="val num" id="cdInsGlp" style="padding-top:4px;font-size:16px">—</div><div class="hint" id="cdInsGlpH" style="font-size:11px;color:var(--muted);margin-top:2px">—</div></div>
+        <div><label class="lbl">Комиссия ЛК за срок</label><div class="val num" id="cdInsComm" style="padding-top:4px;font-size:16px;color:var(--teal)">—</div><div class="hint" style="font-size:11px;color:var(--muted);margin-top:2px">доход ЛК</div></div>
+      </div>
+      <div style="font-size:11.5px;color:var(--muted);padding:7px 10px;background:var(--paper);border-radius:7px">Заполняется на вкладке «Страхование» — здесь только сводка.</div>
+    </div>
     <div class="mb12">
       <label class="lbl">Источник финансирования кассового разрыва</label>
       <div class="toggle">
@@ -178,9 +199,13 @@
     <div class="grid g4 mb12">
       <div>
         <label class="lbl">Выкупной платёж</label>
-        <div class="row" style="gap:6px">
+        <div class="row" style="gap:6px;align-items:stretch">
           <input id="buyout" type="number" value="1000" style="flex:1">
-          <select id="buyoutMode" onchange="calc()" style="width:64px;padding:9px 6px;border:1px solid var(--line);border-radius:8px;font-size:14px;background:var(--card);color:var(--ink)">
+          <div class="toggle" style="flex-direction:column;gap:4px;width:52px;flex:0 0 52px">
+            <button type="button" id="buRub" class="on" onclick="setBuyUnit('rub')">₽</button>
+            <button type="button" id="buPct" onclick="setBuyUnit('pct')">%</button>
+          </div>
+          <select id="buyoutMode" onchange="syncBuyUnit();calc()" style="display:none">
             <option value="rub" selected>₽</option>
             <option value="pct">%</option>
           </select>
@@ -221,11 +246,6 @@
       <div><label class="lbl">Возврат НДС, мес. после квартала</label><input id="vatlag" type="number" value="3"></div>
       <div><label class="lbl">Комиссия за кредит, %</label><input id="comm" type="number" step="0.1" value="1"></div>
       <div><label class="lbl">Налог на прибыль, %</label><input id="ptax" type="number" value="25"></div>
-    </div>
-    <div class="grid g3 mb12">
-      <div><label class="lbl">Предмет лизинга (для КП)</label><input id="item" type="text" value="Офисное помещение"></div>
-      <div><label class="lbl">Клиент / лизингополучатель (для КП)</label><input id="client" type="text" value=""></div>
-      <div><label class="lbl">ИНН клиента</label><input id="inn" type="text" value="" placeholder="7700000000"></div>
     </div>
     <div class="mb12"><label class="lbl">Комментарий к сделке (для реестра)</label><input id="dlNote" type="text" placeholder="условия, договорённости, срок действия"></div>
     <div class="mb22" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
@@ -423,16 +443,39 @@
       <div class="metric"><div class="lab">Сальдо в бюджет</div><div class="val num" id="ndsNet">—</div><div class="hint" id="ndsNetH">исходящий − вычет</div></div>
     </div>
 
+    <h2>Сводка по налогу на прибыль</h2>
+    <div class="grid g4 mb16">
+      <div class="metric"><div class="lab">Налог за срок договора</div><div class="val num" id="ptSumTerm" style="color:var(--amber)">—</div><div class="hint" id="ptSumTermH">авансами поквартально</div></div>
+      <div class="metric"><div class="lab">Убыток от выкупа (п.3 ст.268)</div><div class="val num" id="ptLoss" style="color:var(--teal)">—</div><div class="hint">остаточная − цена выкупа</div></div>
+      <div class="metric"><div class="lab">Период списания убытка</div><div class="val num" id="ptLossPer">—</div><div class="hint" id="ptLossPerH">СПИ/коэфф. − срок лизинга</div></div>
+      <div class="metric"><div class="lab">Списание в год</div><div class="val num" id="ptLossYear">—</div><div class="hint">равными долями</div></div>
+    </div>
+    <div id="ptLossWrap" style="display:none">
+      <p style="font-size:12.5px;color:var(--muted);margin-bottom:10px">Убыток от реализации предмета при выкупе списывается <b>после окончания договора</b> равными долями в течение оставшегося срока полезного использования (с учётом коэффициента ускорения). В эти годы у самой сделки дохода уже нет, поэтому списание <b>уменьшает налоговую базу по прочей прибыли лизинговой компании</b> — при её наличии экономия составит <span id="ptRatePct">25</span>% от суммы списания за год.</p>
+      <div class="tableWrap mb22">
+        <table id="tblLoss">
+          <thead><tr><th>Год после договора</th><th>Период</th><th>Списание убытка за год</th><th>Остаток убытка</th><th>Потенц. экономия налога</th></tr></thead>
+          <tbody id="lossBody"></tbody>
+          <tfoot id="lossFoot"></tfoot>
+        </table>
+      </div>
+    </div>
+    <div id="ptLossNone" style="font-size:12.5px;color:var(--muted);margin-bottom:22px">—</div>
+
     <h2>Казначейский расчёт (помесячно)</h2>
     <div style="display:flex;justify-content:flex-end;margin-bottom:8px"><button onclick="tableToXLS('tblDDS','ДДС','Движение_денежных_средств')" style="padding:8px 14px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;font-size:12.5px;font-weight:600;cursor:pointer">📊 Выгрузить в Excel</button></div>
     <div class="tableWrap">
       <table id="tblDDS">
-        <thead><tr><th>Мес. / дата</th><th>Клиент (приток)</th><th>Компенсация клиента</th><th>Страхование (комиссия)</th><th>Возврат НДС</th><th>Поставщик</th><th>Доп. расходы</th><th>Налог на имущество</th><th>Регистрация</th><th>НДС в бюджет</th><th>Налог на прибыль</th><th>% кредита</th><th>Выборка</th><th>Погашение</th><th>Долг по кредиту</th><th>Дельта</th></tr></thead>
+        <thead><tr><th>Мес. / дата</th><th>Клиент (приток)</th><th>Страхование (комиссия)</th><th>Возврат НДС</th><th>Поставщик</th><th>Доп. расходы</th><th>Налог на имущество</th><th>Регистрация</th><th>Компенсация клиента</th><th>НДС в бюджет</th><th>НДС с аванса (нач.)</th><th>НДС с платежа (нач.)</th><th>Входной НДС (вычет)</th><th>Налог на прибыль</th><th>Списание убытка (аморт.)</th><th>% кредита</th><th>Комиссия за кредит</th><th>Выборка</th><th>Погашение</th><th>Долг по кредиту</th><th>Дельта</th></tr></thead>
         <tbody id="trBody"></tbody>
         <tfoot id="trFoot"></tfoot>
       </table>
     </div>
     <div id="compNote" style="margin-top:10px;font-size:12px;color:var(--muted);line-height:1.5"></div>
+    <div style="margin-top:10px;font-size:12px;color:var(--muted);line-height:1.5;padding:10px 12px;background:var(--paper);border-radius:8px">
+      <b>Серые столбцы «НДС с аванса / НДС с платежа / Входной НДС» — справочные (начисление, для сверки с книгами покупок и продаж).</b> В денежный поток и «Дельту» они не входят: реальные движения денег — это «НДС в бюджет» и «Возврат НДС», уже после квартального сальдирования начисленного НДС против вычета. Суммировать те и другие вместе нельзя — получится двойной счёт.
+      <div style="margin-top:8px"><b>«Комиссия за кредит»</b> — разовый платёж банку в месяце первой выборки. Если на «Калькуляторе» она включена в тело лизинга, комиссия отражена <i>серым</i>: деньги банку уходят, но их возмещает клиент через лизинговые платежи, поэтому расходом ЛК в P&amp;L она не является (стоит 0). Если не включена — это реальный расход ЛК и в P&amp;L он показан минусом.</div>
+    </div>
     <div class="edu">
       <h3>Как читать движение денежных средств</h3>
       <p><b>Принцип:</b> кредит берём не на весь график Поставщику, а только на кассовый разрыв. Поступления клиента и возврат НДС из бюджета сначала накапливаются и гасят обязательства перед Поставщиком; кредитом добираем нехватку.</p>
@@ -490,6 +533,9 @@
         <thead id="plHead"><tr><th>Показатель</th><th>1-й год</th><th>2-й год</th><th>3-й год</th><th>Итого</th></tr></thead>
         <tbody id="plBody"></tbody>
       </table>
+    </div>
+    <div id="onaNote" style="display:none;margin-top:-14px;margin-bottom:22px;font-size:12px;color:var(--muted);line-height:1.5;padding:10px 12px;background:var(--paper);border-radius:8px">
+      <b>Об отложенном налоговом активе.</b> Налоговый доход признаётся сразу, а расход (амортизация + убыток от выкупа) растянут на годы вперёд — возникает вычитаемая временная разница (ПБУ 18/02). Уплаченный налог не потерян: он возвращается через списание убытка по п. 3 ст. 268 НК (график — на вкладке «Движение денежных средств»). Строка «условно», потому что зачёт возможен только при наличии у ЛК прочей налоговой прибыли в эти годы. <b>На денежный поток это не влияет</b> — налог реально уплачен сейчас, и в казначейском расчёте отражён по факту.
     </div>
 
     <h2>Денежный поток по годам (cash, с НДС)</h2>
@@ -1248,7 +1294,24 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
   function setFundMode(v){fundMode=v;
     document.getElementById('fmCredit').className=(v==='credit')?'on':'';
     document.getElementById('fmOwn').className=(v==='own')?'on':'';
+    syncFundUI();
     calc();}
+  // П.3: при «Собственных средствах» комиссия банка не участвует — блокируем поле и делаем серым
+  function syncFundUI(){
+    var c=document.getElementById('comm'); if(!c)return;
+    if(fundMode==='own'){ c.disabled=true; c.style.background='var(--paper)'; c.style.color='var(--muted)'; c.title='В режиме «Собственные средства» комиссия банка не применяется'; }
+    else { c.disabled=false; c.style.background=''; c.style.color=''; c.title=''; }
+  }
+  // П.4: переключатель ₽/% для выкупного платежа (управляет скрытым select-носителем состояния)
+  function setBuyUnit(u){
+    var sel=document.getElementById('buyoutMode'); if(sel)sel.value=(u==='pct')?'pct':'rub';
+    syncBuyUnit(); calc();
+  }
+  function syncBuyUnit(){
+    var sel=document.getElementById('buyoutMode'); var u=(sel&&sel.value==='pct')?'pct':'rub';
+    var r=document.getElementById('buRub'),p=document.getElementById('buPct');
+    if(r)r.className=(u==='rub')?'on':''; if(p)p.className=(u==='pct')?'on':'';
+  }
   var supp=[{m:0,s:100}];
   var kasko=[0,0,0];
   var kaskoTermEdited=false;
@@ -1342,6 +1405,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     fundMode='credit';
     document.getElementById('fmCredit').className='on';
     document.getElementById('fmOwn').className='';
+    var bmR=document.getElementById('buyoutMode'); if(bmR)bmR.value='rub';
+    syncFundUI(); syncBuyUnit();
     supp=[{m:0,s:100}];
     kasko=[0,0,0]; kaskoTermEdited=false; bankTermEdited=false; cadEdited=false;
     applyPayMode('ann'); applyScheme('classic',true);
@@ -1352,7 +1417,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     var d=document.getElementById(divId); if(!d)return;
     d.querySelectorAll('input').forEach(function(el){ if(el.type==='checkbox')el.checked=el.defaultChecked; else el.value=el.defaultValue; });
     d.querySelectorAll('select').forEach(function(el){ el.selectedIndex=0; });
-    if(divId==='t0'){ withVat=true; applyPayMode('ann'); document.getElementById('vatYes').className='on'; document.getElementById('vatNo').className=''; fundMode='credit'; document.getElementById('fmCredit').className='on'; document.getElementById('fmOwn').className=''; }
+    if(divId==='t0'){ withVat=true; applyPayMode('ann'); document.getElementById('vatYes').className='on'; document.getElementById('vatNo').className=''; fundMode='credit'; document.getElementById('fmCredit').className='on'; document.getElementById('fmOwn').className=''; syncFundUI(); syncBuyUnit(); }
     if(divId==='t2'){ supp=[{m:0,s:100}]; repayType='sweep'; document.getElementById('rtSweep').className=''; document.getElementById('rtAnn').className='on'; document.getElementById('rtDiff').className=''; renderSupp(); }
     if(divId==='t8'){ kasko=[0,0,0]; kaskoTermEdited=false; renderKasko(); }
     calc();
@@ -1570,6 +1635,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     fundMode=(s.fm==='own')?'own':'credit';
     document.getElementById('fmCredit').className=(fundMode==='credit')?'on':'';
     document.getElementById('fmOwn').className=(fundMode==='own')?'on':'';
+    syncFundUI(); syncBuyUnit();
     applyPayMode(s.pm||'ann');
     applyScheme(s.sch||'captive',true);
     renderSupp();renderKasko();calc();
@@ -1651,13 +1717,15 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
       d[id]=(e.type==='checkbox')?(e.defaultChecked?1:0):e.defaultValue;});
     return d;
   }
+  // короткие коды полей для компактной ссылки: индекс в DEAL_IDS -> base36
+  function idCode(i){return i.toString(36);}
   function getStateSlim(){
     var full=getState(), base=baseDefaults(), out={};
-    DEAL_IDS.forEach(function(id){
+    DEAL_IDS.forEach(function(id,i){
       var cur=(id in full.c)?full.c[id]:full.f[id];
-      if(String(cur)!==String(base[id]))out[id]=cur;
+      if(String(cur)!==String(base[id]))out[idCode(i)]=cur;
     });
-    var s={v:1,d:out};
+    var s={v:2,d:out};
     if(document.getElementById('kaskoSK')&&document.getElementById('kaskoSK').value)s.sk=document.getElementById('kaskoSK').value;
     if(document.getElementById('kaskoPay')&&document.getElementById('kaskoPay').value!=='1')s.kp=document.getElementById('kaskoPay').value;
     if(document.getElementById('buyoutMode')&&document.getElementById('buyoutMode').value==='pct')s.bm='pct';
@@ -1675,8 +1743,11 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
   function applyStateSlim(s){
     if(!s||!s.d)return false;
     resetToBase();
-    Object.keys(s.d).forEach(function(id){var e=document.getElementById(id);if(!e)return;
-      if(e.type==='checkbox')e.checked=!!Number(s.d[id]); else e.value=s.d[id];});
+    var v2=(s.v===2);
+    Object.keys(s.d).forEach(function(kk){
+      var id=v2?DEAL_IDS[parseInt(kk,36)]:kk; if(!id)return;
+      var e=document.getElementById(id);if(!e)return;
+      if(e.type==='checkbox')e.checked=!!Number(s.d[kk]); else e.value=s.d[kk];});
     if(s.sk){var e1=document.getElementById('kaskoSK');if(e1)e1.value=s.sk;}
     if(s.kp){var e2=document.getElementById('kaskoPay');if(e2)e2.value=s.kp;}
     if(s.bm){var e2b=document.getElementById('buyoutMode');if(e2b)e2b.value=s.bm;}
@@ -1695,6 +1766,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     fundMode=(s.fm==='own')?'own':'credit';
     document.getElementById('fmCredit').className=(fundMode==='credit')?'on':'';
     document.getElementById('fmOwn').className=(fundMode==='own')?'on':'';
+    syncFundUI(); syncBuyUnit();
     applyPayMode(s.pm||'ann');
     applyScheme(s.sch||'captive',true);
     renderSupp();renderKasko();calc();
@@ -1702,8 +1774,33 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
   }
   function b64url(str){return btoa(unescape(encodeURIComponent(str))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');}
   function unb64url(s){s=s.replace(/-/g,'+').replace(/_/g,'/');while(s.length%4)s+='=';return decodeURIComponent(escape(atob(s)));}
+  // компактная сериализация состояния: 2|ключ=значение|... (вместо JSON — экономит кавычки и скобки)
+  function packSlim(s){
+    var parts=['2'];
+    Object.keys(s.d).forEach(function(k){parts.push(k+'='+String(s.d[k]).replace(/\|/g,'%7C'));});
+    ['sk','kp','bm','rt','pm','sch','fm','kte','wv'].forEach(function(k){
+      if(s[k]!==undefined&&s[k]!==null)parts.push('~'+k+'='+String(s[k]).replace(/\|/g,'%7C'));});
+    if(s.sp)parts.push('~sp='+s.sp.map(function(a){return a[0]+'.'+a[1];}).join(','));
+    if(s.ks)parts.push('~ks='+s.ks.join(','));
+    return parts.join('|');
+  }
+  function unpackSlim(str){
+    var parts=String(str).split('|'); if(parts.shift()!=='2')return null;
+    var s={v:2,d:{}};
+    parts.forEach(function(pp){
+      var i=pp.indexOf('='); if(i<0)return;
+      var k=pp.slice(0,i), v=pp.slice(i+1).replace(/%7C/g,'|');
+      if(k.charAt(0)==='~'){
+        k=k.slice(1);
+        if(k==='sp')s.sp=v.split(',').map(function(a){var b=a.split('.');return [Number(b[0])||0,Number(b[1])||0];});
+        else if(k==='ks')s.ks=v.split(',').map(function(x){return Number(x)||0;});
+        else s[k]=(k==='wv'||k==='kte')?Number(v):v;
+      } else s.d[k]=v;
+    });
+    return s;
+  }
   function buildShareUrl(){
-    return location.origin+location.pathname+'#d='+b64url(JSON.stringify(getStateSlim()));
+    return location.origin+location.pathname+'#d='+b64url(packSlim(getStateSlim()));
   }
   function shareLink(){
     if(location.protocol==='file:'){msgDeal('Ссылка работает только когда калькулятор открыт с сайта. Сейчас файл открыт локально.',true);return;}
@@ -1729,28 +1826,52 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
   function showKPView(){
     var w=document.querySelector('.wrap'), k=document.getElementById('kpView');
     if(w)w.style.display='none'; if(k)k.style.display='block';
-    var g=function(id,v){var e=document.getElementById(id);if(e)e.textContent=v;};
-    g('kvItem',(document.getElementById('item')||{}).value||'—');
-    g('kvClient',(document.getElementById('client')||{}).value||'—');
-    g('kvPrice',(document.getElementById('oSum')?document.getElementById('price').value:''));
-    try{
-      g('kvPrice',fmtRub(val('price')));
-      g('kvAdv',(document.getElementById('oAdv')||{}).textContent||'—');
-      g('kvTerm',(document.getElementById('term')||{}).value+' мес.');
-      g('kvPay',(document.getElementById('oPay')||{}).textContent||'—');
-      g('kvUdor',String((document.getElementById('oUdor')||{}).innerHTML||'').replace(/<[^>]+>/g,''));
-      g('kvSum',(document.getElementById('oSum')||{}).textContent||'—');
-      var cb=document.getElementById('cliBody'), kv=document.getElementById('kvBody');
-      if(cb&&kv)kv.innerHTML=cb.innerHTML;
-    }catch(e){}
+    try{ if(!KP||!KP.rows) calc(); }catch(e){}
+    if(!KP||!KP.rows)return;
+    var g=function(id,v){var e=document.getElementById(id);if(e)e.innerHTML=v;};
+    var today=new Date(), valid=new Date(today.getTime()+10*86400000);
+    g('kvValid','КП от '+kpD(today)+', действительно до '+kpD(valid));
+    var komu=document.getElementById('kvKomu');
+    if(komu){ if(KP.client){komu.style.display='block';komu.textContent='Кому: '+KP.client+(KP.inn?', ИНН '+KP.inn:'');} else komu.style.display='none'; }
+    // условия — те же строки, что в PDF
+    var terms=[['Предмет лизинга',KP.item],['Стоимость объекта (с НДС '+KP.vat+'%)',fmtRub(KP.priceVat)],
+      ['Авансовый платёж ('+KP.adv+'%)',fmtRub(KP.advGross)],['Срок лизинга',KP.N+' мес.'],
+      ['Ежемесячный лизинговый платёж (с НДС)',fmtRub(KP.annGross)],['Удорожание',fmtPct(KP.udorYear)+'/год'],
+      ['Общая сумма договора лизинга (с НДС)',fmtRub(KP.sumGross)]];
+    g('kvTerms', terms.map(function(r){
+      return '<tr><td style="padding:5px 0;color:#666;border-bottom:1px solid #E6E5E0">'+r[0]+'</td>'+
+             '<td style="padding:5px 0;font-weight:700;text-align:right;border-bottom:1px solid #E6E5E0">'+r[1]+'</td></tr>';}).join(''));
+    // график: аванс + платежи + выкуп
+    var td='style="border:1px solid #DDD;padding:4px 8px"', tdR='style="border:1px solid #DDD;padding:4px 8px;text-align:right"';
+    var rows='';
+    var d0=new Date(KP.start.y,KP.start.m,KP.start.d), vA=KP.advGross*KP.vat/(100+KP.vat);
+    rows+='<tr style="background:#EEF4F0"><td '+td+'>Аванс</td><td '+td+'>'+kpD(d0)+'</td><td '+tdR+'>'+fmtRub(KP.advGross)+'</td><td '+tdR+'>'+fmtRub(vA)+'</td></tr>';
+    KP.rows.forEach(function(r,idx){
+      var d=new Date(KP.start.y,KP.start.m+r.t,KP.start.d), sb=KP.sub||0, pg=r.payG+sb, vt=pg*KP.vat/(100+KP.vat);
+      rows+='<tr'+(idx%2?' style="background:#FCFCFB"':'')+'><td '+td+'>'+r.t+'</td><td '+td+'>'+kpD(d)+'</td><td '+tdR+'>'+fmtRub(pg)+'</td><td '+tdR+'>'+fmtRub(vt)+'</td></tr>';
+    });
+    if((KP.buyoutGross||0)>0.5){
+      var dB=new Date(KP.start.y,KP.start.m+KP.N,KP.start.d), vB=KP.buyoutGross*KP.vat/(100+KP.vat);
+      rows+='<tr style="background:#EEF4F0"><td '+td+'>Выкуп</td><td '+td+'>'+kpD(dB)+'</td><td '+tdR+'>'+fmtRub(KP.buyoutGross)+'</td><td '+tdR+'>'+fmtRub(vB)+'</td></tr>';
+    }
+    g('kvBody',rows);
+    // доп. расходы — те же три строки, что в PDF
+    var EX=KP.ex||{}, glpN=function(x){return x?'включено в график лизинговых платежей':'оплачивается отдельно по счёту';};
+    var ex=[['Страхование (в год)',EX.ins],['Расходы на регистрацию',EX.reg],['Налог на имущество (в год)',EX.prop]];
+    g('kvEx', ex.map(function(r){var o=r[1]||{};
+      return '<tr><td style="padding:5px 0;color:#666;border-bottom:1px solid #E6E5E0">'+r[0]+'</td>'+
+             '<td style="padding:5px 0;font-weight:700;text-align:right;border-bottom:1px solid #E6E5E0">'+(o.on?fmtRub(o.sum):'0 ₽')+'</td>'+
+             '<td style="padding:5px 0 5px 14px;color:#666;font-size:11px;text-align:right;border-bottom:1px solid #E6E5E0">'+(o.on?glpN(o.glp):'не применяется')+'</td></tr>';}).join(''));
   }
   function loadFromHash(){
     if(!location.hash||location.hash.indexOf('#d=')!==0)return false;
     var raw=location.hash.slice(3), autoKP=false;
     var amp=raw.indexOf('&');
     if(amp>=0){autoKP=/(^|&)kp=1(&|$)/.test(raw.slice(amp)); raw=raw.slice(0,amp);}
-    try{var s=JSON.parse(unb64url(raw));
-      var ok=(s&&s.v===1)?applyStateSlim(s):(setState(s),true);   // совместимость со старыми длинными ссылками
+    try{var dec=unb64url(raw), s=null;
+      if(dec.charAt(0)==='2'&&dec.indexOf('|')>=0){s=unpackSlim(dec);}
+      if(!s)s=JSON.parse(dec);
+      var ok=(s&&(s.v===1||s.v===2))?applyStateSlim(s):(setState(s),true);   // v2 — короткие коды, v1 — старый формат
       if(ok&&autoKP)setTimeout(function(){try{showKPView();}catch(e){}},250);
       return ok;
     }catch(e){return false;}
@@ -1821,31 +1942,56 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     doc.setTextColor.apply(doc,INK); doc.setFontSize(10.5);
     if(KP.client){doc.text('Кому: '+KP.client+(KP.inn?', ИНН '+KP.inn:''), Mg, y); y+=16;}
     doc.text('Предлагаем приобретение техники в финансовый лизинг на следующих условиях:', Mg, y); y+=18;
-    var terms=[['Предмет лизинга',KP.item],['Стоимость техники (с НДС '+KP.vat+'%)',fmtRub(KP.priceVat)],
+    var terms=[['Предмет лизинга',KP.item],['Стоимость объекта (с НДС '+KP.vat+'%)',fmtRub(KP.priceVat)],
      ['Авансовый платёж ('+KP.adv+'%)',fmtRub(KP.advGross)],['Срок лизинга',KP.N+' мес.'],
-     [KP.acc?'Лизинговый платёж (с НДС), 1-й → последний':'Ежемесячный лизинговый платёж (с НДС)',KP.acc?(fmtRub(KP.annGross)+' → '+fmtRub(KP.payLast)):fmtRub(KP.annGross)],['Удорожание',fmtPct(KP.udorYear)+'/год (за срок '+fmtPct(KP.udorTotal)+')'],
-     ['Общая сумма договора лизинга (с НДС)',fmtRub(KP.sumGross)],['Удорожание в рублях (переплата)',fmtRub(KP.overpay)]];
+     ['Ежемесячный лизинговый платёж (с НДС)',fmtRub(KP.annGross)],['Удорожание',fmtPct(KP.udorYear)+'/год'],
+     ['Общая сумма договора лизинга (с НДС)',fmtRub(KP.sumGross)]];
     doc.setFontSize(10);
     terms.forEach(function(r){
       doc.setTextColor.apply(doc,MUT); doc.text(r[0], Mg, y, {maxWidth:300});
       doc.setTextColor.apply(doc,INK); doc.text(String(r[1]), W-Mg, y, {align:'right'});
       doc.setDrawColor(230,229,224); doc.setLineWidth(.5); doc.line(Mg,y+5,W-Mg,y+5); y+=19;
     });
+    y+=14; if(y>H-140){doc.addPage();y=48;}
+    doc.setTextColor.apply(doc,BLUE); doc.setFontSize(12); doc.text('Дополнительные расходы', Mg, y); y+=14;
+    var EX=KP.ex||{}, glpN=function(g){return g?'включено в график лизинговых платежей':'оплачивается отдельно по счёту';};
+    var exRows=[['Страхование (в год)', (EX.ins&&EX.ins.on)?fmtRub(EX.ins.sum):'0 ₽', (EX.ins&&EX.ins.on)?glpN(EX.ins.glp):'не применяется'],
+                ['Расходы на регистрацию', (EX.reg&&EX.reg.on)?fmtRub(EX.reg.sum):'0 ₽', (EX.reg&&EX.reg.on)?glpN(EX.reg.glp):'не применяется'],
+                ['Налог на имущество (в год)', (EX.prop&&EX.prop.on)?fmtRub(EX.prop.sum):'0 ₽', (EX.prop&&EX.prop.on)?glpN(EX.prop.glp):'не применяется']];
+    doc.setFontSize(9.5);
+    exRows.forEach(function(r){
+      doc.setTextColor.apply(doc,MUT); doc.text(r[0], Mg, y, {maxWidth:170});
+      doc.setTextColor.apply(doc,INK); doc.text(String(r[1]), Mg+250, y, {align:'right'});
+      doc.setTextColor.apply(doc,MUT); doc.setFontSize(8.5); doc.text(String(r[2]), W-Mg, y, {align:'right', maxWidth:200}); doc.setFontSize(9.5);
+      doc.setDrawColor(230,229,224); doc.setLineWidth(.5); doc.line(Mg,y+5,W-Mg,y+5); y+=19;
+    });
     y+=10; doc.setTextColor.apply(doc,BLUE); doc.setFontSize(12); doc.text('График лизинговых платежей', Mg, y); y+=14;
-    var cw=[34,86,132,110,138], head=['№','Дата','Платёж с НДС','в т.ч. НДС','Остаток с НДС'], rowH=15;
+    var cw=[52,110,150,138], head=['№','Дата','Платёж с НДС','в т.ч. НДС'], rowH=15;
     var tw=cw.reduce(function(a,b){return a+b;},0);
     function drawHead(){doc.setFillColor.apply(doc,BLUE); doc.rect(Mg,y,tw,rowH,'F'); doc.setTextColor(255,255,255); doc.setFontSize(8);
       var cx=Mg; head.forEach(function(h,i){var right=i>=2; doc.text(h, right?cx+cw[i]-4:cx+4, y+10, {align:right?'right':'left'}); cx+=cw[i];}); y+=rowH;}
     drawHead(); doc.setFontSize(8.5);
-    KP.rows.forEach(function(r,idx){
+    function pdfRow(cells,idx,fill){
       if(y>H-48){doc.addPage(); y=48; doc.setFont('Roboto','normal'); drawHead(); doc.setFontSize(8.5);}
-      var d=new Date(KP.start.y,KP.start.m+r.t,KP.start.d), sb=KP.sub||0, pg=r.payG+sb, vt=pg*KP.vat/(100+KP.vat);
-      if(idx%2){doc.setFillColor(252,252,251); doc.rect(Mg,y,tw,rowH,'F');}
+      if(fill){doc.setFillColor(238,244,240); doc.rect(Mg,y,tw,rowH,'F');}
+      else if(idx%2){doc.setFillColor(252,252,251); doc.rect(Mg,y,tw,rowH,'F');}
       doc.setTextColor.apply(doc,INK);
-      var cells=[String(r.t),kpD(d),fmtRub(pg),fmtRub(vt),fmtRub(r.balG)], cx=Mg;
+      var cx=Mg;
       cells.forEach(function(c,i){var right=i>=2; doc.text(c, right?cx+cw[i]-4:cx+4, y+10, {align:right?'right':'left'}); cx+=cw[i];});
       doc.setDrawColor(235,235,232); doc.line(Mg,y+rowH,Mg+tw,y+rowH); y+=rowH;
+    }
+    // строка аванса (мес. 0)
+    (function(){var d0=new Date(KP.start.y,KP.start.m,KP.start.d), vA=KP.advGross*KP.vat/(100+KP.vat);
+      pdfRow(['Аванс',kpD(d0),fmtRub(KP.advGross),fmtRub(vA)],0,true);})();
+    KP.rows.forEach(function(r,idx){
+      var d=new Date(KP.start.y,KP.start.m+r.t,KP.start.d), sb=KP.sub||0, pg=r.payG+sb, vt=pg*KP.vat/(100+KP.vat);
+      pdfRow([String(r.t),kpD(d),fmtRub(pg),fmtRub(vt)],idx+1,false);
     });
+    // строка выкупного платежа
+    if((KP.buyoutGross||0)>0.5){
+      var dB=new Date(KP.start.y,KP.start.m+KP.N,KP.start.d), vB=KP.buyoutGross*KP.vat/(100+KP.vat);
+      pdfRow(['Выкуп',kpD(dB),fmtRub(KP.buyoutGross),fmtRub(vB)],0,true);
+    }
     y+=16; if(y>H-40){doc.addPage();y=48;}
     doc.setTextColor.apply(doc,MUT); doc.setFontSize(7.5);
     doc.text('Настоящее предложение носит информационный характер и не является публичной офертой (ст. 437 ГК РФ). Расчёт предварительный.', Mg, y, {maxWidth:W-2*Mg});
@@ -2216,6 +2362,26 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     kasko.forEach(function(price,i){var cm=price*kaskoComm/100; kaskoCommArr.push(cm); kaskoTotPrice+=price; kaskoTotComm+=cm;
       var y=Math.min(i+1,YMAX); if(kaskoPay==='1'){kaskoCommYear[y]=(kaskoCommYear[y]||0)+cm; kaskoPV+=cm/Math.pow(1+discRate,i*12);}});
     var kaskoPnLTot=(kaskoPay==='1')?kaskoTotComm:0;
+    // --- сводка «Доп. расходы» и «Страхование» на вкладке «Калькулятор» (только отображение) ---
+    (function(){
+      var g=function(id,v){var e=document.getElementById(id);if(e)e.textContent=v;};
+      var glpTxt=function(on){return on?'включено в график клиенту':'по счёту клиенту (компенсация)';};
+      g('cdProp', propOff?'не применяется':fmtRub(propYear)+' / год');
+      g('cdPropH', propOff?'выключен на вкладке':glpTxt(propGLP)+' · '+fmtRub(propTot)+' за срок');
+      g('cdReg', regOff?'не применяется':fmtRub(regTot));
+      g('cdRegH', regOff?'выключены на вкладке':glpTxt(regGLP));
+      var aeOn=0,aeSum=0; ae.forEach(function(e){if(e.applied){aeOn++;aeSum+=e.cliVat||e.lkVat;}});
+      g('cdAe', aeOn?fmtRub(aeSum):'не применяются');
+      g('cdAeH', aeOn?(aeOn+' статей активно'):'статьи не заполнены');
+      var exTot=(propOff?0:propTot)+(regOff?0:regTot)+aeSum;
+      g('cdExTot', exTot>0.5?fmtRub(exTot)+' за срок':'—');
+      var insGlp=(kaskoPay==='2');
+      g('cdInsYear', kaskoTotPrice>0.5?fmtRub(kasko[0]||0):'не применяется');
+      g('cdInsGlp', kaskoTotPrice>0.5?(insGlp?'Да':'Нет'):'—');
+      g('cdInsGlpH', kaskoTotPrice>0.5?(insGlp?'в ежемесячном платеже':'единовременно по счёту за год'):'полис не заполнен');
+      g('cdInsComm', kaskoTotComm>0.5?fmtRub(kaskoTotComm):'—');
+      g('cdInsTot', kaskoTotPrice>0.5?fmtRub(kaskoTotPrice)+' за срок':'—');
+    })();
     cliPVnet+=kaskoPV; marginPV+=kaskoPV;
 
     // --- P&L по годам (доход = лиз. % + наценка на технике + доп.расходы, равномерно/помесячно) ---
@@ -2235,6 +2401,20 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     var taxLossAtSale=saleResult<0?-saleResult:0;
     var remSPI=Math.max(1,Math.round(spiM/amCoef)-N);         // остаток (СПИ/коэфф. − факт. срок эксплуатации), мес.
     var lossPerMonth=taxLossAtSale>0?taxLossAtSale/remSPI:0;
+    // --- общий график списания убытка от выкупа ПО ГОДАМ (после окончания договора) ---
+    // месяцы N+1 .. N+remSPI, равными долями; используется и в таблице «Списание убытка», и в казначейском расчёте
+    var lossSchedule=[];
+    if(taxAcc && taxLossAtSale>0.5){
+      var _ly={};
+      for(var _m=N+1;_m<=N+remSPI;_m++){var _yr=Math.ceil(_m/12);_ly[_yr]=(_ly[_yr]||0)+lossPerMonth;}
+      var _yrs=Object.keys(_ly).map(Number).sort(function(a,b){return a-b;});
+      var _rem=taxLossAtSale, _cd=null;
+      _yrs.forEach(function(yr,idx){
+        var w=_ly[yr]; if(idx===_yrs.length-1)w=_rem;   // последний год гасит остаток (страховка от округления)
+        _rem-=w; if(_rem<0)_rem=0;
+        lossSchedule.push({yr:yr, m1:(yr-1)*12+1, m2:yr*12, w:w, rem:_rem, ec:w*ptax/100});
+      });
+    }
     var yTaxIncome={};
     for(var ti=1;ti<=N;ti++){var tiy=Math.min(yOf(ti),Math.ceil(N/12));yTaxIncome[tiy]=(yTaxIncome[tiy]||0)+payNetAt(ti)+advNet/N;}
     // проценты на уплаченный налог: клиент возвращает их в составе платежей -> это доход ЛК,
@@ -2286,10 +2466,39 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     // --- помесячный график уплаты налога на прибыль (для ДДС) ---
     // в период действия договора — квартальные авансы; после окончания срока — одной суммой за год
     var ptaxM={};
+    // помесячная налоговая база: доход (платёж без НДС + доля аванса) − амортизация − проценты по кредиту
+    // прочие годовые статьи распределяются равномерно; служит ТОЛЬКО для разбивки годового налога по кварталам
+    var mIntArr={}; T.rows.forEach(function(r){mIntArr[r.t]=(mIntArr[r.t]||0)+(r.interest||0);});
+    var mIntCli={}; cli.forEach(function(r){mIntCli[r.t]=(mIntCli[r.t]||0)+(r.intr||0);});
+    function taxBaseAtMonth(t){
+      if(t<1||t>N)return 0;
+      var yy=Math.min(yOf(t),YMAX);
+      var inc = payNetAt(t) + (N>0?advNet/N:0);
+      var am  = taxAcc ? amMonth : 0;
+      var fin = (mIntArr[t]||0) + ((t===1)?commCost:0);
+      var oth = taxAcc ? (((aeCostYear[yy]||0)+(propGLP?propYear:0)+((regGLP&&yy===1)?regTot:0))/12) : 0;
+      if(!taxAcc){ // бухгалтерская база: доход = лизинговый процент, без амортизации
+        inc = (payNetAt(t)>0? (mIntCli[t]||0) : 0);
+        am  = 0;
+      }
+      return inc-am-fin-oth;
+    }
     for(var yp=1;yp<=YMAX;yp++){
       var typ=yTax[yp]||0; if(typ<=0.5)continue;
       if(12*yp<=N){                                   // год целиком внутри срока лизинга -> поквартально
-        for(var q=1;q<=4;q++){var mq=12*(yp-1)+3*q+1; ptaxM[mq]=(ptaxM[mq]||0)+typ/4;}
+        // квартальные авансы пропорциональны ФАКТИЧЕСКОЙ базе квартала (ст. 286, 287 НК),
+        // а не равными долями: проценты по кредиту убывают -> база и авансы растут к концу года
+        var qb=[0,0,0,0], qSum=0;
+        for(var q1=1;q1<=4;q1++){
+          for(var mm=12*(yp-1)+3*(q1-1)+1; mm<=12*(yp-1)+3*q1; mm++){qb[q1-1]+=taxBaseAtMonth(mm);}
+          if(qb[q1-1]<0)qb[q1-1]=0;
+          qSum+=qb[q1-1];
+        }
+        for(var q=1;q<=4;q++){
+          var mq=12*(yp-1)+3*q+1;
+          var share=(qSum>0.5)?(qb[q-1]/qSum):0.25;   // вырожденный случай -> равными долями
+          ptaxM[mq]=(ptaxM[mq]||0)+typ*share;
+        }
       } else {                                        // год выходит за срок -> одной суммой после закрытия года
         var mY=12*yp+3; ptaxM[mY]=(ptaxM[mY]||0)+typ;
       }
@@ -2413,7 +2622,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     var eb='', tPr=0,tInt=0,tSub=0,tKas=0,tNet=0,tVat=0,tGross=0, cum=0;
     (function(){                                   // авансовый платёж отдельной строкой
       var aN=advNet, aV=advGross-advNet; cum+=advGross;
-      eb+='<tr style="background:var(--tealSoft)"><td>0</td><td>'+dateAt(0).toLocaleDateString('ru-RU',{month:'short',year:'2-digit'})+'</td>'+
+      eb+='<tr style="background:var(--tealSoft)"><td>Аванс</td><td>'+dateAt(0).toLocaleDateString('ru-RU',{month:'short',year:'2-digit'})+'</td>'+
         '<td>'+fmtRub(aN)+'</td><td>—</td><td>—</td><td>—</td>'+
         '<td>'+fmtRub(aN)+'</td><td>'+fmtRub(aV)+'</td><td style="font-weight:600">'+fmtRub(advGross)+'</td>'+
         '<td>'+fmtRub(cum)+'</td><td>'+fmtRub(body)+'</td></tr>';
@@ -2437,7 +2646,11 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     KP={item:(document.getElementById('item').value||'Офисное помещение'),client:document.getElementById('client').value||'',inn:(document.getElementById('inn')||{}).value||'',
         priceVat:priceVat,adv:adv,advGross:advGross,annGross:annGross+subGross,annNet:annNet,sumGross:sumGross+subGross*N,sumNet:sumNet,sub:subGross,acc:showLastArrow,payLast:payLastG+subGross,accR:accR,
         overpay:(sumGross+subGross*N)-priceVat,udorYear:udorYear,udorTotal:udorTotal,N:N,vat:vat,k:k,leaseRate:leaseRate,
-        start:{y:start.getFullYear(),m:start.getMonth(),d:start.getDate()},rows:cli};
+        start:{y:start.getFullYear(),m:start.getMonth(),d:start.getDate()},rows:cli,
+        buyoutGross:buyoutGross,
+        ex:{ ins:{sum:(kasko[0]||0), glp:(kaskoPay==='2'), on:(kaskoTotPrice>0.5)},
+             reg:{sum:(regOff?0:regTot), glp:regGLP, on:!regOff},
+             prop:{sum:(propOff?0:propYear), glp:propGLP, on:!propOff} }};
 
     // tab2
     var suppShareSum=supp.reduce(function(a,r){return a+(Number(r.s)||0);},0);
@@ -2489,12 +2702,53 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     document.getElementById('ndsNetH').textContent=(ndsNet>=0?'итого уплачено в бюджет за срок':'итого возмещено за срок');
     document.getElementById('eInVat').textContent=fmtRub(inputVat);
     document.getElementById('eLag').textContent=vatLag;
+
+    // === П.1: Сводка по налогу на прибыль + график списания убытка после окончания договора ===
+    (function(){
+      var ptTerm=0; for(var y=1;y<=YMAX;y++)ptTerm+=(yTax[y]||0);   // налог, уплачиваемый в период действия договора
+      var g=function(id,v){var e=document.getElementById(id);if(e)e.textContent=v;};
+      g('ptSumTerm', taxAcc?fmtRub(ptTerm):'—');
+      var e=document.getElementById('ptSumTermH'); if(e)e.textContent=(N<=12?'разово за год':'авансами поквартально');
+      var hasLoss=(taxAcc && taxLossAtSale>0.5);
+      g('ptLoss', hasLoss?fmtRub(taxLossAtSale):'—');
+      g('ptLossPer', hasLoss?(remSPI+' мес. ('+(remSPI/12).toFixed(remSPI%12===0?0:1)+' лет)'):'—');
+      var lpy=lossPerMonth*12;
+      g('ptLossYear', hasLoss?fmtRub(lpy):'—');
+      var rp=document.getElementById('ptRatePct'); if(rp)rp.textContent=ptax;
+      var wrap=document.getElementById('ptLossWrap'), none=document.getElementById('ptLossNone');
+      if(!hasLoss){
+        if(wrap)wrap.style.display='none';
+        if(none){none.style.display='block';
+          none.textContent = !taxAcc
+            ? 'Учёт по налоговой базе выключен (чек-бокс на вкладке «Маржа и прибыль») — график списания не рассчитывается.'
+            : 'Убытка от выкупа нет: цена выкупа не ниже остаточной налоговой стоимости, списывать нечего (весь результат реализации учтён в год выкупа).';
+        }
+      } else {
+        if(none)none.style.display='none';
+        if(wrap)wrap.style.display='block';
+        var cd=dateAt(0);
+        var lb='', tW=0, tEc=0;
+        lossSchedule.forEach(function(r){
+          tW+=r.w; tEc+=r.ec;
+          var d1=new Date(cd.getFullYear(),cd.getMonth()+r.m1,1), d2=new Date(cd.getFullYear(),cd.getMonth()+r.m2,1);
+          var per=d1.toLocaleDateString('ru-RU',{month:'short',year:'2-digit'})+' – '+d2.toLocaleDateString('ru-RU',{month:'short',year:'2-digit'});
+          lb+='<tr><td>'+r.yr+'-й год</td><td>'+per+'</td><td>'+fmtRub(r.w)+'</td><td>'+fmtRub(r.rem)+'</td><td style="color:var(--teal)">'+fmtRub(r.ec)+'</td></tr>';
+        });
+        var lbody=document.getElementById('lossBody'); if(lbody)lbody.innerHTML=lb;
+        var lfoot=document.getElementById('lossFoot'); if(lfoot)lfoot.innerHTML='<tr><td>Итого</td><td>—</td><td>'+fmtRub(tW)+'</td><td>—</td><td style="color:var(--teal)">'+fmtRub(tEc)+'</td></tr>';
+      }
+    })();
     var tb=document.getElementById('trBody'),th='';
     var lastRow=Math.max(T.paidOff>=0?T.paidOff+1:0, N>=12?13:N+1, 13);
     var ptaxLast=0; Object.keys(ptaxM).forEach(function(mk){if(Number(mk)>ptaxLast)ptaxLast=Number(mk);});
-    var tKasM=0,tPtaxM=0;
+    var tKasM=0,tPtaxM=0,tVAdv=0,tVPay=0,tVIn=0;
     T.rows.forEach(function(r){
       var kasHere=kaskoM[r.t]||0, ptaxHere=ptaxM[r.t]||0;
+      // справочно (начисление, не денежный поток): НДС с аванса, НДС с платежа клиента, входной НДС к вычету
+      var vAdvAcc=(r.t===0)?advGross*rV:0;
+      var vPayAcc=(r.t>=1&&r.t<=N)?clientAt(r.t)*rV:0;
+      var vInAcc=((r.t===0)?inputVat:0)+aeInVatAt(r.t);
+      tVAdv+=vAdvAcc; tVPay+=vPayAcc; tVIn+=vInAcc;
       var oSt=r.oS+(r.oExtra||0);
       var noActivity=(r.debt<0.5 && r.inC===0 && r.inV===0 && oSt===0 && r.oV===0 && kasHere<0.5 && ptaxHere<0.5);
       if(r.t>lastRow && noActivity) return;
@@ -2506,21 +2760,40 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
       var buyHere=(r.t===N&&buyoutGross>0.5);
       th+='<tr'+(r.drawn>0.5?' class="draw"':(buyHere?' style="background:var(--tealSoft)"':''))+'><td>'+r.t+' · '+dateAt(r.t).toLocaleDateString('ru-RU',{month:'short',year:'2-digit'})+'</td>'+
         '<td>'+(r.inC>0.5?fmtRub(r.inC):'—')+(buyHere?' <span style="color:var(--teal);font-size:10px;font-weight:600">(вкл. выкуп '+fmtRub(buyoutGross)+')</span>':'')+'</td>'+
-        '<td>'+((r.inComp||0)>0.5?'<span style="color:var(--teal)">'+fmtRub(r.inComp)+'</span>':'—')+'</td>'+
         '<td>'+(kasHere>0.5?'<span style="color:var(--teal)">'+fmtRub(kasHere)+'</span>':'—')+'</td>'+
         '<td>'+(r.inV>0.5?fmtRub(r.inV):'—')+'</td>'+
         '<td>'+(r.oS>0.5?fmtRub(r.oS):'—')+'</td>'+
         '<td>'+((r.oAE+r.oDef+r.oGuar)>0.5?fmtRub(r.oAE+r.oDef+r.oGuar):'—')+'</td>'+
         '<td>'+((r.oProp||0)>0.5?fmtRub(r.oProp):'—')+'</td>'+
         '<td>'+((r.oReg||0)>0.5?fmtRub(r.oReg):'—')+'</td>'+
+        '<td>'+((r.inComp||0)>0.5?'<span style="color:var(--teal)">'+fmtRub(r.inComp)+'</span>':'—')+'</td>'+
         '<td>'+(r.oV>0.5?fmtRub(r.oV):'—')+'</td>'+
+        '<td style="color:var(--muted)">'+(vAdvAcc>0.5?fmtRub(vAdvAcc):'—')+'</td>'+
+        '<td style="color:var(--muted)">'+(vPayAcc>0.5?fmtRub(vPayAcc):'—')+'</td>'+
+        '<td style="color:var(--muted)">'+(vInAcc>0.5?fmtRub(vInAcc):'—')+'</td>'+
         '<td>'+(ptaxHere>0.5?'<span style="color:var(--amber)">'+fmtRub(ptaxHere)+'</span>':'—')+'</td>'+
+        '<td>—</td>'+
         '<td>'+(r.interest>0.5?fmtRub(r.interest):'—')+'</td>'+
+        '<td>'+((r.oC||0)>0.5?(bankOn?'<span style="color:var(--muted)">'+fmtRub(r.oC)+'</span>':fmtRub(r.oC)):'—')+'</td>'+
         '<td>'+(r.drawn>0.5?fmtRub(r.drawn):'—')+'</td>'+
         '<td>'+(r.repaid>0.5?fmtRub(r.repaid):'—')+'</td>'+
         '<td>'+fmtRub(r.debt)+'</td>'+
         '<td style="color:'+dcol+';font-weight:600">'+dstr+'</td></tr>';
     });
+    // --- годовые строки списания убытка от выкупа (после окончания договора) ---
+    // 17 столбцов; заполняем только «Мес./дата» и «Списание убытка (аморт.)», остальные — прочерк
+    if(lossSchedule.length){
+      var _cd2=dateAt(0);
+      th+='<tr style="border-top:2px solid var(--line)"><td colspan="21" style="background:var(--paper);font-weight:600;font-size:11.5px;color:var(--muted)">Списание убытка от выкупа после окончания договора (п.3 ст.268 НК) — уменьшает налоговую базу по прибыли ЛК; денежным потоком не является</td></tr>';
+      lossSchedule.forEach(function(r){
+        var d1=new Date(_cd2.getFullYear(),_cd2.getMonth()+r.m1,1), d2=new Date(_cd2.getFullYear(),_cd2.getMonth()+r.m2,1);
+        var per=d1.toLocaleDateString('ru-RU',{month:'short',year:'2-digit'})+'–'+d2.toLocaleDateString('ru-RU',{month:'short',year:'2-digit'});
+        th+='<tr style="background:var(--paper)"><td>'+r.yr+'-й год · '+per+'</td>'+
+          '<td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td>'+
+          '<td style="color:var(--teal);font-weight:600">'+fmtRub(r.w)+'</td>'+
+          '<td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>';
+      });
+    }
     tb.innerHTML=th;
     // итоги по столбцам казначейства
     var dT=tot.netCF+tKasM-tPtaxM, dTs2=(dT>=0?'+':'−')+fmtRub(Math.abs(dT));
@@ -2554,7 +2827,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
       }
       el.innerHTML=parts.length?parts.join('<br><br>'):'';
     })();
-    document.getElementById('trFoot').innerHTML='<tr><td>Итого</td><td>'+fmtRub(tot.inC)+'</td><td>'+fmtRub(tComp)+'</td><td>'+fmtRub(tKasM)+'</td><td>'+fmtRub(tot.inV)+'</td><td>'+fmtRub(tot.oS)+'</td><td>'+fmtRub(tot.oAE+tot.oDef+tot.oGuar)+'</td><td>'+fmtRub(tProp)+'</td><td>'+fmtRub(tReg)+'</td><td>'+fmtRub(tot.oV)+'</td><td>'+fmtRub(tPtaxM)+'</td><td>'+fmtRub(tot.interest)+'</td><td>'+fmtRub(tot.drawn)+'</td><td>'+fmtRub(tot.repaid)+'</td><td>—</td><td>'+dTs2+'</td></tr>';
+    document.getElementById('trFoot').innerHTML='<tr><td>Итого</td><td>'+fmtRub(tot.inC)+'</td><td>'+fmtRub(tKasM)+'</td><td>'+fmtRub(tot.inV)+'</td><td>'+fmtRub(tot.oS)+'</td><td>'+fmtRub(tot.oAE+tot.oDef+tot.oGuar)+'</td><td>'+fmtRub(tProp)+'</td><td>'+fmtRub(tReg)+'</td><td>'+fmtRub(tComp)+'</td><td>'+fmtRub(tot.oV)+'</td><td style="color:var(--muted)">'+fmtRub(tVAdv)+'</td><td style="color:var(--muted)">'+fmtRub(tVPay)+'</td><td style="color:var(--muted)">'+fmtRub(tVIn)+'</td><td>'+fmtRub(tPtaxM)+'</td><td style="color:var(--teal)">'+(lossSchedule.length?fmtRub(taxLossAtSale):'—')+'</td><td>'+fmtRub(tot.interest)+'</td><td>'+fmtRub(commCost)+'</td><td>'+fmtRub(tot.drawn)+'</td><td>'+fmtRub(tot.repaid)+'</td><td>—</td><td>'+dTs2+'</td></tr>';
 
     // график выборок и погашения кредита
     var ch='<tr><th>Мес. / дата</th><th>Выборка</th>';
@@ -2602,7 +2875,14 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
       plRow('Страхование (комиссия)',function(y){return kaskoCommYear[y]||0;},kaskoPnLTot)+
       plRow('= Прибыль до налога',function(y){return yProfit[y]||0;},totBefore,true)+
       plRow('Налог на прибыль '+ptax+'%',function(y){return -(yTax[y]||0);},-totTax)+
-      plRow('= Чистая прибыль',function(y){return yNet[y]||0;},totNet,true);
+      plRow('= Чистая прибыль',function(y){return yNet[y]||0;},totNet,true)+
+      (lossSchedule.length?
+        '<tr style="color:var(--muted);font-style:italic"><td>Отложенный налоговый актив (условно)</td>'+
+          (function(){var s='';for(var y=1;y<=YMAX;y++)s+='<td>'+((y===YMAX)?fmtRub(taxLossAtSale*ptax/100):'—')+'</td>';return s;})()+
+          '<td>'+fmtRub(taxLossAtSale*ptax/100)+'</td></tr>'+
+        plRow('= Чистая прибыль с учётом ОНА',function(y){return (yNet[y]||0)+((y===YMAX)?taxLossAtSale*ptax/100:0);},totNet+taxLossAtSale*ptax/100,true)
+      :'');
+    var _on=document.getElementById('onaNote'); if(_on)_on.style.display=lossSchedule.length?'block':'none';
     function cfRow(lbl,key,sign,strong){var tot=0,s='';for(var y=1;y<=YMAX;y++){var v=((cf[y]&&cf[y][key])||0)*sign;tot+=v;s+='<td>'+fmtRub(v)+'</td>';}return '<tr'+(strong?' style="font-weight:700"':'')+'><td>'+lbl+'</td>'+s+'<td>'+fmtRub(tot)+'</td></tr>';}
     document.getElementById('cfBody').innerHTML=
       cfRow('Приток от клиента','inC',1)+
@@ -2736,7 +3016,10 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
 
     // --- сходимость процентов на уплаченный налог на прибыль ---
     // тело -> платежи -> налоговая база -> налог -> проценты на налог -> тело. Итерируем до стабилизации.
-    if(Math.abs(taxIntNew-taxIntCarry)>1 && taxIntPass<6){
+    // допуск 0,005 ₽ вместо 1 ₽: иначе результат зависит от стартовой точки итерации
+    // (после восстановления по ссылке старт другой → расхождение до рубля). Итерация сходится
+    // геометрически, поэтому запас проходов увеличен.
+    if(Math.abs(taxIntNew-taxIntCarry)>0.005 && taxIntPass<40){
       taxIntPass++; taxIntCarry=taxIntNew; calc(); return;
     }
     taxIntPass=0; taxIntCarry=taxIntNew;
@@ -2746,6 +3029,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
   (function(){var t=document.getElementById('techOn');if(t)t.addEventListener('change',function(){var b=document.getElementById('techBox');if(b)b.style.display=t.checked?'block':'none';});})();
   renderSupp();renderKasko();
   try{applyScheme('classic',true);}catch(e){}
+  try{syncFundUI();syncBuyUnit();}catch(e){}
   calc();
   try{initFieldSync();}catch(e){}
   try{loadFromHash();}catch(e){}
