@@ -242,7 +242,8 @@
       </div>
     </div>
     <div class="grid g4 mb22">
-      <div><label class="lbl">Дата договора / аванса</label><input id="cdate" type="date" value="2026-08-28"></div>
+      <div><label class="lbl">Дата договора / аванса</label><input id="cdate" type="date" value="2026-08-28" oninput="syncTdate();calc()"></div>
+      <div><label class="lbl">Дата передачи предмета</label><input id="tdate" type="date" value="2026-08-28" oninput="tdateEdited=true;calc()"><div class="hint" id="tdateH" style="font-size:11px;color:var(--muted);margin-top:2px">—</div></div>
       <div><label class="lbl">Возврат НДС, мес. после квартала</label><input id="vatlag" type="number" value="3"></div>
       <div><label class="lbl">Комиссия за кредит, %</label><input id="comm" type="number" step="0.1" value="1"></div>
       <div><label class="lbl">Налог на прибыль, %</label><input id="ptax" type="number" value="25"></div>
@@ -1304,6 +1305,11 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
   var repayType='sweep';
   var taxIntCarry=0, taxIntPass=0;      // проценты на уплаченный налог: сходящаяся итерация (тело -> налог -> % -> тело)
   var fundMode='credit';                // credit | own
+  function syncTdate(){
+    if(tdateEdited)return;
+    var c=document.getElementById('cdate'), t=document.getElementById('tdate');
+    if(c&&t&&c.value)t.value=c.value;
+  }
   function setFundMode(v){fundMode=v;
     document.getElementById('fmCredit').className=(v==='credit')?'on':'';
     document.getElementById('fmOwn').className=(v==='own')?'on':'';
@@ -1328,6 +1334,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
   var supp=[{m:0,s:100}];
   var kasko=[0,0,0];
   var kaskoTermEdited=false;
+  var tdateEdited=false;
   var scheme='classic';
   var SCHEME_HIDE={classic:[],captive:['b13']};   // какие вкладки прячем
   var capSaved=null;                       // снимок кэптивных параметров перед уходом в классику
@@ -1415,7 +1422,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     document.getElementById('rtSweep').className='';
     document.getElementById('rtAnn').className='on';
     document.getElementById('rtDiff').className='';
-    fundMode='credit';
+    fundMode='credit'; tdateEdited=false; syncTdate();
     document.getElementById('fmCredit').className='on';
     document.getElementById('fmOwn').className='';
     var bmR=document.getElementById('buyoutMode'); if(bmR)bmR.value='rub';
@@ -1619,7 +1626,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
   }
 
   // ================= СДЕЛКИ: состояние, сохранение, ссылка, экспорт =================
-  var DEAL_IDS=['price','priceD','vat','fund','spread','adv','term','cdate','vatlag','comm','ptax','item','client','inn','accRatio','vatMode','taxAcc','spiM','amCoef','amGroup','buyout','cadVal','propRate','propOff','regFee','regExtra','regAuto','regOff','techOn','techN','techAmt','bankOn','bankTerm','suppOff','suppGLP','suppRate','repterm','guarOff','guarGLP','guarRate','guarBase','guarTerm','ae1_lk','ae1_cli','ae1_off','ae1_glp','ae2_lk','ae2_cli','ae2_off','ae2_glp','ae3_lk','ae3_cli','ae3_off','ae3_glp','ae4_lk','ae4_cli','ae4_off','ae4_glp','kaskoTerm','kaskoComm','fdefOn','fdefRate','fdefTerm','fdefSpread'];
+  var DEAL_IDS=['price','priceD','vat','fund','spread','adv','term','cdate','vatlag','comm','ptax','item','client','inn','accRatio','vatMode','taxAcc','spiM','amCoef','amGroup','buyout','cadVal','propRate','propOff','regFee','regExtra','regAuto','regOff','techOn','techN','techAmt','bankOn','bankTerm','suppOff','suppGLP','suppRate','repterm','guarOff','guarGLP','guarRate','guarBase','guarTerm','ae1_lk','ae1_cli','ae1_off','ae1_glp','ae2_lk','ae2_cli','ae2_off','ae2_glp','ae3_lk','ae3_cli','ae3_off','ae3_glp','ae4_lk','ae4_cli','ae4_off','ae4_glp','kaskoTerm','kaskoComm','fdefOn','fdefRate','fdefTerm','fdefSpread','tdate'];
   var DEAL_SELECTS=['kaskoSK','kaskoPay','buyoutMode'];
   function getState(){
     var s={f:{},c:{},s:{},supp:supp,kasko:kasko,kte:kaskoTermEdited,wv:withVat,rt:repayType,pm:payMode,sch:scheme,fm:fundMode};
@@ -2405,8 +2412,24 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     var spiM=Math.max(1,val('spiM')), amCoef=Math.max(0.1,val('amCoef'));
     var assetCost=priceDNet;                                  // первоначальная стоимость предмета (без НДС)
     var amMonth=assetCost/(spiM/amCoef);
-    var amYear={}, amLeft=assetCost;
-    for(var am=1;am<=N;am++){var a=Math.min(amMonth,amLeft);amLeft-=a;var ay=Math.min(yOf(am),Math.ceil(N/12));amYear[ay]=(amYear[ay]||0)+a;}
+    // п. 4 ст. 259 НК: начисление с 1-го числа месяца, СЛЕДУЮЩЕГО за месяцем ввода в эксплуатацию.
+    // amStart — месяц ввода (0 = предмет передан в месяце заключения договора). Начисляем amStart+1 .. N.
+    // месяц передачи предмета относительно даты договора (0 = передан в месяце заключения)
+    var amStart=0;
+    (function(){
+      var te=document.getElementById('tdate'); if(!te||!te.value)return;
+      var tp=te.value.split('-'); if(tp.length!==3)return;
+      var td=new Date(parseInt(tp[0]),parseInt(tp[1])-1,parseInt(tp[2]));
+      var m=(td.getFullYear()-start.getFullYear())*12+(td.getMonth()-start.getMonth());
+      if(td.getDate()<start.getDate())m-=1;              // неполный месяц не считаем
+      amStart=Math.max(0,Math.min(N,m));
+    })();
+    var amYear={}, amLeft=assetCost, amCount=0;
+    for(var am=amStart+1;am<=N;am++){var a=Math.min(amMonth,amLeft);amLeft-=a;amCount++;var ay=Math.min(yOf(am),Math.ceil(N/12));amYear[ay]=(amYear[ay]||0)+a;}
+    (function(){var e=document.getElementById('tdateH'); if(!e)return;
+      if(!taxAcc){e.textContent='налоговый учёт выключен';return;}
+      var d1=dateAt(amStart+1);
+      e.textContent='амортизация с '+d1.toLocaleDateString('ru-RU',{month:'short',year:'2-digit'})+' — '+amCount+' начислений за срок';})();
     var amResid=Math.max(0,amLeft);                           // остаточная (налоговая) стоимость на дату выкупа
     // --- п.3 ст.268 НК: реализация предмета при выкупе — отдельно от лизингового дохода ---
     var saleResult=buyoutNet-amResid;                         // >=0 доход сразу в базу; <0 убыток к переносу
@@ -2490,7 +2513,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
       if(t<1||t>N)return 0;
       var yy=Math.min(yOf(t),YMAX);
       var inc = payNetAt(t) + (N>0?advNet/N:0);
-      var am  = taxAcc ? amMonth : 0;
+      var am  = (taxAcc && t>amStart) ? amMonth : 0;
       var fin = (mIntArr[t]||0) + ((t===1)?commCost:0);
       var oth = taxAcc ? (((aeCostYear[yy]||0)+(propGLP?propYear:0)+((regGLP&&yy===1)?regTot:0))/12) : 0;
       if(!taxAcc){ // бухгалтерская база: доход = лизинговый процент, без амортизации
