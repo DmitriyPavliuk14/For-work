@@ -537,6 +537,19 @@
     <div id="onaNote" style="display:none;margin-top:-14px;margin-bottom:22px;font-size:12px;color:var(--muted);line-height:1.5;padding:10px 12px;background:var(--paper);border-radius:8px">
       <b>Об отложенном налоговом активе.</b> Налоговый доход признаётся сразу, а расход (амортизация + убыток от выкупа) растянут на годы вперёд — возникает вычитаемая временная разница (ПБУ 18/02). Уплаченный налог не потерян: он возвращается через списание убытка по п. 3 ст. 268 НК (график — на вкладке «Движение денежных средств»). Строка «условно», потому что зачёт возможен только при наличии у ЛК прочей налоговой прибыли в эти годы. <b>На денежный поток это не влияет</b> — налог реально уплачен сейчас, и в казначейском расчёте отражён по факту.
     </div>
+    <div id="recWrap" style="display:none">
+      <h2>Сверка: бухгалтерская прибыль → налоговая база</h2>
+      <p style="font-size:12.5px;color:var(--muted);margin-bottom:10px;line-height:1.5">Налог считается не от бухгалтерской прибыли, а от налоговой базы — поэтому он непропорционален прибыли в P&amp;L. Таблица показывает, из чего складывается разница.</p>
+      <div class="tableWrap mb12">
+        <table id="tblRec">
+          <thead id="recHead"><tr><th>Показатель</th><th>1-й год</th><th>Итого</th></tr></thead>
+          <tbody id="recBody"></tbody>
+        </table>
+      </div>
+      <div style="font-size:12px;color:var(--muted);line-height:1.5;padding:10px 12px;background:var(--paper);border-radius:8px;margin-bottom:22px">
+        <b>Почему базы расходятся.</b> В бухучёте по ФСБУ 25/2018 предмет лизинга у лизингодателя не амортизируется: он списан с баланса и заменён чистой инвестицией в аренду, а доходом признаётся только процентная часть платежа. В налоговом учёте (гл. 25 НК) предмет остаётся у лизингодателя и амортизируется, а в доход попадает <i>весь</i> платёж без НДС. Отсюда две разные базы. Разницы временны́е: за весь срок сделки они закрываются, но по годам расходятся — в начале налог выше бухгалтерской прибыли, в конце разница возвращается через списание убытка от выкупа (п. 3 ст. 268 НК).
+      </div>
+    </div>
 
     <h2>Денежный поток по годам (cash, с НДС)</h2>
     <div style="display:flex;justify-content:flex-end;margin-bottom:8px"><button onclick="tableToXLS('tblCF','Денежный поток','Денежный_поток_по_годам')" style="padding:8px 14px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;font-size:12.5px;font-weight:600;cursor:pointer">📊 Выгрузить в Excel</button></div>
@@ -2421,7 +2434,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     // признаём равномерно по месяцам срока (иначе P&L занижен, т.к. механизм признания трактует их как возврат тела)
     var taxIntYear={};
     if(taxIntCarry>0.5&&N>0){for(var tim=1;tim<=N;tim++){var tiy2=Math.min(yOf(tim),YMAX);taxIntYear[tiy2]=(taxIntYear[tiy2]||0)+taxIntCarry/N;}}
-    var taxLoss=0, taxRows=[];
+    var taxLoss=0, taxRows=[], recRows=[];
     var yProfit={},yTax={},yNet={},totBefore=0,totTax=0,totNet=0;
     for(var y=1;y<=YMAX;y++){
       var income=yIncome[y]||0;
@@ -2444,6 +2457,9 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
         else {taxLoss+=-tBase;tBase=0;}
         tax=ptax/100*tBase;
         taxRows.push([y,tInc,tAm,tFin,tOth,tGainY,tBase,tax]);
+        // данные для сверки БУ <-> НУ: бухгалтерская прибыль -> временные разницы -> налоговая база
+        recRows.push({y:y, acc:before, dInc:tInc-(income+markup+(aeNetYear[y]||0)+(kaskoCommYear[y]||0)+(taxIntYear[y]||0)),
+                      am:tAm, gain:tGainY, base:tBase, tax:tax});
       }
       var net=before-tax;
       yProfit[y]=before;yTax[y]=tax;yNet[y]=net;
@@ -2514,7 +2530,12 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
       Object.keys(ptaxM).forEach(function(mk){
         var mm=Number(mk); if(mm>N)return;             // после окончания договора начислять некуда — графика уже нет
         var amt=ptaxM[mk]; if(amt<=0.5)return;
-        taxIntNew+=amt*(Math.pow(1+iLease,N-mm)-1);
+        // Стоимость финансирования налога с месяца mm до конца договора, приведённая к моменту 0.
+        // ВАЖНО: величина кладётся в тело договора (месяц 0), поэтому она должна быть в текущих
+        // деньгах — аннуитет доначислит на неё проценты сам. Прежняя формула брала будущую
+        // стоимость на момент N, из-за чего проценты начислялись дважды: обратная связь
+        // «тело -> налог -> % -> тело» усиливалась со сроком и на 120 мес. расходилась (g>1).
+        taxIntNew+=amt*(Math.pow(1+iLease,-mm)-Math.pow(1+iLease,-N));
       });
     }
 
@@ -2883,6 +2904,30 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
         plRow('= Чистая прибыль с учётом ОНА',function(y){return (yNet[y]||0)+((y===YMAX)?taxLossAtSale*ptax/100:0);},totNet+taxLossAtSale*ptax/100,true)
       :'');
     var _on=document.getElementById('onaNote'); if(_on)_on.style.display=lossSchedule.length?'block':'none';
+    // --- сверка БУ -> НУ ---
+    (function(){
+      var wrapR=document.getElementById('recWrap'); if(!wrapR)return;
+      if(!taxAcc||!recRows.length){wrapR.style.display='none';return;}
+      wrapR.style.display='block';
+      var hd='<tr><th>Показатель</th>';
+      for(var y=1;y<=YMAX;y++)hd+='<th>'+y+'-й год</th>';
+      hd+='<th>Итого</th></tr>';
+      var hEl=document.getElementById('recHead'); if(hEl)hEl.innerHTML=hd;
+      function line(lbl,f,strong,muted){
+        var s='<tr'+(strong?' style="font-weight:700"':(muted?' style="color:var(--muted)"':''))+'><td>'+lbl+'</td>', tot=0;
+        recRows.forEach(function(r){var v=f(r); tot+=v; s+='<td>'+fmtRub(v)+'</td>';});
+        return s+'<td>'+fmtRub(tot)+'</td></tr>';
+      }
+      var body=
+        line('Бухгалтерская прибыль до налога (P&L)',function(r){return r.acc;},true)+
+        line('+ Разница в признании дохода (ФСБУ 25 → гл. 25 НК)',function(r){return r.dInc;},false,true)+
+        line('− Амортизация предмета (только в налоговом учёте)',function(r){return -r.am;},false,true)+
+        line('+ Доход от реализации при выкупе',function(r){return r.gain;},false,true)+
+        line('± Прочие разницы и перенос убытка',function(r){return r.base-(r.acc+r.dInc-r.am+r.gain);},false,true)+
+        line('= Налоговая база',function(r){return r.base;},true)+
+        line('Налог на прибыль '+ptax+'%',function(r){return -r.tax;},true);
+      var bEl=document.getElementById('recBody'); if(bEl)bEl.innerHTML=body;
+    })();
     function cfRow(lbl,key,sign,strong){var tot=0,s='';for(var y=1;y<=YMAX;y++){var v=((cf[y]&&cf[y][key])||0)*sign;tot+=v;s+='<td>'+fmtRub(v)+'</td>';}return '<tr'+(strong?' style="font-weight:700"':'')+'><td>'+lbl+'</td>'+s+'<td>'+fmtRub(tot)+'</td></tr>';}
     document.getElementById('cfBody').innerHTML=
       cfRow('Приток от клиента','inC',1)+
