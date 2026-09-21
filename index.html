@@ -3097,6 +3097,16 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
       });
     }
 
+    // === СХОДИМОСТЬ: выходим ДО отрисовки таблиц ===
+    // Итерация «тело -> налог -> проценты на налог -> тело» делает до 10 проходов.
+    // Раньше каждый проход перерисовывал все таблицы (ДДС, графики, P&L) — при 60 мес.
+    // это давало ~0,9 с на одно нажатие стрелки. Теперь промежуточные проходы считают
+    // только математику, а рисуется один раз — последний, сошедшийся.
+    if(Math.abs(taxIntNew-taxIntCarry)>0.005 && taxIntPass<40){
+      taxIntPass++; taxIntCarry=taxIntNew; calc(); return;
+    }
+    taxIntPass=0; taxIntCarry=taxIntNew;
+
     // ===== график выборок и погашения кредита (тренчи, FIFO) =====
     var drawMs=[]; T.rows.forEach(function(r){if(r.drawn>0.5)drawMs.push(r.t);});
     var nTr=drawMs.length;
@@ -3634,7 +3644,15 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     taxIntPass=0; taxIntCarry=taxIntNew;
   }
 
-  document.querySelectorAll('input').forEach(function(el){el.addEventListener('input',calc);});
+  // Стрелки «вверх/вниз» в числовых полях при удержании шлют input каждые ~50 мс.
+  // Склеиваем их в один пересчёт, иначе очередь calc() отстаёт от нажатий.
+  var calcTimer=null;
+  function calcSoon(){ if(calcTimer)clearTimeout(calcTimer);
+    calcTimer=setTimeout(function(){calcTimer=null;try{calc();}catch(e){}},110); }
+  document.querySelectorAll('input').forEach(function(el){el.addEventListener('input',calcSoon);});
+  // после отпускания клавиши/потери фокуса — гарантированный финальный пересчёт
+  document.querySelectorAll('input').forEach(function(el){
+    el.addEventListener('change',function(){if(calcTimer){clearTimeout(calcTimer);calcTimer=null;}try{calc();}catch(e){}});});
   (function(){var t=document.getElementById('techOn');if(t)t.addEventListener('change',function(){var b=document.getElementById('techBox');if(b)b.style.display=t.checked?'block':'none';});})();
   renderSupp();renderKasko();
   try{applyScheme('classic',true);}catch(e){}
