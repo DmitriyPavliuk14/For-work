@@ -134,7 +134,7 @@
    как скрипт сам выставит inline-display. */
 (function(){try{
   var h=String(location.hash||'');
-  if(h.indexOf('#d=')===0&&/[&?]kp=1(&|$)/.test(h)){
+  if(h.indexOf('#d=')===0&&/[&?](k|kp=1)(&|$)/.test(h)){
     var s=document.createElement('style');
     s.id='kpBoot';
     s.textContent='.wrap{display:none!important}#kpView{display:block!important}';
@@ -354,14 +354,20 @@
     </div>
     <div class="marg mb22">
       <div class="mt" id="margTitle">Реальная маржа (приведено к дате договора)</div>
-      <div class="grid g4">
-        <div class="bare"><div class="lab">Затраты, PV</div><div class="val num" id="oCost">—</div><div class="hint" id="oCostH">все выплаты</div></div>
-        <div class="bare"><div class="lab">Выручка, PV</div><div class="val num" id="oRev">—</div><div class="hint" id="oRevH">от клиента</div></div>
+      <div class="grid g3 mb16">
+        <div class="bare"><div class="lab">Затраты, PV</div><div class="val num" id="oCost">—</div><div class="hint" id="oCostH">всё, что платит ЛК</div></div>
+        <div class="bare"><div class="lab">Выручка, PV</div><div class="val num" id="oRev">—</div><div class="hint" id="oRevH">всё, что получает ЛК</div></div>
         <div class="bare"><div class="lab">Экономическая маржа</div><div class="val num" id="oMarg">—</div><div class="hint" id="oMargH">—</div></div>
-        <div class="bare"><div class="lab">Прибыль за срок</div><div class="val num" id="oProfit">—</div><div class="hint" id="oProfitH">после налога, факт</div></div>
       </div>
-      <div style="margin-top:10px;font-size:11.5px;color:var(--muted)" id="margVat">—</div>
-      <div style="margin-top:6px;font-size:11.5px;color:var(--muted)">Экономическая маржа = NPV всех фактических потоков (включая НДС и лаг возврата), приведённых к дате договора по ставке фондирования. Проценты по кредиту отдельно не вычитаются — стоимость денег уже заложена в ставку дисконтирования. «Прибыль за срок» — фактический финансовый результат после налога.</div>
+      <div style="font-size:11.5px;font-weight:600;color:var(--teal);margin-bottom:8px">Финансовый результат сделки</div>
+      <div class="grid g3">
+        <div class="bare"><div class="lab">1. За срок договора</div><div class="val num" id="oProfit">—</div><div class="hint" id="oProfitH">после налога, факт</div></div>
+        <div class="bare"><div class="lab">2. После договора</div><div class="val num" id="oLossFx">—</div><div class="hint" id="oLossFxH">—</div></div>
+        <div class="bare"><div class="lab">3. Итог по сделке (1 + 2)</div><div class="val num" id="oTotal">—</div><div class="hint" id="oTotalH">—</div></div>
+      </div>
+      <div style="margin-top:10px;font-size:11.5px;color:var(--muted)" id="margSplit">—</div>
+      <div style="margin-top:8px;font-size:11.5px;color:var(--muted)" id="margVat">—</div>
+      <div style="margin-top:6px;font-size:11.5px;color:var(--muted)"><b>Экономическая маржа</b> — сколько сделка стоит в деньгах на дату договора: все фактические платежи и поступления (вместе с НДС и лагом его возврата) приведены к этой дате по ставке фондирования. Проценты по кредиту отдельной строкой не вычитаются — цена денег уже сидит в ставке приведения, иначе получится двойной счёт.</div>
     </div>
 
     <div class="edu">
@@ -800,7 +806,7 @@
   <!-- ===== TAB 13: БАНКОВСКОЕ КРЕДИТОВАНИЕ ===== -->
   <div id="t13" style="display:none">
     <h2>Банковское кредитование</h2>
-    <p style="font-size:12.5px;color:var(--muted);margin-bottom:16px">Классическая схема: лизингополучатель — предмет лизинга — поставщик — лизинговая компания — банк. ЛК покупает предмет у поставщика (100% оплата в мес. 0), передаёт клиенту в лизинг и финансирует покупку обычным банковским кредитом. Рассрочка поставщика, отсрочка Поставщика и банковская гарантия в этом режиме не применяются.</p>
+    <p style="font-size:12.5px;color:var(--muted);margin-bottom:16px">Классическая схема: лизингополучатель — предмет лизинга — поставщик — лизинговая компания — банк. ЛК покупает предмет у поставщика (100% оплата в мес. 0), передаёт клиенту в лизинг и финансирует покупку обычным банковским кредитом.</p>
     <div id="ownFundsBanner" style="display:none;background:var(--tealSoft);border-radius:10px;padding:12px 14px;margin-bottom:16px;font-size:12.5px">На «Калькуляторе» выбран режим <b>«Собственные средства»</b> — эта вкладка не участвует в расчёте: кредит не берётся, проценты и комиссия банка равны нулю. Ставка клиенту при этом не меняется. Пиковая потребность в собственных деньгах показана в карточке ниже.</div>
     <div class="mb16">
       <label class="lbl">Тип погашения кредита</label>
@@ -1669,7 +1675,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     function say(t,err){if(m){m.textContent=t;m.style.color=err?'var(--red)':'var(--teal)';setTimeout(function(){if(m.textContent===t){m.textContent='PDF откроется в новой вкладке — сохраните или распечатайте.';m.style.color='var(--muted)';}},6000);}}
     if(location.protocol==='file:'){say('Ссылка работает только когда калькулятор открыт с сайта.',true);return;}
     var url;
-    try{url=buildShareUrl()+'&kp=1';}catch(e){say('Не удалось сформировать ссылку.',true);return;}
+    try{url=buildShareUrl()+'&k';}catch(e){say('Не удалось сформировать ссылку.',true);return;}
     var cl=(document.getElementById('client').value||'').trim();
     kpLog('link');
     var isMobile=/iPhone|iPad|iPod|Android/i.test(navigator.userAgent||'')||(navigator.maxTouchPoints>1&&/Mac/i.test(navigator.platform||''));
@@ -1804,7 +1810,16 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
   function idCode(i){return i.toString(36);}
   function getStateSlim(){
     var full=getState(), base=baseDefaults(), out={};
+    // Поля, которые калькулятор восстанавливает сам, в ссылку не пишем — она короче,
+    // а результат тот же. Исключаем только то, что пересчитывается БЕЗУСЛОВНО,
+    // и то, что авто-следует за другим полем и не тронуто вручную.
+    var skip={priceD:1};                                   // одна цена: цена дилера = цене клиента
+    if(!bankTermEdited){skip.bankTerm=1;skip.repterm=1;}    // срок кредита/погашения = сроку лизинга
+    if(!cadEdited)skip.cadVal=1;                            // кадастр следует за стоимостью объекта
+    var ra=document.getElementById('regAuto');
+    if(ra&&ra.checked)skip.regFee=1;                        // госпошлина считается по НК автоматически
     DEAL_IDS.forEach(function(id,i){
+      if(skip[id])return;
       var cur=(id in full.c)?full.c[id]:full.f[id];
       if(String(cur)!==String(base[id]))out[idCode(i)]=cur;
     });
@@ -1812,14 +1827,17 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     if(document.getElementById('kaskoSK')&&document.getElementById('kaskoSK').value)s.sk=document.getElementById('kaskoSK').value;
     if(document.getElementById('kaskoPay')&&document.getElementById('kaskoPay').value!=='1')s.kp=document.getElementById('kaskoPay').value;
     if(document.getElementById('buyoutMode')&&document.getElementById('buyoutMode').value==='pct')s.bm='pct';
-    var baseSupp=JSON.stringify([{m:0,s:10},{m:6,s:10},{m:9,s:30},{m:12,s:50}]);
-    if(JSON.stringify(supp)!==baseSupp)s.sp=supp.map(function(r){return [r.m,r.s];});
+    // этапы оплаты поставщику и схема в модели недвижимости всегда одни и те же
+    // (100% в мес. 0, классическая схема) — в ссылку не пишем
     if(kasko.some(function(x){return Number(x)!==0;}))s.ks=kasko;
     if(kaskoTermEdited)s.kte=1;
-    if(!withVat)s.wv=0;
+    if(!withVat){s.wv=0;
+      // точные суммы «с НДС» — иначе после восстановления по ссылке итоги разъезжаются на рубль
+      if(vatStash){var vsp=[];DEAL_IDS.forEach(function(id,i){var st=vatStash[id];
+        if(st&&isFinite(st.gross))vsp.push(idCode(i)+'.'+Math.round(st.gross));});
+        if(vsp.length)s.vs=vsp.join(',');}}
     if(repayType!=='annuity')s.rt=repayType;
     if(payMode!=='ann')s.pm=payMode;
-    if(scheme!=='captive')s.sch=scheme;
     if(fundMode!=='credit')s.fm=fundMode;
     return s;
   }
@@ -1830,7 +1848,11 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     Object.keys(s.d).forEach(function(kk){
       var id=v2?DEAL_IDS[parseInt(kk,36)]:kk; if(!id)return;
       var e=document.getElementById(id);if(!e)return;
-      if(e.type==='checkbox')e.checked=!!Number(s.d[kk]); else e.value=s.d[kk];});
+      if(e.type==='checkbox')e.checked=!!Number(s.d[kk]); else e.value=s.d[kk];
+      // если поле пришло в ссылке — значит отправитель задал его вручную;
+      // иначе расчёт тут же затрёт его авто-значением
+      if(id==='bankTerm')bankTermEdited=true;
+      if(id==='cadVal')cadEdited=true;});
     if(s.sk){var e1=document.getElementById('kaskoSK');if(e1)e1.value=s.sk;}
     if(s.kp){var e2=document.getElementById('kaskoPay');if(e2)e2.value=s.kp;}
     if(s.bm){var e2b=document.getElementById('buyoutMode');if(e2b)e2b.value=s.bm;}
@@ -1840,6 +1862,12 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
       if(kt&&Math.round(parseFloat(kt.value)||0)!==kasko.length)kt.value=kasko.length;}   // срок полиса под восстановленный массив, иначе годы обрежутся
     kaskoTermEdited=!!s.kte;
     withVat=(s.wv===0)?false:true;
+    vatStash=null;
+    if(!withVat&&s.vs){vatStash={};String(s.vs).split(',').forEach(function(p){
+      var q=p.split('.'), id=DEAL_IDS[parseInt(q[0],36)], g=Number(q[1]);
+      if(!id||!isFinite(g))return;
+      var el=document.getElementById(id); if(!el)return;
+      vatStash[id]={gross:g,net:numVal(el.value)};});}
     document.getElementById('vatYes').className=withVat?'on':'';
     document.getElementById('vatNo').className=withVat?'':'on';
     repayType=s.rt||'annuity'; syncRT();
@@ -1858,7 +1886,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
   function packSlim(s){
     var parts=['2'];
     Object.keys(s.d).forEach(function(k){parts.push(k+'='+String(s.d[k]).replace(/\|/g,'%7C'));});
-    ['sk','kp','bm','rt','pm','sch','fm','kte','wv'].forEach(function(k){
+    ['sk','kp','bm','rt','pm','sch','fm','kte','wv','vs'].forEach(function(k){
       if(s[k]!==undefined&&s[k]!==null)parts.push('~'+k+'='+String(s[k]).replace(/\|/g,'%7C'));});
     if(s.sp)parts.push('~sp='+s.sp.map(function(a){return a[0]+'.'+a[1];}).join(','));
     if(s.ks)parts.push('~ks='+s.ks.join(','));
@@ -1953,6 +1981,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
              '<td class="kvV">'+fmtRub(o.sum)+'</td></tr>';}).join(''));
     // график свёрнут по умолчанию: сводка должна умещаться на один экран
     kpSchedOpen=false; kpApplySched(rowsN);
+    // название вкладки браузера — из условий сделки
+    try{document.title=kpDealTitle();}catch(e){}
     kpBootOff();
     try{kpFit();}catch(e){}
   }
@@ -1989,7 +2019,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     if(!location.hash||location.hash.indexOf('#d=')!==0)return false;
     var raw=location.hash.slice(3), autoKP=false;
     var amp=raw.indexOf('&');
-    if(amp>=0){autoKP=/(^|&)kp=1(&|$)/.test(raw.slice(amp)); raw=raw.slice(0,amp);}
+    if(amp>=0){autoKP=/(^|&)(k|kp=1)(&|$)/.test(raw.slice(amp)); raw=raw.slice(0,amp);}
     try{var dec=unb64url(raw), s=null;
       if(dec.charAt(0)==='2'&&dec.indexOf('|')>=0){s=unpackSlim(dec);}
       if(!s)s=JSON.parse(dec);
@@ -2438,10 +2468,47 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     y+=16; if(y>H-40){doc.addPage();y=48;}
     doc.setTextColor.apply(doc,MUT); doc.setFontSize(7.5);
     doc.text('Настоящее предложение носит информационный характер и не является публичной офертой (ст. 437 ГК РФ). Расчёт предварительный.', Mg, y, {maxWidth:W-2*Mg});
-    var url=doc.output('bloburl');
-    var w=window.open(url,'_blank');
-    if(!w){var a=document.createElement('a'); a.href=url; a.target='_blank'; a.rel='noopener'; document.body.appendChild(a); a.click(); a.remove();}
+    kpSavePdf(doc);
     if(!window.__kpAuto)kpLog('pdf');            // авто-запись в журнал (кроме автогенерации по ссылке у получателя)
+  }
+  // --- название сделки: клиент · предмет · график · аванс · срок ---
+  function kpSchedName(){
+    return payMode==='ann'?'аннуитет':payMode==='light'?'лёгкое ускорение':
+           payMode==='mid'?'умеренное ускорение':'максимальное ускорение';
+  }
+  function kpDealTitle(){
+    if(!KP)return 'Коммерческое предложение по лизингу';
+    var p=[];
+    if(KP.client)p.push(KP.client);
+    if(KP.item)p.push(KP.item);
+    p.push(kpSchedName());
+    p.push('аванс '+KP.adv+'%');
+    p.push(KP.N+' мес.');
+    return p.join(' · ');
+  }
+  function kpFileName(){
+    var n=('КП '+kpDealTitle()).replace(/[\\\/:*?"<>|]/g,' ').replace(/[\u0000-\u001F]/g,'').replace(/\s+/g,' ').trim();
+    if(n.length>120)n=n.slice(0,120).trim();
+    n=n.replace(/[.\s]+$/,'');                 // без двойной точки перед расширением
+    return (n||'КП')+'.pdf';
+  }
+  // --- сохранение PDF ФАЙЛОМ на устройство (а не открытие новой вкладки) ---
+  // На iPhone открытие blob: в новой вкладке давало пустую страницу — поэтому только скачивание.
+  function kpSavePdf(doc){
+    var name=kpFileName(), blob, url;
+    try{ blob=doc.output('blob'); }catch(e){ blob=null; }
+    if(!blob){ try{ doc.save(name); }catch(e2){} return; }
+    try{ url=URL.createObjectURL(blob); }catch(e){ url=null; }
+    if(!url){ try{ doc.save(name); }catch(e2){} return; }
+    var a=document.createElement('a');
+    if(typeof a.download==='undefined'){        // очень старый браузер — запасной путь
+      try{ doc.save(name); }catch(e){ window.open(url,'_blank'); }
+      setTimeout(function(){try{URL.revokeObjectURL(url);}catch(e){}},8000); return;
+    }
+    a.href=url; a.download=name; a.style.display='none'; a.rel='noopener';
+    document.body.appendChild(a); a.click();
+    setTimeout(function(){try{a.remove();URL.revokeObjectURL(url);}catch(e){}},8000);
+    try{msgDeal('Файл «'+name+'» сохранён в «Загрузки».');}catch(e){}
   }
   function renderSupp(){/* UI этапов оплаты Поставщику удалён: поставщик получает 100% в мес.0 */}
   function renderKasko(){
@@ -2931,8 +2998,35 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     }
     var pEl=document.getElementById('oProfit');
     if(pEl){pEl.textContent=fmtRub(totNet);
+      pEl.style.color=(totNet<0)?'var(--amber)':'';
       var pH=document.getElementById('oProfitH');
       if(pH)pH.textContent='после налога · '+fmtPct(totNet/priceNet*100)+' от цены';}
+    // --- финансовый результат: за срок / после договора / итог ---
+    // Доход признаётся за срок договора, а убыток от выкупа (п. 3 ст. 268 НК) списывается
+    // ПОСЛЕ него. Поэтому «за срок» может быть минусовым при прибыльной сделке в целом.
+    (function(){
+      var lossFx=(taxAcc&&taxLossAtSale>0.5)?taxLossAtSale*ptax/100:0;
+      var lossYrs=Math.max(1,Math.round(remSPI/12));
+      var e=document.getElementById('oLossFx');
+      if(e){e.textContent=(lossFx>0.5?'+':'')+fmtRub(lossFx);
+        e.style.color=lossFx>0.5?'var(--teal)':'';
+        var h=document.getElementById('oLossFxH');
+        if(h)h.textContent=lossFx>0.5?('экономия налога, '+lossYrs+' '+(lossYrs===1?'год':(lossYrs<5?'года':'лет'))+' после выкупа'):'убытка при выкупе нет';}
+      var tot=totNet+lossFx, t=document.getElementById('oTotal');
+      if(t){t.textContent=fmtRub(tot);
+        t.style.color=(tot<0)?'var(--red)':'var(--teal)';
+        var th=document.getElementById('oTotalH');
+        if(th)th.textContent=fmtPct(tot/priceNet*100)+' от цены объекта';}
+      var ms=document.getElementById('margSplit');
+      if(ms)ms.innerHTML=lossFx>0.5
+        ? ('<b>Почему за срок договора может быть минус.</b> Лизинговый доход ЛК признаёт за '+N+' мес. и платит с него налог сразу. '+
+           'А убыток от продажи предмета при выкупе ('+fmtRub(taxLossAtSale)+') по п.&nbsp;3 ст.&nbsp;268 НК списывается не сразу, '+
+           'а равными долями ещё '+lossYrs+' '+(lossYrs===1?'год':(lossYrs<5?'года':'лет'))+' после окончания договора. '+
+           'Столбец&nbsp;2 — та самая отложенная экономия налога ('+fmtPct(ptax)+' от убытка). '+
+           'Она реальна только при наличии у ЛК прочей налоговой прибыли в эти годы. Суммы номинальные, без приведения к дате договора.')
+        : ('Убытка при выкупе нет — весь результат сделки признаётся в течение срока договора. '+
+           'Условие, при котором убыток не возникает: аванс&nbsp;≤ срок × коэффициент ускорения / СПИ.');
+    })();
 
     // --- денежный поток по годам ---
     var cf={};
@@ -3077,7 +3171,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     document.getElementById('oRev').textContent=fmtRub(cliPVnet);
     document.getElementById('oMarg').textContent=fmtRub(marginPV);
     document.getElementById('oMargH').textContent=fmtPct(marginPV/priceNet*100)+' от цены';
-    document.getElementById('margVat').textContent='Потоки приведены к дате договора по ставке '+fmtPct(fund)+'. Затраты включают выплаты Поставщику, отсрочку, гарантию, доп. расходы, НДС в бюджет и комиссию банка; выручка — платежи клиента, возврат НДС и комиссию Страхование.';
+    document.getElementById('margVat').textContent='Что во что входит: затраты — оплата поставщику, доп. расходы ЛК, НДС к уплате в бюджет и комиссия банка; выручка — платежи клиента, возврат НДС из бюджета и комиссия за страхование. Всё приведено к дате договора по ставке '+fmtPct(fund)+'.';
 
     // tab1
     document.getElementById('r1rate').textContent=fmtPct(leaseRate);
@@ -3409,7 +3503,6 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
       plRow(fdefOn?'Проценты Поставщику (отсрочка)':'Проценты по кредиту',function(y){return -(T.yInt[y]||0);},-(T.sInt))+
       plRow('Комиссия за кредит'+(bankOn?' (в тело клиенту)':''),function(y){return (bankOn||y!==1)?0:-commCost;},bankOn?0:-commCost)+
       plRow('Отсрочка Поставщика (%)',function(y){return -(suppGLP?0:(sIntYear[y]||0));},-(suppGLP?0:sTotInt))+
-      plRow('Банковская гарантия',function(y){return (!guarGLP&&y===1)?-guarCost:0;},-(guarGLP?0:guarCost))+
       plRow('Доп. расходы (нетто)',function(y){return aeNetYear[y]||0;},aeNetTot)+
       plRow('Налог на имущество (транзит клиенту)',function(y){return 0;},0)+
       plRow('Расходы на регистрацию (транзит клиенту)',function(y){return 0;},0)+
@@ -3456,7 +3549,6 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
       cfRow('НДС в бюджет','oV',-1)+
       cfRow(fdefOn?'Проценты Поставщику (отсрочка)':'Проценты+комиссия','fin',-1)+
       cfRow('Отсрочка Поставщика (%)','suppInt',-1)+
-      cfRow('Банковская гарантия','guar',-1)+
       cfRow('Доп. расходы (ЛК)','oAE',-1)+
       cfRow('Налог на имущество','prop',-1)+
       cfRow('Расходы на регистрацию','reg',-1)+
