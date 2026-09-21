@@ -85,7 +85,40 @@
   }
   .tabreset{padding:6px 12px;border:1px solid var(--line);background:var(--card);color:var(--muted);border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap}
   .tabresetRow{display:flex;justify-content:flex-end;margin-bottom:10px}
+  /* --- КП по ссылке: адаптив под смартфон --- */
+  #kpView table{min-width:0;width:100%}
+  #kpView th{position:static;background:transparent;color:inherit;letter-spacing:normal;border-bottom:none}
+  #kpView .kvK{padding:6px 0;color:#666;border-bottom:1px solid #E6E5E0;vertical-align:top;text-align:left;white-space:normal;overflow-wrap:anywhere;font-size:13px;font-weight:400}
+  #kpView .kvV{padding:6px 0 6px 12px;font-weight:700;text-align:right;border-bottom:1px solid #E6E5E0;vertical-align:top;white-space:nowrap;width:1%;font-size:13px;color:#18181B}
+  #kpView .kvVw{white-space:normal;width:auto;overflow-wrap:anywhere}
+  #kpView .kvSch{border-collapse:collapse;font-size:11.5px}
+  #kpView .kvSch th,#kpView .kvSch td{border:1px solid #DDD;padding:4px 6px;white-space:nowrap}
+  #kpView .kvSch thead th{font-size:10px;text-transform:uppercase;background:#1E3A5F;color:#fff;font-weight:600}
+  @media(max-width:600px){
+    html.kpMode body{padding:12px}
+    #kpView{margin:14px auto;padding:0 8px}
+    #kpView .kpCard{padding:18px 13px 16px}
+    #kpView .kvK,#kpView .kvV{font-size:12.5px}
+    #kpView .kvSch{font-size:10px}
+    #kpView .kvSch th,#kpView .kvSch td{padding:3px 3px}
+    #kpView .kvSch th:first-child,#kpView .kvSch td:first-child{width:1%}
+  }
 </style>
+<script>
+/* КП по ссылке должно открываться сразу: прячем калькулятор ДО первой отрисовки,
+   чтобы не мелькал интерфейс. Стиль снимается функцией kpBootOff() после того,
+   как скрипт сам выставит inline-display. */
+(function(){try{
+  var h=String(location.hash||'');
+  if(h.indexOf('#d=')===0&&/[&?]kp=1(&|$)/.test(h)){
+    var s=document.createElement('style');
+    s.id='kpBoot';
+    s.textContent='.wrap{display:none!important}#kpView{display:block!important}';
+    (document.head||document.documentElement).appendChild(s);
+    document.documentElement.className+=' kpMode';
+  }
+}catch(e){}})();
+</script>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Лизинг">
@@ -95,25 +128,25 @@
 </head>
 <body>
 <div id="kpView" style="display:none;max-width:760px;margin:28px auto;padding:0 18px">
-  <div style="background:#fff;color:#18181B;font-family:Arial,Helvetica,sans-serif;padding:30px 26px 24px;border:1px solid #E5E5E0;border-radius:10px;box-sizing:border-box;overflow-wrap:anywhere">
+  <div class="kpCard" style="background:#fff;color:#18181B;font-family:Arial,Helvetica,sans-serif;padding:30px 26px 24px;border:1px solid #E5E5E0;border-radius:10px;box-sizing:border-box;overflow-wrap:anywhere">
     <div style="text-align:right;font-size:11px;color:#666" id="kvValid">—</div>
     <div style="font-size:19px;color:#1E3A5F;font-weight:700;margin-top:4px">Коммерческое предложение по финансовому лизингу</div>
     <div style="height:3px;background:#1E3A5F;margin:10px 0 16px"></div>
     <div id="kvKomu" style="font-size:13px;margin-bottom:10px;display:none"></div>
     <div style="font-size:13px;margin-bottom:16px">Предлагаем приобретение объекта в финансовый лизинг на следующих условиях:</div>
-    <table style="width:100%;border-collapse:collapse;font-size:13px;table-layout:fixed" id="kvTerms"></table>
+    <table style="width:100%;border-collapse:collapse;font-size:13px" id="kvTerms"></table>
 
     <div style="font-size:15px;color:#1E3A5F;font-weight:700;margin:22px 0 6px">Дополнительные расходы</div>
-    <table style="width:100%;border-collapse:collapse;font-size:13px;table-layout:fixed" id="kvEx"></table>
+    <table style="width:100%;border-collapse:collapse;font-size:13px" id="kvEx"></table>
 
     <div style="font-size:15px;color:#1E3A5F;font-weight:700;margin:22px 0 6px">График лизинговых платежей</div>
     <div style="overflow-x:auto;-webkit-overflow-scrolling:touch">
-    <table style="width:100%;border-collapse:collapse;font-size:11.5px;min-width:420px">
+    <table class="kvSch">
       <thead><tr style="background:#1E3A5F;color:#fff">
-        <th style="border:1px solid #DDD;padding:5px 8px;text-align:left;font-size:10px;text-transform:uppercase">№</th>
-        <th style="border:1px solid #DDD;padding:5px 8px;text-align:left;font-size:10px;text-transform:uppercase">Дата</th>
-        <th style="border:1px solid #DDD;padding:5px 8px;text-align:right;font-size:10px;text-transform:uppercase">Платёж с НДС</th>
-        <th style="border:1px solid #DDD;padding:5px 8px;text-align:right;font-size:10px;text-transform:uppercase">в т.ч. НДС</th>
+        <th style="text-align:left">№</th>
+        <th style="text-align:left">Дата</th>
+        <th style="text-align:right">Платёж с НДС</th>
+        <th style="text-align:right">в т.ч. НДС</th>
       </tr></thead>
       <tbody id="kvBody"></tbody>
     </table>
@@ -1820,13 +1853,16 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
   }
   function showCalc(){
     var w=document.querySelector('.wrap'), k=document.getElementById('kpView');
+    try{kpBootOff();}catch(e){}
+    try{document.documentElement.classList.remove('kpMode');}catch(e){}
     if(w)w.style.display=''; if(k)k.style.display='none';
   }
   function showKPView(){
     var w=document.querySelector('.wrap'), k=document.getElementById('kpView');
+    try{document.documentElement.classList.add('kpMode');}catch(e){}
     if(w)w.style.display='none'; if(k)k.style.display='block';
     try{ if(!KP||!KP.rows) calc(); }catch(e){}
-    if(!KP||!KP.rows)return;
+    if(!KP||!KP.rows){try{showCalc();}catch(e){}return;}
     var g=function(id,v){var e=document.getElementById(id);if(e)e.innerHTML=v;};
     var today=new Date(), valid=new Date(today.getTime()+10*86400000);
     g('kvValid','КП от '+kpD(today)+', действительно до '+kpD(valid));
@@ -1837,9 +1873,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
       ['Авансовый платёж ('+KP.adv+'%)',fmtRub(KP.advGross)],['Срок лизинга',KP.N+' мес.'],
       ['Ежемесячный лизинговый платёж (с НДС)',fmtRub(KP.annGross)],['Удорожание',fmtPct(KP.udorYear)+'/год'],
       ['Общая сумма договора лизинга (с НДС)',fmtRub(KP.sumGross)]];
-    g('kvTerms', terms.map(function(r){
-      return '<tr><td style="padding:5px 0;color:#666;border-bottom:1px solid #E6E5E0">'+r[0]+'</td>'+
-             '<td style="padding:5px 0;font-weight:700;text-align:right;border-bottom:1px solid #E6E5E0;white-space:nowrap">'+r[1]+'</td></tr>';}).join(''));
+    g('kvTerms', terms.map(function(r,i){
+      return '<tr><td class="kvK">'+r[0]+'</td><td class="kvV'+(i===0?' kvVw':'')+'">'+r[1]+'</td></tr>';}).join(''));
     // график: аванс + платежи + выкуп
     var td='style="border:1px solid #DDD;padding:4px 8px"', tdR='style="border:1px solid #DDD;padding:4px 8px;text-align:right"';
     var rows='';
@@ -1860,10 +1895,13 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     // две колонки — как в блоке условий, чтобы суммы стояли по одной линии;
     // пояснение о включении в график — второй строкой под названием
     g('kvEx', ex.map(function(r){var o=r[1]||{};
-      return '<tr><td style="padding:6px 0;color:#666;border-bottom:1px solid #E6E5E0;vertical-align:top">'+r[0]+
+      return '<tr><td class="kvK">'+r[0]+
              '<div style="font-size:11px;color:#999;margin-top:2px">'+(o.on?glpN(o.glp):'не применяется')+'</div></td>'+
-             '<td style="padding:6px 0;font-weight:700;text-align:right;border-bottom:1px solid #E6E5E0;vertical-align:top;white-space:nowrap">'+(o.on?fmtRub(o.sum):'0 ₽')+'</td></tr>';}).join(''));
+             '<td class="kvV">'+(o.on?fmtRub(o.sum):'0 ₽')+'</td></tr>';}).join(''));
+    kpBootOff();
   }
+  // снимает загрузочный стиль, спрятавший калькулятор до первой отрисовки
+  function kpBootOff(){try{var b=document.getElementById('kpBoot');if(b&&b.parentNode)b.parentNode.removeChild(b);}catch(e){}}
   function loadFromHash(){
     if(!location.hash||location.hash.indexOf('#d=')!==0)return false;
     var raw=location.hash.slice(3), autoKP=false;
@@ -1873,9 +1911,10 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
       if(dec.charAt(0)==='2'&&dec.indexOf('|')>=0){s=unpackSlim(dec);}
       if(!s)s=JSON.parse(dec);
       var ok=(s&&(s.v===1||s.v===2))?applyStateSlim(s):(setState(s),true);   // v2 — короткие коды, v1 — старый формат
-      if(ok&&autoKP)setTimeout(function(){try{showKPView();}catch(e){}},250);
+      if(ok&&autoKP){try{showKPView();}catch(e){try{showCalc();}catch(e2){}}}
+      else if(autoKP){try{showCalc();}catch(e){}}
       return ok;
-    }catch(e){return false;}
+    }catch(e){try{if(autoKP)showCalc();}catch(e2){} return false;}
   }
   // --- экспорт любой таблицы в Excel ---
   function xlEsc(s){return String(s===undefined||s===null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
@@ -3442,6 +3481,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
   calc();
   try{initFieldSync();}catch(e){}
   try{loadFromHash();}catch(e){}
+  try{kpBootOff();}catch(e){}   // страховка: если КП не открылось — калькулятор не должен остаться скрытым
   try{renderDeals();}catch(e){}
 </script>
 </body>
