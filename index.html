@@ -45,8 +45,8 @@
   .marg{background:var(--tealSoft);border:1px solid var(--line);border-radius:12px;padding:15px}
   .marg .mt{font-size:13px;font-weight:600;margin-bottom:11px;color:var(--teal)}
   .bare .lab{font-size:10px;letter-spacing:.4px;text-transform:uppercase;color:var(--faint)}.bare .val{font-size:17px;font-weight:700;margin-top:5px}.bare .hint{font-size:10.5px;color:var(--muted);margin-top:3px}
-  .tableWrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--card)}
-  table{border-collapse:collapse;width:100%;font-size:12.5px;min-width:720px}
+  .tableWrap{overflow:auto;max-height:72vh;-webkit-overflow-scrolling:touch;border:1px solid var(--line);border-radius:12px;background:var(--card)}
+  table{border-collapse:separate;border-spacing:0;width:100%;font-size:12.5px;min-width:720px}
   th,td{padding:8px 11px;text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
   th{font-size:10px;letter-spacing:.3px;text-transform:uppercase;color:var(--faint);font-weight:600;border-bottom:1px solid var(--line);background:var(--paper);position:sticky;top:0}
   th:first-child,td:first-child{text-align:left}
@@ -54,6 +54,22 @@
   tbody tr.special{background:var(--tealSoft);font-weight:600}
   tbody tr.draw{background:var(--amberSoft)}
   tfoot td{border-top:2px solid var(--ink);font-weight:700}
+  /* --- закрепление шапки и первого столбца при прокрутке --- */
+  .tableWrap thead th{position:sticky;top:0;z-index:3}
+  .tableWrap thead tr:nth-child(2) th{top:var(--th1,30px);z-index:3}
+  .tableWrap th:first-child,.tableWrap td:first-child{position:sticky;left:0;z-index:2;box-shadow:1px 0 0 var(--line)}
+  .tableWrap thead th:first-child{z-index:5;background:var(--paper)}
+  .tableWrap tbody td:first-child{background:var(--card)}
+  .tableWrap tbody tr:nth-child(even) td:first-child{background:#FCFCFB}
+  .tableWrap tbody tr.special td:first-child{background:var(--tealSoft)}
+  .tableWrap tbody tr.draw td:first-child{background:var(--amberSoft)}
+  .tableWrap tfoot td{position:sticky;bottom:0;z-index:2;background:var(--card)}
+  .tableWrap tfoot td:first-child{z-index:4}
+  @media(max-width:600px){
+    .tableWrap{max-height:66vh}
+    /* закреплённый столбец должен помещаться на экран, иначе фиксация бесполезна */
+    .tableWrap th:first-child,.tableWrap td:first-child{max-width:46vw;min-width:104px;white-space:normal;overflow-wrap:break-word}
+  }
   .edu{margin-top:20px;background:#FFFFFF;border:1px solid var(--line);border-left:3px solid var(--teal);border-radius:10px;padding:15px 17px}
   .edu h3{font-size:12px;letter-spacing:.5px;text-transform:uppercase;color:var(--teal);margin-bottom:10px}
   .edu p{font-size:12.5px;color:#3F3F46;margin-bottom:9px;line-height:1.6}
@@ -90,15 +106,23 @@
   #kpView th{position:static;background:transparent;color:inherit;letter-spacing:normal;border-bottom:none}
   #kpView .kvK{padding:6px 0;color:#666;border-bottom:1px solid #E6E5E0;vertical-align:top;text-align:left;white-space:normal;overflow-wrap:anywhere;font-size:13px;font-weight:400}
   #kpView .kvV{padding:6px 0 6px 12px;font-weight:700;text-align:right;border-bottom:1px solid #E6E5E0;vertical-align:top;white-space:nowrap;width:1%;font-size:13px;color:#18181B}
-  #kpView .kvVw{white-space:normal;width:auto;overflow-wrap:anywhere}
-  #kpView .kvSch{border-collapse:collapse;font-size:11.5px}
-  #kpView .kvSch th,#kpView .kvSch td{border:1px solid #DDD;padding:4px 6px;white-space:nowrap}
-  #kpView .kvSch thead th{font-size:10px;text-transform:uppercase;background:#1E3A5F;color:#fff;font-weight:600}
+  #kpView .kvVw{white-space:normal;width:auto;overflow-wrap:break-word}
+  @media(min-width:601px){#kpView .kvVw{white-space:nowrap}}   /* на широком экране название в одну строку */
+  #kpView .kvSch{border-collapse:separate;border-spacing:0;font-size:11.5px}
+  #kpView .kvSch th,#kpView .kvSch td{border-right:1px solid #DDD;border-bottom:1px solid #DDD;padding:4px 6px;white-space:nowrap}
+  #kpView .kvSch thead th{font-size:10px;text-transform:uppercase;background:#1E3A5F;color:#fff;font-weight:600;position:sticky;top:0;z-index:2}
   @media(max-width:600px){
-    html.kpMode body{padding:12px}
-    #kpView{margin:14px auto;padding:0 8px}
-    #kpView .kpCard{padding:18px 13px 16px}
-    #kpView .kvK,#kpView .kvV{font-size:12.5px}
+    html.kpMode body{padding:8px}
+    #kpView{margin:8px auto;padding:0 4px}
+    #kpView .kpCard{padding:14px 12px 12px}
+    #kpView .kvIntro{display:none}          /* сводка должна умещаться на один экран */
+    #kpView .kvTitle{font-size:15px;line-height:1.25}
+    #kpView .kvBar{margin:7px 0 9px}
+    #kpView .kvH2{font-size:13.5px;margin:12px 0 4px}
+    #kpView .kvK,#kpView .kvV{font-size:12.5px;padding-top:3px;padding-bottom:3px;line-height:1.3}
+    #kpView .kvNote{margin-top:10px;font-size:9.5px;line-height:1.35}
+    #kpView .kvBtns{margin-top:12px;gap:8px}
+    #kpView .kvBtns button{padding:9px 12px;font-size:13px}
     #kpView .kvSch{font-size:10px}
     #kpView .kvSch th,#kpView .kvSch td{padding:3px 3px}
     #kpView .kvSch th:first-child,#kpView .kvSch td:first-child{width:1%}
@@ -130,17 +154,25 @@
 <div id="kpView" style="display:none;max-width:760px;margin:28px auto;padding:0 18px">
   <div class="kpCard" style="background:#fff;color:#18181B;font-family:Arial,Helvetica,sans-serif;padding:30px 26px 24px;border:1px solid #E5E5E0;border-radius:10px;box-sizing:border-box;overflow-wrap:anywhere">
     <div style="text-align:right;font-size:11px;color:#666" id="kvValid">—</div>
-    <div style="font-size:19px;color:#1E3A5F;font-weight:700;margin-top:4px">Коммерческое предложение по финансовому лизингу</div>
-    <div style="height:3px;background:#1E3A5F;margin:10px 0 16px"></div>
+    <div class="kvTitle" style="font-size:19px;color:#1E3A5F;font-weight:700;margin-top:4px">Коммерческое предложение по финансовому лизингу</div>
+    <div class="kvBar" style="height:3px;background:#1E3A5F;margin:10px 0 16px"></div>
     <div id="kvKomu" style="font-size:13px;margin-bottom:10px;display:none"></div>
-    <div style="font-size:13px;margin-bottom:16px">Предлагаем приобретение объекта в финансовый лизинг на следующих условиях:</div>
+    <div class="kvIntro" style="font-size:13px;margin-bottom:16px">Предлагаем приобретение объекта в финансовый лизинг на следующих условиях:</div>
     <table style="width:100%;border-collapse:collapse;font-size:13px" id="kvTerms"></table>
 
-    <div style="font-size:15px;color:#1E3A5F;font-weight:700;margin:22px 0 6px">Дополнительные расходы</div>
-    <table style="width:100%;border-collapse:collapse;font-size:13px" id="kvEx"></table>
+    <div id="kvExWrap">
+      <div class="kvH2" style="font-size:15px;color:#1E3A5F;font-weight:700;margin:22px 0 6px">Дополнительные расходы</div>
+      <table style="width:100%;border-collapse:collapse;font-size:13px" id="kvEx"></table>
+    </div>
 
-    <div style="font-size:15px;color:#1E3A5F;font-weight:700;margin:22px 0 6px">График лизинговых платежей</div>
-    <div style="overflow-x:auto;-webkit-overflow-scrolling:touch">
+    <div class="kvBtns" style="display:flex;gap:10px;flex-wrap:wrap;margin:18px 0 0">
+      <button type="button" id="kvSchBtn" onclick="kpToggleSched()" style="flex:1 1 180px;padding:11px 16px;background:#fff;color:#1E3A5F;border:1px solid #1E3A5F;border-radius:9px;font-size:14px;font-weight:600;cursor:pointer">Показать график платежей</button>
+      <button type="button" onclick="generateKP()" style="flex:1 1 180px;padding:11px 16px;background:#1E3A5F;color:#fff;border:none;border-radius:9px;font-size:14px;font-weight:600;cursor:pointer">📄 Скачать КП в PDF</button>
+    </div>
+
+    <div id="kvSchBox" style="display:none">
+    <div class="kvH2" style="font-size:15px;color:#1E3A5F;font-weight:700;margin:18px 0 6px">График лизинговых платежей</div>
+    <div id="kvSchScroll" style="overflow:auto;-webkit-overflow-scrolling:touch;max-height:52vh;border:1px solid #E5E5E0;border-radius:8px">
     <table class="kvSch">
       <thead><tr style="background:#1E3A5F;color:#fff">
         <th style="text-align:left">№</th>
@@ -151,11 +183,9 @@
       <tbody id="kvBody"></tbody>
     </table>
     </div>
+    </div>
 
-    <div style="margin-top:18px;font-size:10px;color:#666">Настоящее предложение носит информационный характер и не является публичной офертой (ст. 437 ГК РФ). Расчёт предварительный.</div>
-  </div>
-  <div style="display:flex;gap:10px;flex-wrap:wrap;margin:16px 0 8px">
-    <button onclick="generateKP()" style="padding:12px 22px;background:var(--blue);color:#fff;border:none;border-radius:9px;font-size:15px;font-weight:600;cursor:pointer">📄 Скачать КП в PDF</button>
+    <div class="kvNote" style="margin-top:16px;font-size:10px;color:#666">Настоящее предложение носит информационный характер и не является публичной офертой (ст. 437 ГК РФ). Расчёт предварительный.</div>
   </div>
 </div>
 <div class="wrap">
@@ -1327,21 +1357,18 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
   function applyScheme(s,skipCalc){
     var prev=scheme;
     scheme=(s==='classic')?'classic':'captive';
-    var pd=document.getElementById('priceD'), so=document.getElementById('suppOff'), go=document.getElementById('guarOff');
+    var pd=document.getElementById('priceD');
     if(scheme==='classic'){
       if(prev!=='classic'){                                                     // запоминаем всё, что перетрёт классика
         var rp=document.getElementById('repterm');
         var aeOffs={}; ['ae1_off','ae2_off','ae3_off','ae4_off'].forEach(function(id){var e=document.getElementById(id);if(e)aeOffs[id]=e.checked;});
         capSaved={priceD:pd?pd.value:null, supp:JSON.parse(JSON.stringify(supp)),
-                  suppOff:so?so.checked:false, guarOff:go?go.checked:false,
                   repterm:rp?rp.value:null, aeOffs:aeOffs};
       }
       ['ae1_off','ae2_off','ae3_off','ae4_off'].forEach(function(id){var e=document.getElementById(id);if(e)e.checked=true;});  // в классике доп. расходы базово не применяются
     } else if(capSaved){                                                        // возвращаем кэптивные параметры
       if(pd&&capSaved.priceD!==null)pd.value=capSaved.priceD;
       if(capSaved.supp&&capSaved.supp.length)supp=JSON.parse(JSON.stringify(capSaved.supp));
-      if(so)so.checked=capSaved.suppOff;
-      if(go)go.checked=capSaved.guarOff;
       var rp2=document.getElementById('repterm');
       if(rp2&&capSaved.repterm!==null)rp2.value=capSaved.repterm;
       if(capSaved.aeOffs)Object.keys(capSaved.aeOffs).forEach(function(id){var e=document.getElementById(id);if(e)e.checked=capSaved.aeOffs[id];});
@@ -1443,7 +1470,20 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     if(divId==='t8'){ kasko=[0,0,0]; kaskoTermEdited=false; renderKasko(); }
     calc();
   }
-  function tab(i){for(var j=0;j<14;j++){var t=document.getElementById('t'+j),b=document.getElementById('b'+j);if(t)t.style.display=(j===i)?'block':'none';if(b)b.className=(j===i)?'on':'';}}
+  function tab(i){for(var j=0;j<14;j++){var t=document.getElementById('t'+j),b=document.getElementById('b'+j);if(t)t.style.display=(j===i)?'block':'none';if(b)b.className=(j===i)?'on':'';}
+    try{syncStickyHead();}catch(e){}}
+  // двухуровневая шапка (ДДС): второй ряд должен «прилипать» ровно под первым.
+  // высота первого ряда зависит от переноса текста, поэтому меряем её и кладём в --th1.
+  function syncStickyHead(){
+    var ths=document.querySelectorAll('.tableWrap table thead');
+    for(var i=0;i<ths.length;i++){
+      var rows=ths[i].rows; if(rows.length<2)continue;
+      var h=Math.round(rows[0].getBoundingClientRect().height);
+      if(!h)continue;
+      for(var c=0;c<rows[1].cells.length;c++)rows[1].cells[c].style.top=h+'px';
+    }
+  }
+  try{window.addEventListener('resize',function(){try{syncStickyHead();}catch(e){}});}catch(e){}
   var vatStash=null;   // исходные суммы «с НДС», чтобы обратное переключение возвращало их точь-в-точь
   function setVat(v){
     if(v!==withVat){
@@ -1533,7 +1573,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     var a=(list&&list.length!==undefined)?list:dealsAll().filter(function(d){
       var r=periodRange(), t=new Date((d.kp&&d.kp.dt)?d.kp.dt:d.dt);return t>=r.from&&t<r.to;});
     var nSum=0,nMarg=0,rSum=0,rN=0,nKp=0;
-    a.forEach(function(x){nSum+=parseFloat(x.sum)||0;nMarg+=numOf(x.marg);var rr=rateOf(x.rate);if(rr){rSum+=rr;rN++;}if(x.kp&&x.kp.dt)nKp++;});
+    a.forEach(function(x){nSum+=numVal(x.sum);nMarg+=numOf(x.marg);var rr=rateOf(x.rate);if(rr){rSum+=rr;rN++;}if(x.kp&&x.kp.dt)nKp++;});
     var set=function(id,v){var e=document.getElementById(id);if(e)e.textContent=v;};
     set('rpCount',a.length);
     set('rpPendCount','из них с КП: '+nKp+(a.length-nKp?' · без КП: '+(a.length-nKp):''));
@@ -1546,7 +1586,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     var a=reportRows();
     if(!a.length&&!pendingRows().length)return '';
     var nSum=0,nMarg=0,rSum=0,rN=0;
-    a.forEach(function(x){nSum+=parseFloat(x.sum)||0;nMarg+=numOf(x.marg);var rr=rateOf(x.rate);if(rr){rSum+=rr;rN++;}});
+    a.forEach(function(x){nSum+=numVal(x.sum);nMarg+=numOf(x.marg);var rr=rateOf(x.rate);if(rr){rSum+=rr;rN++;}});
     var L=['Отчёт по КП '+periodLabel(),
       'Сформировано КП: '+a.length,
       'Сумма техники: '+fmtRub(nSum),
@@ -1555,14 +1595,14 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     a.slice().reverse().forEach(function(x,i){
       var t=new Date(x.dt), tm=('0'+t.getHours()).slice(-2)+':'+('0'+t.getMinutes()).slice(-2);
       L.push((i+1)+'. '+(x.client||'без названия')+(x.inn?' (ИНН '+x.inn+')':'')+' — '+(x.item||'')+
-        ': '+fmtRub(parseFloat(x.sum)||0)+', аванс '+x.advPct+'%, '+x.term+' мес., ставка '+x.rate+
+        ': '+fmtRub(numVal(x.sum))+', аванс '+x.advPct+'%, '+x.term+' мес., ставка '+x.rate+
         ', платёж '+x.pay+', маржа '+x.marg+' ['+tm+', '+(x.way==='link'?'ссылка':'PDF')+']');
     });
     var p=pendingRows();
     if(p.length){
       L.push('');L.push('Сохранено расчётов без КП: '+p.length);
       p.slice().reverse().forEach(function(d,i){
-        L.push('— '+(d.client||'без названия')+(d.inn?' (ИНН '+d.inn+')':'')+': '+fmtRub(parseFloat(d.sum)||0)+', '+d.term+' мес., платёж '+d.pay+(d.note?' · '+d.note:''));
+        L.push('— '+(d.client||'без названия')+(d.inn?' (ИНН '+d.inn+')':'')+': '+fmtRub(numVal(d.sum))+', '+d.term+' мес., платёж '+d.pay+(d.note?' · '+d.note:''));
       });
     }
     return L.join('\n').replace(/\u00A0/g,' ');
@@ -1592,12 +1632,12 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     var r1=[h1];
     a.slice().reverse().forEach(function(x){var t=new Date(x.kp&&x.kp.dt?x.kp.dt:x.dt);
       r1.push([t.toLocaleDateString('ru-RU'),('0'+t.getHours()).slice(-2)+':'+('0'+t.getMinutes()).slice(-2),
-        x.client||'',x.inn||'',x.item||'',parseFloat(x.sum)||0,(parseFloat(x.advPct)||0),x.term||'',
+        x.client||'',x.inn||'',x.item||'',numVal(x.sum),(parseFloat(x.advPct)||0),x.term||'',
         clean(x.rate),clean(x.pay),clean(x.marg),(x.kp&&x.kp.way==='link')?'ссылка':'PDF']);});
     var h2=['Дата сохранения','Клиент','ИНН','Предмет','Цена клиенту','Аванс, %','Срок, мес.','Ставка','Платёж','Маржа','Комментарий'];
     var r2=[h2];
     p.slice().reverse().forEach(function(d){var t=new Date(d.dt);
-      r2.push([t.toLocaleDateString('ru-RU'),d.client||'',d.inn||'',d.item||'',parseFloat(d.sum)||0,(parseFloat(d.advPct)||0),
+      r2.push([t.toLocaleDateString('ru-RU'),d.client||'',d.inn||'',d.item||'',numVal(d.sum),(parseFloat(d.advPct)||0),
         d.term||'',clean(d.rate),clean(d.pay),clean(d.marg),d.note||'']);});
     var xml='<?xml version="1.0" encoding="UTF-8"?>\n<?mso-application progid="Excel.Sheet"?>\n'+
       '<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">'+
@@ -1675,7 +1715,15 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     applyScheme(s.sch||'captive',true);
     renderSupp();renderKasko();calc();
   }
-  function dealsAll(){try{return JSON.parse(localStorage.getItem('lizingDeals')||'[]');}catch(e){return [];}}
+  function dealsAll(){try{
+    var a=JSON.parse(localStorage.getItem('lizingDeals')||'[]');
+    // починка ранее сохранённых сделок: цена хранилась строкой с разделителями разрядов
+    // ("17 983 407"), а читалась через parseFloat → 17 ₽. Приводим к числу при каждом чтении.
+    var fixed=false;
+    a.forEach(function(d){ if(d&&typeof d.sum!=='number'){ d.sum=numVal(d.sum); fixed=true; } });
+    if(fixed){try{localStorage.setItem('lizingDeals',JSON.stringify(a));}catch(e){}}
+    return a;
+  }catch(e){return [];}}
   function dealsSave(a){try{localStorage.setItem('lizingDeals',JSON.stringify(a));return true;}catch(e){msgDeal('Не удалось сохранить: хранилище браузера недоступно.',true);return false;}}
   function msgDeal(txt,err){
     ['dlMsg','kpMsg'].forEach(function(id){var m=document.getElementById(id);if(!m)return;
@@ -1687,13 +1735,13 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     var tx=function(id){var e=document.getElementById(id);return e?(e.textContent||''):'';};
     return {client:(g('dlClient')||g('client')||'Без названия').trim(),
       inn:(g('dlInn')||g('inn')).trim(), item:(g('dlItem')||g('item')).trim(), note:g('dlNote').trim(),
-      sum:g('price'), term:g('term'), advPct:g('adv'),
+      sum:numVal(g('price')), term:g('term'), advPct:g('adv'),
       rate:tx('oRate'), pay:tx('oPay'), advSum:tx('oAdv'), marg:tx('oMarg'), st:getState()};
   }
   // ищем «ту же» сделку: тот же клиент+ИНН и те же ключевые параметры расчёта
   function findSame(a,s){
     for(var i=0;i<a.length;i++){var d=a[i];
-      if((d.client||'')===s.client && (d.inn||'')===s.inn && String(d.sum)===String(s.sum) &&
+      if((d.client||'')===s.client && (d.inn||'')===s.inn && numVal(d.sum)===numVal(s.sum) &&
          String(d.term)===String(s.term) && String(d.advPct)===String(s.advPct) && (d.pay||'')===s.pay)return i;}
     return -1;
   }
@@ -1733,7 +1781,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     if(!a.length){b.innerHTML='<tr><td colspan="12" style="color:var(--muted)">За выбранный период сделок нет. Посчитайте сделку и нажмите «Сохранить сделку» либо сформируйте КП.</td></tr>';if(ft)ft.innerHTML='';return;}
     var tSum=0,tMarg=0,nKp=0;
     b.innerHTML=a.map(function(d){var dt=new Date(d.dt);
-      tSum+=parseFloat(d.sum)||0; tMarg+=numOf(d.marg); if(d.kp&&d.kp.dt)nKp++;
+      tSum+=numVal(d.sum); tMarg+=numOf(d.marg); if(d.kp&&d.kp.dt)nKp++;
       var advTxt=d.advSum?(esc(d.advSum)+(d.advPct?' <span style="color:var(--faint);font-size:11px">('+esc(d.advPct)+'%)</span>':'')):'—';
       var margTxt=d.marg?esc(d.marg):'—';
       var kpTxt='<span style="color:var(--amber);font-weight:600">нет</span>';
@@ -1741,7 +1789,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
         kpTxt='<span style="color:var(--teal);font-weight:600">'+kd.toLocaleDateString('ru-RU')+'</span><br><span style="font-size:10px;color:var(--muted)">'+(d.kp.way==='link'?'ссылка':'PDF')+'</span>';}
       return '<tr><td style="white-space:nowrap"><button onclick="openDeal('+d.id+')" style="border:none;background:var(--blue);color:#fff;border-radius:6px;padding:4px 9px;font-size:11px;cursor:pointer;margin-right:4px">открыть</button>'+
       '<button onclick="delDeal('+d.id+')" style="border:1px solid var(--line);background:var(--card);color:var(--muted);border-radius:6px;padding:4px 9px;font-size:11px;cursor:pointer">×</button></td>'+
-      '<td>'+dt.toLocaleDateString('ru-RU')+'</td><td>'+esc(d.client)+'</td><td>'+esc(d.inn)+'</td><td>'+esc(d.item)+'</td><td>'+fmtRub(parseFloat(d.sum)||0)+'</td><td>'+advTxt+'</td><td>'+esc(d.term)+' мес.</td><td>'+esc(d.rate)+'</td><td>'+esc(d.pay)+'</td><td style="font-weight:600;color:var(--teal)">'+margTxt+'</td><td>'+kpTxt+'</td></tr>';}).join('');
+      '<td>'+dt.toLocaleDateString('ru-RU')+'</td><td>'+esc(d.client)+'</td><td>'+esc(d.inn)+'</td><td>'+esc(d.item)+'</td><td>'+fmtRub(numVal(d.sum))+'</td><td>'+advTxt+'</td><td>'+esc(d.term)+' мес.</td><td>'+esc(d.rate)+'</td><td>'+esc(d.pay)+'</td><td style="font-weight:600;color:var(--teal)">'+margTxt+'</td><td>'+kpTxt+'</td></tr>';}).join('');
     if(ft)ft.innerHTML='<tr><td>Итого</td><td></td><td>'+a.length+' сд.</td><td></td><td></td><td>'+fmtRub(tSum)+'</td><td></td><td></td><td></td><td></td><td>'+fmtRub(tMarg)+'</td><td>'+nKp+' с КП</td></tr>';
   }
   function esc(s){return String(s===undefined||s===null?'':s).replace(/[<>&"]/g,function(c){return {'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c];});}
@@ -1889,17 +1937,52 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
       rows+='<tr style="background:#EEF4F0"><td '+td+'>Выкуп</td><td '+td+'>'+kpD(dB)+'</td><td '+tdR+'>'+fmtRub(KP.buyoutGross)+'</td><td '+tdR+'>'+fmtRub(vB)+'</td></tr>';
     }
     g('kvBody',rows);
+    var rowsN=(rows.match(/<tr/g)||[]).length;
     // доп. расходы — те же три строки, что в PDF
     var EX=KP.ex||{}, glpN=function(x){return x?'включено в график лизинговых платежей':'оплачивается отдельно по счёту';};
     var ex=[['Страхование (в год)',EX.ins],['Расходы на регистрацию',EX.reg],['Налог на имущество (в год)',EX.prop]];
     // две колонки — как в блоке условий, чтобы суммы стояли по одной линии;
     // пояснение о включении в график — второй строкой под названием
-    g('kvEx', ex.map(function(r){var o=r[1]||{};
+    // показываем только применяемые статьи — иначе сводка не помещается на экран
+    var exOn=ex.filter(function(r){return r[1]&&r[1].on;});
+    var exWrap=document.getElementById('kvExWrap');
+    if(exWrap)exWrap.style.display=exOn.length?'block':'none';
+    g('kvEx', exOn.map(function(r){var o=r[1];
       return '<tr><td class="kvK">'+r[0]+
-             '<div style="font-size:11px;color:#999;margin-top:2px">'+(o.on?glpN(o.glp):'не применяется')+'</div></td>'+
-             '<td class="kvV">'+(o.on?fmtRub(o.sum):'0 ₽')+'</td></tr>';}).join(''));
+             '<div style="font-size:11px;color:#999;margin-top:2px">'+glpN(o.glp)+'</div></td>'+
+             '<td class="kvV">'+fmtRub(o.sum)+'</td></tr>';}).join(''));
+    // график свёрнут по умолчанию: сводка должна умещаться на один экран
+    kpSchedOpen=false; kpApplySched(rowsN);
     kpBootOff();
+    try{kpFit();}catch(e){}
   }
+  // --- сворачиваемый график в веб-КП ---
+  var kpSchedOpen=false, kpSchedN=0;
+  function kpApplySched(n){
+    if(n!==undefined)kpSchedN=n;
+    var box=document.getElementById('kvSchBox'), btn=document.getElementById('kvSchBtn');
+    if(box)box.style.display=kpSchedOpen?'block':'none';
+    if(btn)btn.textContent=(kpSchedOpen?'Скрыть график платежей':'Показать график платежей')+(kpSchedN?' ('+kpSchedN+')':'');
+  }
+  function kpToggleSched(){
+    kpSchedOpen=!kpSchedOpen; kpApplySched(); kpFit();
+    if(kpSchedOpen){var b=document.getElementById('kvSchBox');
+      if(b&&b.scrollIntoView)try{b.scrollIntoView({block:'nearest'});}catch(e){}}
+  }
+  // Сводка КП должна помещаться на один экран. Если длинные названия/все доп. статьи
+  // её не вмещают — слегка уменьшаем масштаб карточки, но не ниже 0,8 (дальше нечитаемо).
+  function kpFit(){
+    var v=document.getElementById('kpView'); if(!v||v.style.display==='none')return;
+    var c=v.querySelector('.kpCard'); if(!c)return;
+    c.style.zoom='';
+    if(kpSchedOpen)return;                       // график развёрнут — прокрутка ожидаема
+    var vh=window.innerHeight||0; if(!vh)return;
+    var top=v.getBoundingClientRect().top+(window.pageYOffset||0);
+    var avail=vh-top-14; if(avail<200)return;
+    var h=c.scrollHeight; if(h<=avail)return;
+    c.style.zoom=Math.max(0.8,avail/h).toFixed(3);
+  }
+  try{window.addEventListener('resize',function(){try{kpFit();}catch(e){}});}catch(e){}
   // снимает загрузочный стиль, спрятавший калькулятор до первой отрисовки
   function kpBootOff(){try{var b=document.getElementById('kpBoot');if(b&&b.parentNode)b.parentNode.removeChild(b);}catch(e){}}
   function loadFromHash(){
@@ -2400,9 +2483,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
       priceDVat=priceVat; priceDNet=priceNet;
       inputVat=priceDVat-priceDNet; markupNet=0;                     // одна цена → наценки нет
       supp=[{m:0,s:100}];                                            // поставщику 100% в мес. 0
-      var so=document.getElementById('suppOff'); if(so&&!so.checked)so.checked=true;   // отсрочка не применяется
-      var go=document.getElementById('guarOff'); if(go&&!go.checked)go.checked=true;   // гарантия не применяется
-      var fo=document.getElementById('fdefOn'); if(fo&&fo.checked)fo.checked=false;    // полная отсрочка выключена
+      // отсрочка Поставщика, банковская гарантия и полная отсрочка в модели недвижимости не применяются
       var nTerm=Math.max(1,Math.round(val('term')));                                  // срок лизинга (N объявляется ниже)
       var btEl=document.getElementById('bankTerm');
       if(btEl&&!bankTermEdited&&Math.round(parseFloat(btEl.value)||0)!==nTerm)btEl.value=nTerm;  // срок кредита = сроку лизинга
@@ -2965,7 +3046,6 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     document.getElementById('oAdvH').textContent=adv+'% · без НДС '+fmtRub(advNet);
     document.getElementById('oSum').textContent=fmtRub(sumGross);
     document.getElementById('oSumH').textContent='с НДС · без НДС '+fmtRub(sumNet);
-    (document.getElementById('eRate')||{}).textContent=fmtPct(leaseRate)+' (= '+fmtPct(fund+spread)+' / 1,22)';
 
     document.getElementById('margTitle').textContent='Реальная маржа (приведено к дате договора под '+fmtPct(fund)+')';
     (function(){
@@ -2993,7 +3073,6 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
       g('iPropT',propOff?'—':fmtRub(propTot));
       g('iRegT',regOff?'—':fmtRub(regTot),regOff?'отключены':(regGLP?'в графике клиента':'по счёту клиенту')+(regAuto?' · пошлина авто':''),'iRegH');
       g('iTaxT',fmtRub(totTax*-1<0?totTax:totTax),taxAcc?'по налоговой базе':'от бухгалтерской прибыли','iTaxH');})();
-    (function(){var e=document.getElementById('vatLagInfo');if(e)e.textContent=vatLag+' мес.';})();
     document.getElementById('oCost').textContent=fmtRub(costPV);
     document.getElementById('oRev').textContent=fmtRub(cliPVnet);
     document.getElementById('oMarg').textContent=fmtRub(marginPV);
@@ -3107,8 +3186,6 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     document.getElementById('ndsPay').textContent=fmtRub(ndsPay);
     document.getElementById('ndsNet').textContent=fmtRub(ndsNet);
     document.getElementById('ndsNetH').textContent=(ndsNet>=0?'итого уплачено в бюджет за срок':'итого возмещено за срок');
-    (function(){var e1=document.getElementById('eInVat'); if(e1)e1.textContent=fmtRub(inputVat);
-                var e2=document.getElementById('eLag');   if(e2)e2.textContent=vatLag;})();
 
     // === П.1: Сводка по налогу на прибыль + график списания убытка после окончания договора ===
     (function(){
@@ -3448,19 +3525,11 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
       document.getElementById('bkFoot').innerHTML='';
     }
     }
-    var bankBanner=(document.getElementById('bankBanner')||{style:{},classList:{add:function(){},remove:function(){}}});
-    if(bankBanner)bankBanner.style.display=bankOn?'block':'none';
     var pdBox=document.getElementById('priceD');
     if(pdBox){pdBox.disabled=bankOn;pdBox.style.opacity=bankOn?'0.5':'1';}
 
-    // баннер и блокировка полей на Калькуляторе
-    var fdefBanner=(document.getElementById('fdefBanner')||{style:{},classList:{add:function(){},remove:function(){}}});
-    if(fdefBanner)fdefBanner.style.display=fdefOn?'block':'none';
-    ['fund'].forEach(function(id){var el=document.getElementById(id);if(el){el.disabled=fdefOn;el.style.opacity=fdefOn?'0.5':'1';}});
-    // спред и аванс остаются редактируемыми; убедимся, что не заблокированы
-    ['spread','adv'].forEach(function(id){var el=document.getElementById(id);if(el){el.disabled=false;el.style.opacity='1';}});
-    // авто-галка «не применять отсрочку» при полной отсрочке
-    var soff=document.getElementById('suppOff'); if(soff&&fdefOn&&!soff.checked){soff.checked=true;}
+    // фондирование, спред и аванс всегда редактируемы
+    ['fund','spread','adv'].forEach(function(id){var el=document.getElementById(id);if(el){el.disabled=false;el.style.opacity='1';}});
 
     // --- сходимость процентов на уплаченный налог на прибыль ---
     // тело -> платежи -> налоговая база -> налог -> проценты на налог -> тело. Итерируем до стабилизации.
@@ -3480,6 +3549,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
   try{syncFundUI();syncBuyUnit();syncRT();syncVatView();fmtPriceField();}catch(e){}
   calc();
   try{initFieldSync();}catch(e){}
+  try{syncStickyHead();}catch(e){}
   try{loadFromHash();}catch(e){}
   try{kpBootOff();}catch(e){}   // страховка: если КП не открылось — калькулятор не должен остаться скрытым
   try{renderDeals();}catch(e){}
