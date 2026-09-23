@@ -227,7 +227,7 @@
     <div>
       <div class="eyebrow">Финансовая аренда · недвижимость</div>
       <h1>Калькулятор лизинга недвижимости</h1>
-      <div style="font-size:11px;color:var(--faint);margin-top:3px">версия <b id="appVer">2026.09.22-3</b> · если здесь другая версия — на сайте лежит старый файл</div>
+      <div style="font-size:11px;color:var(--faint);margin-top:3px">версия <b id="appVer">2026.09.23-1</b> · если здесь другая версия — на сайте лежит старый файл</div>
     </div>
     <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end">
       <button onclick="resetToBase()" title="Вернуть ВСЕ параметры калькулятора к базовым" style="flex:none;padding:8px 14px;border:1px solid var(--line);background:var(--card);color:var(--muted);border-radius:8px;font-size:12.5px;font-weight:600;cursor:pointer;white-space:nowrap">↺ Сброс всего</button>
@@ -266,8 +266,8 @@
       <button id="vatNo" onclick="setVat(false)">Цены БЕЗ НДС</button>
     </div>
     <div class="grid g4 mb12">
-      <div><label class="lbl">Фондирование, % (в т.ч. НДС)</label><input id="fund" type="number" step="0.1" value="17.5"></div>
-      <div><label class="lbl">Спред, % (в т.ч. НДС)</label><input id="spread" type="number" step="0.5" value="9"></div>
+      <div><label class="lbl">Фондирование, % годовых (без НДС)</label><input id="fund" type="number" step="0.1" value="17.5"></div>
+      <div><label class="lbl">Спред, % годовых (без НДС)</label><input id="spread" type="number" step="0.5" value="6"><div class="hint" id="spreadH" style="font-size:11px;color:var(--muted);margin-top:2px">—</div></div>
       <div><label class="lbl">Аванс клиента, %</label><input id="adv" type="number" value="25"></div>
       <div><label class="lbl">Срок лизинга, мес.</label><input id="term" type="number" value="60"></div>
     </div>
@@ -344,7 +344,7 @@
       </div>
     </div>
     <div class="grid g4 mb22">
-      <div><label class="lbl">Дата договора / аванса</label><input id="cdate" type="date" value="2026-10-01" oninput="syncTdate();calc()"></div>
+      <div><label class="lbl">Дата договора / аванса</label><input type="hidden" id="rateMode" value="net"><input id="cdate" type="date" value="2026-10-01" oninput="syncTdate();calc()"></div>
       <div><label class="lbl">Дата передачи предмета</label><input id="tdate" type="date" value="2026-10-11" oninput="tdateEdited=true;calc()"><div class="hint" id="tdateH" style="font-size:11px;color:var(--muted);margin-top:2px">—</div></div>
     </div>
     <div class="mb12"><label class="lbl">Комментарий к сделке (для реестра)</label><input id="dlNote" type="text" placeholder="условия, договорённости, срок действия"></div>
@@ -379,6 +379,8 @@
       <div class="metric big"><div class="lab">Сумма договора лизинга</div><div class="val num" id="oSum">—</div><div class="hint" id="oSumH">с НДС</div></div>
     </div>
 
+    <div id="warnLegacy" class="offbox" style="display:none;background:var(--amberSoft);border-color:#F5D9A8;color:var(--amber);cursor:default">⚠ Открыт расчёт по <b>старой формуле ставки</b> ((фондирование + спред) / 1,22). Так считались КП, отправленные до 22.09.2026 — цифры показаны ровно те, что видел клиент. Для нового расчёта нажмите «Сброс всего».</div>
+    <div id="warnUnprofit" class="offbox" style="display:none;background:#FEE2E2;border-color:#FCA5A5;color:var(--red);cursor:default">⚠ <span id="warnUnprofitTxt"></span></div>
     <div class="marg mb22">
       <div class="mt">Выгода для клиента (для коммерческого предложения)</div>
       <div class="grid g4">
@@ -424,7 +426,7 @@
     <div class="edu">
       <h3>Как читать эту вкладку</h3>
       <p><b>Одна цена.</b> Стоимость объекта — единая база: по ней ЛК покупает у поставщика и передаёт в лизинг. Наценки на объекте нет, доход ЛК — лизинговый процент (спред) и комиссия за страхование.</p>
-      <p><b>Лизинговый процент</b> = <code>(фондирование + спред) / 1,22</code> — ставка без НДС, применяется к телу договора. Фондирование — ставка привлечения денег.</p>
+      <p><b>Лизинговый процент</b> = <code>фондирование + спред</code>. Обе величины задаются <b>без НДС</b> — фондирование это цена денег банка, а банковские операции от НДС освобождены (пп.&nbsp;3 п.&nbsp;3 ст.&nbsp;149 НК). Ставка применяется к телу договора без НДС, НДС&nbsp;22% начисляется сверху на платёж.</p>
       <p><b>Две даты.</b> «Дата договора / аванса» — начало графика (мес.&nbsp;0). «Дата передачи предмета» задаёт старт амортизации: по п.&nbsp;4 ст.&nbsp;259 НК начисление идёт с месяца, следующего за вводом в эксплуатацию. По умолчанию следует за датой договора, при ручном изменении фиксируется. Подсказка под полем показывает, сколько начислений попадёт в срок договора.</p>
       <p><b>Источник финансирования.</b> «Банковский кредит» — разрыв закрывается кредитом, начисляются проценты и комиссия. «Собственные средства» — проценты и комиссия обнуляются, поле комиссии блокируется, «Сумма кредита» превращается в «Пик собственных средств». Ставка клиенту не меняется, поэтому весь лизинговый процент становится доходом ЛК и прибыль заметно выше.</p>
       <p><b>Платёж, аванс и сумма договора</b> показаны с НДС (в подписи — без НДС). Проценты считаются на суммы без НДС, НДС 22% начисляется сверху.</p>
@@ -751,7 +753,7 @@
 
     <div class="edu">
       <h3>Как считается</h3>
-      <p><b>Налог на имущество.</b> База — кадастровая стоимость (подставляется из стоимости объекта, редактируется), ставка по умолчанию 2% (офисы, торговые помещения, апартаменты; свыше 300 млн — 2,5%; жилые помещения — по региональной ставке). Уплата авансами поквартально плюс остаток за год. Платит лизингодатель — предмет на его балансе.</p>
+      <p><b>Налог на имущество.</b> База — кадастровая стоимость (подставляется из стоимости объекта, редактируется), ставка по умолчанию 2% (офисы, торговые помещения, апартаменты; свыше 300 млн — 2,5%; жилые помещения — по региональной ставке). Сроки по ст. 383 НК: авансы за I квартал, полугодие и 9 месяцев — не позднее 28 апреля, 28 июля и 28 октября; налог за год за вычетом авансов — не позднее 28 февраля следующего года. Кварталы календарные, а не от даты договора. Месяцы владения считаются с месяца приобретения по месяц, предшествующий выкупу. Платит лизингодатель — предмет на его балансе.</p>
       <p><b>Расходы на регистрацию.</b> Госпошлина для организаций: 44&nbsp;000&nbsp;₽ при кадастровой стоимости до 22&nbsp;млн; свыше — 0,2% кадастровой стоимости, но не более 1&nbsp;млн&nbsp;₽ (ст.&nbsp;333.33 НК), плюс 44&nbsp;000&nbsp;₽ за регистрацию договора. Считается автоматически, формула показана под полем; можно ввести вручную.</p>
       <p><b>Обе статьи — транзит на клиента</b> и не уменьшают маржу и прибыль ЛК. «По счёту» — клиент компенсирует тем же платежом, нетто-эффект нулевой (в казначейском расчёте расход и компенсация стоят в соседних столбцах). «В график с лизинговым&nbsp;%» — сумма финансируется в тело и возвращается платежами с начислением процента, то есть становится доходом, а не расходом.</p>
       <p style="color:var(--muted)">Суммы и признак включения в график дублируются в сводке на вкладке «Калькулятор» и попадают в блок «Дополнительные расходы» коммерческого предложения.</p>
@@ -922,6 +924,14 @@
     <div class="grid g3 mb22">
       <div><label class="lbl">Ставка кредита, % годовых</label><input id="bankRate" type="number" step="0.1" value="17.5" oninput="syncBank('fund',this.value)"></div>
       <div><label class="lbl">Срок кредита, мес.</label><input id="bankTerm" type="number" value="36" oninput="bankTermEdited=true;calc()"></div>
+      <div><label class="lbl">Начисление процентов</label>
+        <select id="dayCount" onchange="calc()" style="width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:8px;font-size:15px;background:var(--card);color:var(--ink)">
+          <option value="actact">По фактическим дням (365/366)</option>
+          <option value="act365">По фактическим дням, база 365</option>
+          <option value="act360">По фактическим дням, база 360</option>
+          <option value="m12">Равные месяцы (ставка / 12)</option>
+        </select>
+        <div class="hint" id="dayCountH" style="font-size:11px;color:var(--muted);margin-top:2px">—</div></div>
       <div><label class="lbl">Комиссия банка, %</label><input id="bankComm" type="number" step="0.1" value="1" oninput="calc()"></div>
     </div>
     <div class="grid g4 mb22">
@@ -943,7 +953,7 @@
     <div class="edu">
       <h3>Как работает</h3>
       <p><b>Схема сделки.</b> Клиент вносит аванс в мес.&nbsp;0 → ЛК оплачивает поставщику 100% стоимости объекта → недостающая сумма закрывается банковским кредитом → клиент гасит лизинговыми платежами, из которых ЛК погашает кредит.</p>
-      <p><b>Ставка кредита</b> — то же поле, что «Фондирование» на вкладке «Калькулятор»: меняется в любом месте, синхронизируется. Проценты начисляются по фактической ставке, <b>без деления на 1,22</b> — в отличие от ставки клиенту.</p>
+      <p><b>Ставка кредита</b> — то же поле, что «Фондирование» на вкладке «Калькулятор»: меняется в любом месте, синхронизируется. Проценты начисляются по этой ставке напрямую: она уже без НДС, банковские операции НДС не облагаются (пп.&nbsp;3 п.&nbsp;3 ст.&nbsp;149 НК).</p>
       <p><b>Срок кредита</b> по умолчанию равен сроку лизинга, можно задать свой. <b>Тип погашения:</b> cash-sweep (по умолчанию — гасим всем свободным остатком, минимум процентов), аннуитет или дифференцированный. <b>Пик задолженности одинаков при любом типе</b> — он задаётся кассовым разрывом; различаются только проценты и срок.</p>
       <p><b>Комиссия банка</b> считается от суммы выборки. Если зашита в тело лизинга, клиент возвращает её платежами с начислением лизингового процента — расходом периода она не является; если нет — это расход ЛК.</p>
       <p style="color:var(--muted)">Если на вкладке «Калькулятор» выбран источник финансирования «Собственные средства», кредит не привлекается: проценты и комиссия обнуляются, а вкладка показывает нулевые значения — потребность в деньгах видна как «Пик собственных средств».</p>
@@ -962,7 +972,7 @@
     <div class="edu">
       <h3>Вкладка «Калькулятор» — ввод условий</h3>
       <p><b>Где что задаётся.</b> Ставка НДС, лаг возврата НДС и ставка налога на прибыль — на вкладке «Налоги + движение денежных средств»; на «Калькуляторе» рядом со стоимостью объекта только зеркало ставки НДС (не редактируется). Комиссия за кредит — на вкладке «Банковское кредитование», единственным полем.</p>
-      <p><b>Ставка.</b> Фондирование и спред задаются «в т.ч. НДС». Лизинговый процент без НДС = <code>(фондирование + спред) / 1,22</code>, применяется к телу без НДС. Тело = стоимость объекта без НДС − аванс без НДС + включённые в график статьи + проценты на уплаченный налог.</p>
+      <p><b>Ставка.</b> Фондирование и спред задаются <b>без НДС</b>. Лизинговый процент = <code>фондирование + спред</code>, применяется к телу без НДС; НДС&nbsp;22% начисляется сверху на платёж. Тело = стоимость объекта без НДС − аванс без НДС + включённые в график статьи + проценты на уплаченный налог.</p>
       <p><b>Две даты.</b> «Дата договора / аванса» — начало графика (мес.&nbsp;0). «Дата передачи предмета» — от неё считается амортизация: по п.&nbsp;4 ст.&nbsp;259 НК начисление идёт с 1-го числа месяца, <i>следующего</i> за месяцем ввода в эксплуатацию. По умолчанию дата передачи следует за датой договора; если изменить вручную — фиксируется. Под полем показано, с какого месяца пойдёт амортизация и сколько начислений попадёт в срок договора.</p>
       <p><b>Источник финансирования.</b> «Банковский кредит» — разрыв закрывается кредитом под ставку фондирования, начисляются проценты и комиссия. «Собственные средства» — проценты и комиссия банка обнуляются, поле комиссии блокируется, метрика «Сумма кредита» превращается в «Пик собственных средств». Лизинговый процент клиенту при этом <b>не меняется</b> — он целиком становится доходом ЛК, поэтому прибыль заметно выше.</p>
       <p><b>Выкупной платёж</b> задаётся в рублях или процентах от стоимости (переключатель справа от поля). Это балунный платёж в мес.&nbsp;N: проценты весь срок начисляются на полный остаток, включая зарезервированную под выкуп часть. Выкупная цена выделяется отдельно — это принципиально для налогового учёта (см. ниже).</p>
@@ -985,6 +995,15 @@
     </div>
 
     <div class="edu">
+      <h3>Как строится ставка клиенту</h3>
+      <p><b>Лизинговый процент = фондирование + спред.</b> Обе величины — без НДС. Ставка применяется к телу договора без НДС, НДС 22% начисляется сверху на платёж и уплачивается в бюджет. Клиенту ставка объявляется без НДС.</p>
+      <p><b>Почему нельзя делить на 1,22.</b> Фондирование — цена денег банка; банковские операции освобождены от НДС (пп. 3 п. 3 ст. 149 НК), и налога в этой величине нет. Прежняя формула <code>(фондирование + спред) / 1,22</code> складывала величины разной природы и делила всё скопом, из-за чего «НДС вычитался» и из фондирования. При фондировании 17,5% и спреде 9 реальный спред получался 4,2 п.п. вместо 9, а при спреде меньше 3,85 — отрицательным. Исправлено 22.09.2026.</p>
+      <p><b>Старые расчёты.</b> Ссылки на КП и сделки, созданные до исправления, открываются по прежней формуле и прежним базовым значениям — клиент увидит ровно те цифры, что получил. Такой расчёт помечается предупреждением вверху вкладки «Калькулятор».</p>
+      <h3>Начисление процентов: дни и месяцы</h3>
+      <p><b>Клиенту — равные месяцы.</b> Лизинговый платёж считается аннуитетом по ставке/12: каждый месяц получает ровно одну двенадцатую годовой ставки. Так строятся лизинговые графики на практике — иначе февральский платёж отличался бы от июльского. Високосный год на платёж клиента не влияет.</p>
+      <p><b>Банку — по фактическим дням.</b> Проценты по кредиту начисляются на остаток задолженности за фактическое число дней месяца (ст. 809 ГК, Положение ЦБ 39-П). База года выбирается на вкладке «Банковское кредитование»: <b>365/366</b> (по умолчанию, так считает большинство банков), <b>365</b> фиксированная, <b>360</b> (встречается в валютных и синдицированных кредитах) или <b>ставка/12</b> для сравнения со старым расчётом.</p>
+      <p><b>Насколько это важно.</b> На базовом кейсе разница между «ставка/12» и фактическими днями — около 6 тыс ₽ за пять лет. При базе 360 проценты выше примерно на 100 тыс ₽, потому что год условно короче фактического. В выгрузку Excel коэффициент каждого месяца попадает числом, поэтому формулы в файле воспроизводят расчёт банка.</p>
+      <p><b>Приведение к дате договора</b> (экономическая маржа) считается по равным месяцам: это параметр оценки, а не фактический платёж.</p>
       <h3>Вкладка «Досрочный выкуп»</h3>
       <p><b>Сумма выкупа</b> = остаток долга без НДС на дату + компенсация недополученных процентов; сверху НДС. Выкупная цена по договору отдельно не добавляется — график амортизирует тело ровно до неё, поэтому она уже внутри остатка.</p>
       <p><b>Мораторий.</b> До указанного месяца выкуп не предусмотрен: в начале срока ЛК ещё не отбила затраты на организацию сделки.</p>
@@ -992,7 +1011,7 @@
       <p><b>Потолок:</b> компенсация не превышает числа месяцев, оставшихся до конца договора. Без него на длинном договоре ранний выкуп давал бы сумму больше всей суммы договора — такие условия оспоримы как неосновательное обогащение.</p>
       <p><b>Что считается для ЛК:</b> процентная маржа = полученный лизинговый процент плюс компенсация минус уплаченные за тот же период проценты по банковскому кредиту. Это величина <b>до налогов и без приведения к дате договора</b>; налог на прибыль при досрочной реализации предмета, восстановление НДС и возможная комиссия банка за досрочное погашение в расчёт не входят.</p>
       <h3>Вкладка «Банковское кредитование»</h3>
-      <p>Невозобновляемая линия: выборка под оплату поставщику за вычетом аванса клиента и возврата НДС. Проценты — по фактической ставке фондирования (без деления на 1,22, в отличие от ставки клиенту). Сумма кредита = пик задолженности; <b>пик одинаков при любом типе погашения</b>, различаются только проценты.</p>
+      <p>Невозобновляемая линия: выборка под оплату поставщику за вычетом аванса клиента и возврата НДС. Проценты — по ставке фондирования напрямую (она без НДС; банковские операции НДС не облагаются). Сумма кредита = пик задолженности; <b>пик одинаков при любом типе погашения</b>, различаются только проценты.</p>
       <p><b>Типы погашения:</b> cash-sweep (весь свободный поток сразу в погашение — минимум процентов), аннуитет, дифференцированный.</p>
       <p><b>Комиссия за кредит</b> — разово от пиковой суммы в месяце первой выборки. Если включена в тело лизинга, её возмещает клиент через платежи (в P&amp;L расхода нет); если нет — это расход ЛК. В режиме собственных средств комиссия равна нулю.</p>
     </div>
@@ -1014,7 +1033,7 @@
 
     <div class="edu">
       <h3>Вкладки «Доп. расходы» и «Страхование»</h3>
-      <p><b>Налог на имущество.</b> База — кадастровая стоимость (по умолчанию равна цене объекта, редактируется), ставка 2% (свыше 300 млн — 2,5%, жилые помещения — по региону). Платит лизингодатель, авансами поквартально плюс остаток за год.</p>
+      <p><b>Налог на имущество.</b> База — кадастровая стоимость (по умолчанию равна цене объекта, редактируется), ставка 2% (свыше 300 млн — 2,5%, жилые помещения — по региону). Платит лизингодатель. Сроки — ст. 383 НК: авансы 28 апреля, 28 июля, 28 октября; налог за год за вычетом авансов — 28 февраля следующего года (кварталы календарные).</p>
       <p><b>Расходы на регистрацию.</b> Госпошлина по НК считается автоматически: 44&nbsp;000&nbsp;₽ при кадастровой стоимости до 22&nbsp;млн; свыше — 0,2% (но не более 1&nbsp;млн) плюс 44&nbsp;000&nbsp;₽ за договор. Формула выводится под полем.</p>
       <p><b>Обе статьи транзитные:</b> перевыставляются клиенту «по счёту» (нетто-эффект ноль) либо включаются «в график с лизинговым процентом» (тогда финансируются в теле и возвращаются аннуитетом). Маржу и прибыль ЛК не уменьшают — в P&amp;L показаны нулями с пометкой «транзит клиенту».</p>
       <p><b>Страхование.</b> Срок полиса следует за сроком лизинга, задаются цена по годам и процент комиссии. Комиссия — доход ЛК (агентское вознаграждение). Вариант «единовременно за год по счёту»: клиент платит страховщику сам, в модель идёт только комиссия. Вариант «в ежемесячный платёж» добавляет стоимость полиса в график клиента.</p>
@@ -1055,7 +1074,7 @@
 
     <div class="edu">
       <h3>Контроль корректности</h3>
-      <p>Модель проверяется набором инвариантов: чистая прибыль = чистый денежный поток; кредит гасится в ноль при любом типе погашения; начисленный НДС = кассовому; налог = ставка × база в каждом году; сумма квартальных авансов = годовому налогу; сумма списаний убытка = его величине; налоговая база в сверке = таблице налогового учёта.</p>
+      <p>Модель проверяется набором инвариантов: чистая прибыль = чистый денежный поток минус непогашенный остаток кредита (на рабочей сделке кредит гасится в ноль, и инвариант превращается в «прибыль = поток»); кредит гасится в ноль при любом типе погашения; начисленный НДС = кассовому; налог = ставка × база в каждом году; сумма квартальных авансов = годовому налогу; сумма списаний убытка = его величине; налоговая база в сверке = таблице налогового учёта.</p>
       <p style="color:var(--muted)"><b>Допущения:</b> поставщику оплачивается 100% в мес.&nbsp;0; аннуитет с балунным выкупным платежом на мес.&nbsp;N; налог на имущество и регистрация — транзит на клиента; амортизация линейная с коэффициентом по амортизационной группе; списание убытка от выкупа уменьшает налог только при наличии прочей прибыли ЛК.</p>
     </div>
   </div>
@@ -1848,7 +1867,10 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
   }
 
   // ================= СДЕЛКИ: состояние, сохранение, ссылка, экспорт =================
-  var DEAL_IDS=['price','priceD','vat','fund','spread','adv','term','cdate','vatlag','bankComm','ptax','item','client','inn','accRatio','vatMode','taxAcc','spiM','amCoef','amGroup','buyout','cadVal','propRate','propOff','regFee','regExtra','regAuto','regOff','techOn','techN','techAmt','bankTerm','ae1_lk','ae1_cli','ae1_off','ae1_glp','ae2_lk','ae2_cli','ae2_off','ae2_glp','ae3_lk','ae3_cli','ae3_off','ae3_glp','ae4_lk','ae4_cli','ae4_off','ae4_glp','kaskoTerm','kaskoComm','tdate'];
+  // Базовые значения, действовавшие до исправления формулы ставки. Применяются при открытии
+  // ссылок формата v2 и сделок, сохранённых раньше, если само значение в них не записано.
+  var LEGACY_DEFAULTS={spread:'9', cdate:'2026-08-28', tdate:'2026-08-28', dayCount:'m12'};
+  var DEAL_IDS=['price','priceD','vat','fund','spread','adv','term','cdate','vatlag','bankComm','ptax','item','client','inn','accRatio','vatMode','taxAcc','spiM','amCoef','amGroup','buyout','cadVal','propRate','propOff','regFee','regExtra','regAuto','regOff','techOn','techN','techAmt','bankTerm','ae1_lk','ae1_cli','ae1_off','ae1_glp','ae2_lk','ae2_cli','ae2_off','ae2_glp','ae3_lk','ae3_cli','ae3_off','ae3_glp','ae4_lk','ae4_cli','ae4_off','ae4_glp','kaskoTerm','kaskoComm','tdate','dayCount','rateMode'];
   var DEAL_SELECTS=['kaskoSK','kaskoPay','buyoutMode'];
   function getState(){
     var s={f:{},c:{},s:{},supp:supp,kasko:kasko,kte:kaskoTermEdited,wv:withVat,rt:repayType,pm:payMode,sch:scheme,fm:fundMode};
@@ -1858,6 +1880,14 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
   }
   function setState(s){
     if(!s)return;
+    // сделки, сохранённые до исправления формулы ставки, открываем по прежней формуле и умолчаниям
+    (function(){var rm=document.getElementById('rateMode');
+      if(!rm||(s.f&&('rateMode' in s.f)))return;
+      rm.value='gross';
+      Object.keys(LEGACY_DEFAULTS).forEach(function(id){
+        if(s.f&&(id in s.f))return;
+        var e=document.getElementById(id); if(e)e.value=LEGACY_DEFAULTS[id];
+      });})();
     DEAL_IDS.forEach(function(id){var e=document.getElementById(id);if(!e)return;
       if(e.type==='checkbox'){if(s.c&&(id in s.c))e.checked=!!s.c[id];}
       else if(s.f&&(id in s.f))e.value=s.f[id];});
@@ -1961,6 +1991,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
   function baseDefaults(){
     var d={};
     DEAL_IDS.forEach(function(id){var e=document.getElementById(id);if(!e)return;
+      if(e.tagName==='SELECT'){var o=e.querySelector('option[selected]')||e.options[0]; d[id]=o?o.value:''; return;}
       d[id]=(e.type==='checkbox')?(e.defaultChecked?1:0):e.defaultValue;});
     return d;
   }
@@ -1981,7 +2012,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
       var cur=(id in full.c)?full.c[id]:full.f[id];
       if(String(cur)!==String(base[id]))out[idCode(i)]=cur;
     });
-    var s={v:2,d:out};
+    var s={v:3,d:out};
     if(document.getElementById('kaskoSK')&&document.getElementById('kaskoSK').value)s.sk=document.getElementById('kaskoSK').value;
     if(document.getElementById('kaskoPay')&&document.getElementById('kaskoPay').value!=='1')s.kp=document.getElementById('kaskoPay').value;
     if(document.getElementById('buyoutMode')&&document.getElementById('buyoutMode').value==='pct')s.bm='pct';
@@ -2002,7 +2033,17 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
   function applyStateSlim(s){
     if(!s||!s.d)return false;
     resetToBase();
-    var v2=(s.v===2);
+    // Ссылки старого формата считались по прежней формуле ставки и от прежних базовых значений.
+    // Восстанавливаем и то и другое — иначе ранее отправленное КП покажет клиенту другие цифры.
+    (function(){var rm=document.getElementById('rateMode');
+      if(!rm||!(s.legacyRate||s.v===1||s.v===2)||('rateMode' in s.d))return;
+      rm.value='gross';
+      Object.keys(LEGACY_DEFAULTS).forEach(function(id){
+        var code=idCode(DEAL_IDS.indexOf(id));
+        if(code in s.d)return;                       // значение пришло в ссылке — не трогаем
+        var e=document.getElementById(id); if(e)e.value=LEGACY_DEFAULTS[id];
+      });})();
+    var v2=(s.v===2||s.v===3);   // base36-коды полей — в обеих версиях слим-формата
     Object.keys(s.d).forEach(function(kk){
       var id=v2?DEAL_IDS[parseInt(kk,36)]:kk; if(!id)return;
       var e=document.getElementById(id);if(!e)return;
@@ -2042,7 +2083,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
   function unb64url(s){s=s.replace(/-/g,'+').replace(/_/g,'/');while(s.length%4)s+='=';return decodeURIComponent(escape(atob(s)));}
   // компактная сериализация состояния: 2|ключ=значение|... (вместо JSON — экономит кавычки и скобки)
   function packSlim(s){
-    var parts=['2'];
+    var parts=['3'];
     Object.keys(s.d).forEach(function(k){parts.push(k+'='+String(s.d[k]).replace(/\|/g,'%7C'));});
     ['sk','kp','bm','rt','pm','sch','fm','kte','wv','vs'].forEach(function(k){
       if(s[k]!==undefined&&s[k]!==null)parts.push('~'+k+'='+String(s[k]).replace(/\|/g,'%7C'));});
@@ -2051,8 +2092,9 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     return parts.join('|');
   }
   function unpackSlim(str){
-    var parts=String(str).split('|'); if(parts.shift()!=='2')return null;
-    var s={v:2,d:{}};
+    var parts=String(str).split('|'); var ver=parts.shift();
+    if(ver!=='2'&&ver!=='3')return null;
+    var s={v:Number(ver),d:{},legacyRate:(ver==='2')};
     parts.forEach(function(pp){
       var i=pp.indexOf('='); if(i<0)return;
       var k=pp.slice(0,i), v=pp.slice(i+1).replace(/%7C/g,'|');
@@ -2187,9 +2229,10 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     var amp=raw.indexOf('&');
     if(amp>=0){autoKP=/(^|&)(k|kp=1)(&|$)/.test(raw.slice(amp)); raw=raw.slice(0,amp);}
     try{var dec=unb64url(raw), s=null;
-      if(dec.charAt(0)==='2'&&dec.indexOf('|')>=0){s=unpackSlim(dec);}
+      var v0=dec.charAt(0);
+      if((v0==='2'||v0==='3')&&dec.indexOf('|')>=0){s=unpackSlim(dec);}
       if(!s)s=JSON.parse(dec);
-      var ok=(s&&(s.v===1||s.v===2))?applyStateSlim(s):(setState(s),true);   // v2 — короткие коды, v1 — старый формат
+      var ok=(s&&(s.v===1||s.v===2||s.v===3))?applyStateSlim(s):(setState(s),true);   // v3 — текущий, v1/v2 — старые
       if(ok&&autoKP){try{showKPView();}catch(e){try{showCalc();}catch(e2){}}}
       else if(autoKP){try{showCalc();}catch(e){}}
       return ok;
@@ -2206,6 +2249,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
   // ширины колонок накапливаются по мере сборки листа
   var XW=[];
   var XLRAW={};   // точные (неокруглённые) значения для Excel-выгрузки
+  var XDC=[];     // коэффициент начисления процентов за каждый месяц (дни/база) — для формул Excel
   function xw(ci,len){if(!(ci>=0))return; if(!XW[ci]||XW[ci]<len)XW[ci]=len;}
   function xC(s,st,ci){xw(ci,String(s==null?'':s).length);
     return '<Cell'+(st?' ss:StyleID="'+st+'"':'')+'><Data ss:Type="String">'+xlEsc(s)+'</Data></Cell>';}
@@ -2297,7 +2341,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     return null;
   }
   // формула-генератор для каждой таблицы: (col, isFirst) -> строка формулы в R1C1 или null
-  function xlFormula(tblId,col,isFirst,ncols,isLast){
+  function xlFormula(tblId,col,isFirst,ncols,isLast,rowIdx){
     var A='R'+XI.vat+'C2', RATE='R'+XI.iMon+'C2', FUND='R'+XI.fund+'C2',
         BODY='R'+XI.body+'C2', PAY='R'+XI.payNet+'C2', ADVN='R'+XI.advNet+'C2',
         PTX='R'+XI.ptax+'C2', ann=(payMode==='ann' && !((document.getElementById('techOn')||{}).checked)),   // при техплатежах график не равен аннуитету
@@ -2353,7 +2397,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
       if(col===15)return '=SUM(RC[-14]:RC[-4])';                                          // поток до кредита: от клиента до комиссии банка
       if(col===16)return '=RC[-1]+RC[-4]+RC[-3]';                                         // + комиссия + выборка + погашение
       if(col===17)return isFirst?'=RC[-1]':'=R[-1]C+RC[-1]';                               // накопленный остаток
-      if(col===18)return isFirst?null:('=R[-1]C[-4]*'+FUND+'/100/12');                     // % кредита от остатка долга
+      if(col===18)return isFirst?null:('=R[-1]C[-4]*'+FUND+'/100*'+(XDC[rowIdx]!==undefined?XDC[rowIdx]:(1/12)).toFixed(8));  // % кредита: остаток × ставка × коэффициент периода
       return null;
     }
     if(tblId==='tblTax'){
@@ -2404,7 +2448,9 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     // ---- блок исходных данных ----
     var vv=function(id){var e=document.getElementById(id);return e?numVal(e.value):0;};
     var priceV=vv('price'),vatV=vv('vat'),advV=vv('adv'),termV=vv('term');
-    var rateV=(vv('fund')+vv('spread'))/(1+vatV/100);   // точно, а не из округлённого вывода
+    // ставка клиенту без НДС = фондирование + спред; режим 'gross' — прежняя формула (старые ссылки/сделки)
+    var rmX=((document.getElementById('rateMode')||{}).value)||'net';
+    var rateV=(rmX==='gross')?((vv('fund')+vv('spread'))/(1+vatV/100)):(vv('fund')+vv('spread'));
     var fundV=vv('fund'),ptaxV=vv('ptax'),spiV=vv('spiM'),coefV=vv('amCoef');
     var buyV=(function(){var m=(document.getElementById('buyoutMode')||{}).value,b=vv('buyout');return m==='pct'?priceV*b/100:b;})();
     var kk=1+vatV/100, pNet=priceV/kk, aNet=pNet*advV/100;
@@ -2480,7 +2526,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
           if(ci===0)return xC(c.t,'txt',ci);
           if(c.n===null&&!numCol[ci])return xC(c.t,'txt',ci);
           var raw=xlRaw(tblId,dataIdx-1,ci), val=(raw===null?(c.n===null?0:c.n):raw);
-          var f=xlFormula(tblId,ci,isFirst,ncols,isLast);
+          var f=xlFormula(tblId,ci,isFirst,ncols,isLast,dataIdx-1);
           return f?xF(f,val,'numf',ci):xN(val,'num',ci);
         })));
         return;
@@ -2586,7 +2632,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     doc.setDrawColor.apply(doc,BLUE); doc.setLineWidth(2); doc.line(Mg,y,W-Mg,y); y+=18;
     doc.setTextColor.apply(doc,INK); doc.setFontSize(10.5);
     if(KP.client){doc.text('Кому: '+KP.client+(KP.inn?', ИНН '+KP.inn:''), Mg, y); y+=16;}
-    doc.text('Предлагаем приобретение техники в финансовый лизинг на следующих условиях:', Mg, y); y+=18;
+    doc.text('Предлагаем приобретение объекта в финансовый лизинг на следующих условиях:', Mg, y); y+=18;
     var terms=[['Предмет лизинга',KP.item],['Стоимость объекта (с НДС '+KP.vat+'%)',fmtRub(KP.priceVat)],
      ['Авансовый платёж ('+KP.adv+'%)',fmtRub(KP.advGross)],['Срок лизинга',KP.N+' мес.'],
      ['Ежемесячный лизинговый платёж (с НДС)',fmtRub(KP.annGross)],['Удорожание',fmtPct(KP.udorYear)+'/год'],
@@ -2610,12 +2656,12 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
         doc.setDrawColor(230,229,224); doc.setLineWidth(.5); doc.line(Mg,y+5,W-Mg,y+5); y+=19;
       });
       if(y>H-150){doc.addPage();y=48;}
-      y+=6;
+      y-=3;                                    // плашка ровно посередине: 12 pt сверху и снизу
       doc.setFillColor.apply(doc,BLUE); doc.roundedRect(Mg,y-2,W-2*Mg,34,5,5,'F');
       doc.setTextColor(255,255,255); doc.setFontSize(10);
       doc.text('Затраты на лизинг с учётом экономии', Mg+12, y+14);
       doc.setFontSize(15); doc.text(fmtRub(B.net||0), W-Mg-12, y+16, {align:'right'});
-      doc.setFontSize(10); y+=42;
+      doc.setFontSize(10); y+=55;
     })();
     if(y>H-140){doc.addPage();y=48;}
     doc.setTextColor.apply(doc,BLUE); doc.setFontSize(12); doc.text('Дополнительные расходы', Mg, y); y+=14;
@@ -2784,8 +2830,35 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     }
     var fdefOn=false;   // полная отсрочка Поставщика в модели недвижимости не применяется //                   // полная отсрочка Поставщика
     var fundEff=fund;    // при полной отсрочке «фондирование» = % за отсрочку
-    var leaseRate=(fundEff+spread)/k;           // лиз. процент без НДС, % год
+    // Ставка клиенту объявляется БЕЗ НДС: лизинговый процент = фондирование + спред.
+    // Делить на 1,22 нельзя — фондирование это цена денег банка, НДС к ней отношения не имеет
+    // (банковские операции освобождены, пп. 3 п. 3 ст. 149 НК). НДС 22% начисляется сверху на платёж.
+    // Режим 'gross' — прежняя формула (фонд+спред)/1,22, включается только для старых ссылок и сделок.
+    var rateMode=((document.getElementById('rateMode')||{}).value)||'net';
+    var leaseRate=(rateMode==='gross')?((fundEff+spread)/k):(fundEff+spread);   // лиз. процент без НДС, % год
+    (function(){var h=document.getElementById('spreadH'); if(!h)return;
+      h.textContent=(rateMode==='gross')
+        ? ('СТАРАЯ ФОРМУЛА: (фонд + спред) / '+(1+vat/100).toFixed(2)+' = '+fmtPct(leaseRate)+' · реальный спред '+fmtPct(leaseRate-fundEff))
+        : ('ставка клиенту = фондирование + спред = '+fmtPct(leaseRate)+' без НДС · НДС '+fmtPct(vat)+' сверху на платёж');
+      h.style.color=(rateMode==='gross')?'var(--amber)':'var(--muted)';})();
     var iLease=leaseRate/100/12, iFund=fund/100/12;
+    // Проценты по банковскому кредиту начисляются на остаток задолженности за фактическое
+    // число дней (Положение ЦБ 39-П, ст. 809 ГК). База года — по конвенции договора.
+    var dcMode=((document.getElementById('dayCount')||{}).value)||'actact';
+    function daysIn(y,m){return new Date(y,m+1,0).getDate();}
+    function isLeap(y){return (y%4===0&&y%100!==0)||y%400===0;}
+    function dcFactor(t){                      // доля года за месяц t по конвенции договора
+      if(dcMode==='m12')return 1/12;
+      var D=dateAt(t), d=daysIn(D.getFullYear(),D.getMonth());
+      var base=(dcMode==='act360')?360:(dcMode==='act365')?365:(isLeap(D.getFullYear())?366:365);
+      return d/base;
+    }
+    function iFundAt(t){                       // ставка за месяц t по правилам банка
+      if(dcMode==='m12')return fund/100/12;
+      var D=dateAt(t), d=daysIn(D.getFullYear(),D.getMonth());
+      var base=(dcMode==='act360')?360:(dcMode==='act365')?365:(isLeap(D.getFullYear())?366:365);
+      return fund/100*d/base;
+    }
     var advGross=priceVat*adv/100, advNet=advGross/k;
     var N=term;
     // --- амортизационная группа → коэффициент ускорения и СПИ (автоматически, ст. 259.3 / Пост. №1) ---
@@ -2851,19 +2924,33 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     var propYear=propOff?0:cadVal*propRateP/100;
     var propTot=propYear*(N/12);
     var propGLP=(!propOff)&&(propMode==='glp');
-    // Налог на имущество: авансы поквартально (28 числа месяца после квартала) + годовой платёж после срока
-    function propAt(t){
-      if(propOff||t<1)return 0;
-      // авансы за I–III кварталы года — 28 числа месяца после квартала;
-      // остаток за год (IV квартал) — до 28 февраля следующего года
-      if(t<=N && t%3===0 && t%12!==0) return propYear/4;
-      if(t>N && t<=N+3){                                  // доплата за незакрытые кварталы после окончания срока
-        var paid=0; for(var q=3;q<=N;q+=3){ if(q%12!==0) paid+=propYear/4; }
-        var due=propYear*(N/12);
-        return (t===N+2)?Math.max(0,due-paid):0;
+    // Налог на имущество, ст. 383 НК: авансы за I квартал, полугодие и 9 месяцев —
+    // не позднее 28 апреля / 28 июля / 28 октября; налог за год за вычетом авансов —
+    // не позднее 28 февраля следующего года. Кварталы КАЛЕНДАРНЫЕ, а не от даты договора.
+    var PROP_MAP=(function(){
+      var map={};
+      if(propOff||propYear<=0)return map;
+      // месяцы владения по календарным годам: объект у ЛК с мес.0 по мес.N включительно
+      var own={}, idx={};
+      // владение: с мес.0 по мес.N−1. Месяц выкупа не облагается — право прекращается 1-го числа
+      for(var m=0;m<N;m++){var dd=dateAt(m), y=dd.getFullYear();
+        own[y]=(own[y]||0)+1; (idx[y]=idx[y]||[]).push(dd.getMonth());}
+      var MAXT=N+14;                                   // хвост для февральской доплаты
+      var paidY={};
+      for(var t=0;t<=MAXT;t++){
+        var D=dateAt(t), mo=D.getMonth(), yr=D.getFullYear(), v=0;
+        if(mo===3||mo===6||mo===9){                     // апрель / июль / октябрь — авансы
+          var qStart=mo-3, months=(idx[yr]||[]).filter(function(x){return x>=qStart&&x<qStart+3;}).length;
+          if(months>0){ v=propYear/4*(months/3); paidY[yr]=(paidY[yr]||0)+v; }
+        } else if(mo===1){                              // февраль — налог за прошлый год минус авансы
+          var py=yr-1, o=own[py]||0;
+          if(o>0){ v=propYear*o/12-(paidY[py]||0); paidY[py]=(paidY[py]||0)+v; }
+        }
+        if(Math.abs(v)>0.005)map[t]=v;
       }
-      return 0;
-    }
+      return map;
+    })();
+    function propAt(t){ return PROP_MAP[t]||0; }
     // Компенсация от клиента при оплате «по счёту» — приходит в том же месяце, что и расход
     function compAt(t){ return (propGLP?0:propAt(t)) + (regGLP?0:regAt(t)); }
     // --- расходы на регистрацию: госпошлина по НК (юрлицо) + прочее ---
@@ -2996,6 +3083,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     function dateAt(t){return new Date(start.getFullYear(),start.getMonth()+t,start.getDate());}
     function qkey(d){return d.getFullYear()*4+Math.floor(d.getMonth()/3);}
     var MAXM=N+24, startQ=qkey(start), qOut={}, qIn={};
+    XDC=[]; for(var _t=0;_t<=MAXM;_t++)XDC[_t]=dcFactor(_t);   // коэффициенты периодов для формул Excel
     qIn[startQ]=(qIn[startQ]||0)+inputVat;   // входной НДС с техники — в квартале постановки на учёт
     for(var t=0;t<=MAXM;t++){var d=dateAt(t);var q=qkey(d);qOut[q]=(qOut[q]||0)+clientAt(t)*(vat/(100+vat));qIn[q]=(qIn[q]||0)+aeInVatAt(t);}
     var vatOnce=false;   // НДС платится 1/3 помесячно (ст. 174 НК)
@@ -3018,7 +3106,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
       var cash=0,debt=0,peak=0,drawnTot=0,firstDraw=-1,paidOff=-1,lastPos=-1,sInt=0,rows=[],yInt={};
       var D0=0,schedSet=false,annPay=0,diffPrin=0,repEnd=drawEnd+R,payList=[],infeasible=false;
       for(var t=0;t<=MAXM;t++){
-        var interest=debt*iFund; debt+=interest; sInt+=interest;
+        var interest=debt*iFundAt(t); debt+=interest; sInt+=interest;
         var yr=Math.min(yOf(t),Math.ceil(N/12)); yInt[yr]=(yInt[yr]||0)+interest;
         var inC=clientAt(t), inV=vatIn[t]||0, oS=suppAt(t), oV=vatOut[t]||0, oC=(commIdx===t)?commCost:0;
         var oDef=suppIntAt(t), oGuar=guarAt(t), oAE=aeLKAt(t), oProp=propAt(t), oReg=regAt(t), inComp=compAt(t), oExtra=oDef+oGuar+oAE+oProp+oReg;   // % отсрочки + гарантия + доп.расходы (в кредит)
@@ -3034,7 +3122,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
         } else if(method==='sweep'){
           if(debt>0.5&&cash>0.5){repaid=Math.min(cash,debt);debt-=repaid;cash-=repaid;}
         } else {
-          if(!schedSet){D0=debt; if(D0>0.5&&R>0){annPay=iFund===0?D0/R:D0*iFund/(1-Math.pow(1+iFund,-R)); diffPrin=D0/R;} schedSet=true;}
+          if(!schedSet){D0=debt; if(D0>0.5&&R>0){var iR=0;for(var q=t;q<t+R;q++)iR+=iFundAt(q); iR=iR/R;   // средняя месячная ставка на срок погашения
+            annPay=iR===0?D0/R:D0*iR/(1-Math.pow(1+iR,-R)); diffPrin=D0/R;} schedSet=true;}
           if(t<=repEnd&&debt>0.5){
             var sched=method==='annuity'?annPay:(diffPrin+interest);
             var want=Math.min(sched,debt);
@@ -3358,7 +3447,9 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     // ================= РЕНДЕР =================
     var iLeaseY=leaseRate;
     document.getElementById('oRate').textContent=fmtPct(leaseRate);
-    document.getElementById('oRateSub').textContent='(фонд. '+fmtPct(fund)+' + спред '+fmtPct(spread)+') / 1,22';
+    document.getElementById('oRateSub').textContent=(rateMode==='gross')
+      ? ('СТАРАЯ ФОРМУЛА: (фонд. '+fmtPct(fund)+' + спред '+fmtPct(spread)+') / 1,22')
+      : ('фонд. '+fmtPct(fund)+' + спред '+fmtPct(spread)+' · без НДС');
     // Эффективная ставка (годовая, IRR потока клиента без НДС): финансируем body, клиент платит annNet + абонплату (нетто) N мес.
     var effFlows=[-body]; var subNet=subGross/k;
     for(var ef=1;ef<=N;ef++)effFlows.push(payNetAt(ef)+subNet);
@@ -3427,6 +3518,27 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     document.getElementById('oRev').textContent=fmtRub(cliPVnet);
     document.getElementById('oMarg').textContent=fmtRub(marginPV);
     document.getElementById('oMargH').textContent=fmtPct(marginPV/priceNet*100)+' от цены';
+    (function(){var h=document.getElementById('dayCountH'); if(!h)return;
+      var names={actact:'фактические дни, база 365 или 366 в високосный год — так считает большинство банков',
+                 act365:'фактические дни, база всегда 365',
+                 act360:'фактические дни, база 360 — даёт больше процентов',
+                 m12:'каждый месяц = 1/12 года независимо от числа дней'};
+      h.textContent=names[dcMode]||'';})();
+    // Предупреждение: сделка не окупает фондирование либо кредит не гасится.
+    // Найдено аудитом: раньше такие сделки показывались молча.
+    (function(){
+      var lg=document.getElementById('warnLegacy'); if(lg)lg.style.display=(rateMode==='gross')?'flex':'none';
+      var box=document.getElementById('warnUnprofit'), txt=document.getElementById('warnUnprofitTxt');
+      if(!box||!txt)return;
+      var msgs=[];
+      if(fundMode==='credit'&&leaseRate<fund-0.001)
+        msgs.push('ставка клиенту '+fmtPct(leaseRate)+' ниже стоимости фондирования '+fmtPct(fund)+' — сделка убыточна по определению: спред '+fmtPct(leaseRate-fund)+'. Проверьте спред: он задаётся «в т.ч. НДС» и делится на '+(1+vat/100).toFixed(2)+'.');
+      var debtEnd=(T&&T.rows&&T.rows.length)?T.rows[T.rows.length-1].debt:0;
+      if(fundMode==='credit'&&debtEnd>1)
+        msgs.push('банковский кредит не погашается: на конец горизонта остаётся '+fmtRub(debtEnd)+'. Прибыль показана с учётом этого долга как обязательства, поэтому она не равна денежному потоку.');
+      box.style.display=msgs.length?'flex':'none';
+      txt.innerHTML=msgs.join('<br>');
+    })();
     document.getElementById('margVat').textContent='Что во что входит: затраты — оплата поставщику, доп. расходы ЛК, НДС к уплате в бюджет и комиссия банка; выручка — платежи клиента, возврат НДС из бюджета и комиссия за страхование. Всё приведено к дате договора по ставке '+fmtPct(fund)+'.';
 
     // tab1
