@@ -63,6 +63,14 @@
   .tableWrap tbody tr:nth-child(even) td:first-child{background:#FCFCFB}
   .tableWrap tbody tr.special td:first-child{background:var(--tealSoft)}
   .tableWrap tbody tr.draw td:first-child{background:var(--amberSoft)}
+  /* ДДС: три блока — Деньги / Расчёты по НДС / Прочее справочно */
+  #tblDDS .bandM{background:#EEF3F8;color:var(--ink);text-align:center;letter-spacing:.6px;text-transform:uppercase;font-size:10.5px}
+  #tblDDS .bandV{background:var(--tealSoft);color:var(--ink);text-align:center;letter-spacing:.6px;text-transform:uppercase;font-size:10.5px}
+  #tblDDS .bandR{background:#F4F4F2;color:var(--ink);text-align:center;letter-spacing:.6px;text-transform:uppercase;font-size:10.5px}
+  #tblDDS th.gV{background:#F0FBF6} #tblDDS td.gV{background:#F8FDFB}
+  #tblDDS th.gR{background:#F7F7F5} #tblDDS td.gR{background:#FCFCFB;color:var(--muted)}
+  #tblDDS.vOnly .gM,#tblDDS.vOnly .gR{display:none}
+  #tblDDS.mOnly .gV,#tblDDS.mOnly .gR{display:none}
   .tableWrap tfoot td{position:sticky;bottom:0;z-index:2;background:var(--card)}
   .tableWrap tfoot td:first-child{z-index:4}
   /* верхний горизонтальный бегунок — дубль нижнего, чтобы не мотать таблицу до низа */
@@ -227,7 +235,7 @@
     <div>
       <div class="eyebrow">Финансовая аренда · недвижимость</div>
       <h1>Калькулятор лизинга недвижимости</h1>
-      <div style="font-size:11px;color:var(--faint);margin-top:3px">версия <b id="appVer">2026.09.23-1</b> · если здесь другая версия — на сайте лежит старый файл</div>
+      <div style="font-size:11px;color:var(--faint);margin-top:3px">версия <b id="appVer">2026.09.23-3</b> · если здесь другая версия — на сайте лежит старый файл</div>
     </div>
     <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end">
       <button onclick="resetToBase()" title="Вернуть ВСЕ параметры калькулятора к базовым" style="flex:none;padding:8px 14px;border:1px solid var(--line);background:var(--card);color:var(--muted);border-radius:8px;font-size:12.5px;font-weight:600;cursor:pointer;white-space:nowrap">↺ Сброс всего</button>
@@ -561,10 +569,10 @@
     <div id="ptLossNone" style="font-size:12.5px;color:var(--muted);margin-bottom:22px">—</div>
 
     <h2>Казначейский расчёт (помесячно)</h2>
-    <div style="display:flex;justify-content:flex-end;margin-bottom:8px"><button onclick="tableToXLS('tblDDS','ДДС','Движение_денежных_средств')" style="padding:8px 14px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;font-size:12.5px;font-weight:600;cursor:pointer">📊 Выгрузить в Excel</button></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px"><div id="ddsSeg" style="display:inline-flex;border:1px solid var(--line);border-radius:9px;overflow:hidden;background:var(--card)"><button id="ddsB3" class="on" onclick="ddsView(3)" style="padding:7px 15px;border:none;background:var(--ink);color:#fff;font-size:12.5px;font-weight:600;cursor:pointer">Всё</button><button id="ddsB1" onclick="ddsView(1)" style="padding:7px 15px;border:none;background:transparent;color:var(--muted);font-size:12.5px;font-weight:600;cursor:pointer">Деньги</button><button id="ddsB2" onclick="ddsView(2)" style="padding:7px 15px;border:none;background:transparent;color:var(--muted);font-size:12.5px;font-weight:600;cursor:pointer">НДС</button></div><button onclick="tableToXLS('tblDDS','ДДС','Движение_денежных_средств')" style="padding:8px 14px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;font-size:12.5px;font-weight:600;cursor:pointer">📊 Выгрузить в Excel</button></div>
     <div class="tableWrap">
       <table id="tblDDS">
-        <thead><tr><th rowspan="2">Мес. / дата</th><th colspan="3">Притоки</th><th colspan="2">Операционные оттоки</th><th colspan="3">Транзит на клиента</th><th colspan="2">Налоги</th><th colspan="4">Кредит</th><th colspan="3">Итого по месяцу</th><th colspan="6">СПРАВОЧНО: расчёты по НДС и прочие начисления</th></tr><tr><th>Клиент (приток)</th><th>Страхование (комиссия)</th><th>НДС возмещён из бюджета</th><th>Поставщик</th><th>Доп. расходы</th><th>Налог на имущество</th><th>Регистрация</th><th>Компенсация клиента</th><th>НДС уплачен в бюджет</th><th>Налог на прибыль</th><th>Комиссия за кредит</th><th>Выборка</th><th>Погашение</th><th>Долг по кредиту</th><th>Поток до кредита</th><th>Денежный поток за месяц</th><th>Накопленный остаток</th><th>Начислено % по кредиту</th><th>Начислен с аванса</th><th>Начислен с платежей</th><th>Принят к вычету (входной)</th><th>Остаток расчётов с бюджетом по НДС</th><th>Списание убытка (аморт.)</th></tr></thead>
+        <thead><tr><th rowspan="2">Мес. / дата</th><th class="gM bandM" colspan="16">Деньги</th><th class="gV bandV" colspan="7">Расчёты по НДС</th><th class="gR bandR" colspan="2">Прочее справочно</th></tr><tr><th class="gM">Клиент (приток)</th><th class="gM">Страхование (комиссия)</th><th class="gM">Поставщик</th><th class="gM">Доп. расходы</th><th class="gM">Налог на имущество</th><th class="gM">Регистрация</th><th class="gM">Компенсация клиента</th><th class="gM">Налог на прибыль</th><th class="gM">НДС: получено / уплачено</th><th class="gM">Комиссия за кредит</th><th class="gM">Выборка</th><th class="gM">Погашение</th><th class="gM">Долг по кредиту</th><th class="gM">Поток до кредита</th><th class="gM">Денежный поток за месяц</th><th class="gM">Накопленный остаток</th><th class="gV">Начислен с аванса</th><th class="gV">Начислен с платежей</th><th class="gV">Принят к вычету (входной)</th><th class="gV">К уплате за квартал</th><th class="gV">Возмещено из бюджета (факт)</th><th class="gV">Уплачено в бюджет (факт)</th><th class="gV">Сальдо расчётов с бюджетом</th><th class="gR">Начислено % по кредиту</th><th class="gR">Списание убытка (аморт.)</th></tr></thead>
         <tbody id="trBody"></tbody>
         <tfoot id="trFoot"></tfoot>
       </table>
@@ -572,7 +580,11 @@
     <div id="vatRecon" style="margin-top:12px;font-size:12.5px;line-height:1.6;padding:11px 13px;background:var(--paper);border-radius:8px"></div>
     <div id="compNote" style="margin-top:10px;font-size:12px;color:var(--muted);line-height:1.5"></div>
     <div style="margin-top:10px;font-size:12px;color:var(--muted);line-height:1.5;padding:10px 12px;background:var(--paper);border-radius:8px">
-      <b>Столбец «Остаток расчётов с бюджетом по НДС»</b> показывает всё движение налога одной величиной: начисление увеличивает долг перед бюджетом, вычет и уплата деньгами его уменьшают, полученное возмещение — восстанавливает. Отрицательное значение означает, что бюджет должен ЛК. К концу расчётов остаток приходит в ноль — это и есть проверка, что весь НДС учтён и ничего не задвоено. Справочные столбцы начисления в «Дельту» и накопленный остаток не входят: деньгами являются только «НДС уплачен в бюджет» и «НДС возмещён из бюджета».
+      <b>Столбец «Сальдо расчётов с бюджетом»</b> показывает всё движение налога одной величиной: начисление увеличивает долг перед бюджетом, вычет и уплата деньгами его уменьшают, полученное возмещение — восстанавливает. Отрицательное значение означает, что бюджет должен ЛК. К концу расчётов остаток приходит в ноль — это и есть проверка, что весь НДС учтён и ничего не задвоено. Справочные столбцы начисления в «Дельту» и накопленный остаток не входят: деньгами являются только «Уплачено в бюджет (факт)» и «Возмещено из бюджета (факт)».
+      <div style="margin-top:8px"><b>Три блока таблицы.</b> <i>Деньги</i> — всё, что проходит по расчётному счёту; сумма столбцов от «Клиент (приток)» до «НДС: получено / уплачено» даёт «Поток до кредита». <i>Расчёты по НДС</i> — начисления и уплата налога: деньгами являются только «Возмещено из бюджета (факт)» и «Уплачено в бюджет (факт)», в денежном блоке они свёрнуты в один столбец. <i>Прочее справочно</i> — начисленные проценты по кредиту и списание убытка. Переключатель над таблицей показывает один блок или все сразу.</div>
+      <div style="margin-top:8px"><b>«НДС: получено / уплачено»</b> — возмещено из бюджета минус уплачено в бюджет. Одна величина вместо двух: в каждом месяце работает только одно направление. Полная расшифровка — в блоке «Расчёты по НДС».</div>
+      <div style="margin-top:8px"><b>«К уплате за квартал»</b> — начислено минус вычет за календарный квартал, показано в последнем месяце квартала (март, июнь, сентябрь, декабрь). Это сумма декларации. Она уплачивается тремя равными долями в течение следующего квартала (п.&nbsp;1 ст.&nbsp;174 НК) — видно в столбце «Уплачено в бюджет (факт)». Отрицательная величина означает квартал к возмещению: деньги приходят одной суммой с лагом камеральной проверки.</div>
+      <div style="margin-top:8px"><b>Налог на прибыль и комиссия по страхованию — полноценные потоки казначейства.</b> Кассовый разрыв от уплаты налога закрывается выборкой по кредитной линии, на неё начисляются проценты. Поэтому накопленный остаток за время договора не уходит в минус ни при одном типе погашения. После окончания договора новых выборок нет: хвост НДС и налог за последний год ЛК платит собственными средствами — в этих строках остаток может быть отрицательным.</div>
       <div style="margin-top:8px"><b>«Комиссия за кредит»</b> — разовый платёж банку в месяце первой выборки. Если на «Калькуляторе» она включена в тело лизинга, комиссия отражена <i>серым</i>: деньги банку уходят, но их возмещает клиент через лизинговые платежи, поэтому расходом ЛК в P&amp;L она не является (стоит 0). Если не включена — это реальный расход ЛК и в P&amp;L он показан минусом.</div>
     </div>
     
@@ -1021,13 +1033,17 @@
       <p>Помесячная таблица всех расчётов по сделке. Столбцы сгруппированы в шапке: <b>Притоки</b> · <b>Операционные оттоки</b> · <b>Транзит на клиента</b> · <b>Налоги</b> · <b>Кредит</b> · <b>Итого по месяцу</b> · <b>Справочно</b>. Притоки со знаком плюс, оттоки со знаком минус — строку можно просто просуммировать.</p>
       <p><b>Здесь же задаются</b> ставка НДС, лаг возврата НДС и ставка налога на прибыль — эти поля перенесены с «Калькулятора», где осталось только зеркало ставки НДС.</p>
       <p><b>Три итоговых столбца.</b> «Поток до кредита» — операционный результат месяца. «Денежный поток за месяц» — уже с учётом выборки и погашения. «Накопленный остаток» — деньги на любую дату; его значение на конец совпадает с чистой прибылью, что и служит контролем сходимости всей таблицы.</p>
-      <p><b>НДС показан дважды по существу разными величинами — это не задвоение.</b> В группе «Налоги» стоят <b>деньги</b>: «НДС уплачен в бюджет» и «НДС возмещён из бюджета» — только они входят в «Дельту» и накопленный остаток. В справочной группе стоит <b>начисление</b>: «Начислен с аванса», «Начислен с платежей», «Принят к вычету (входной)».</p>
-      <p><b>Чем отличаются похожие столбцы.</b> «Принят к вычету (входной)» — право на вычет, возникает сразу при покупке объекта; «НДС возмещён из бюджета» — живые деньги, приходят позже и частями. «Начислен с платежей» — исходящий налог с каждого лизингового платежа; «НДС уплачен в бюджет» — фактическая уплата по итогам квартала, уже после зачёта входного, тремя равными долями (ст. 174 НК).</p>
-      <p><b>Столбец «Остаток расчётов с бюджетом по НДС»</b> сводит всё движение налога в одну величину: начисление увеличивает долг перед бюджетом, вычет и уплата деньгами его уменьшают, полученное возмещение восстанавливает. Минус означает, что должен бюджет. К концу расчётов остаток приходит <b>в ноль</b> — это и есть доказательство, что весь НДС учтён и ничего не потеряно.</p>
+      <p><b>НДС показан дважды по существу разными величинами — это не задвоение.</b> В группе «Налоги» стоят <b>деньги</b>: «Уплачено в бюджет (факт)» и «Возмещено из бюджета (факт)» — только они входят в «Дельту» и накопленный остаток. В справочной группе стоит <b>начисление</b>: «Начислен с аванса», «Начислен с платежей», «Принят к вычету (входной)».</p>
+      <p><b>Чем отличаются похожие столбцы.</b> «Принят к вычету (входной)» — право на вычет, возникает сразу при покупке объекта; «Возмещено из бюджета (факт)» — живые деньги, приходят позже и частями. «Начислен с платежей» — исходящий налог с каждого лизингового платежа; «Уплачено в бюджет (факт)» — фактическая уплата по итогам квартала, уже после зачёта входного, тремя равными долями (ст. 174 НК).</p>
+      <p><b>Столбец «Сальдо расчётов с бюджетом»</b> сводит всё движение налога в одну величину: начисление увеличивает долг перед бюджетом, вычет и уплата деньгами его уменьшают, полученное возмещение восстанавливает. Минус означает, что должен бюджет. К концу расчётов остаток приходит <b>в ноль</b> — это и есть доказательство, что весь НДС учтён и ничего не потеряно.</p>
       <p><b>Почему возмещение меньше вычета.</b> Входной НДС сначала гасит собственные обязательства ЛК за тот же квартал и лишь остаток возвращается деньгами. Пример базового кейса: вычет 3 242 909 ₽, из них 880 477 ₽ зачтено против начисленного с аванса и первого платежа, и только 2 362 432 ₽ пришло деньгами. Зачтённая часть не «пропала» — на неё просто не платили налог, и это видно по остатку расчётов.</p>
       <p>Под таблицей выводится <b>живая сверка</b>: начислено с аванса + начислено с платежей − вычет = сальдо, и оно совпадает с «уплачено − возмещено»; рядом показано, сколько вычета зачтено, а сколько возвращено деньгами. Складывать справочные столбцы с денежными нельзя — вот это дало бы двойной счёт.</p>
       <p><b>«Начислено % по кредиту»</b> — тоже справочный столбец: проценты капитализируются в тело долга, а деньгами уходят внутри платежа банку в столбце «Погашение».</p>
       <p><b>Столбец «Списание убытка (аморт.)»</b> и годовые строки после месячных — списание убытка от выкупа уже <i>после</i> окончания договора. Денежным потоком не является: уменьшает налоговую базу ЛК по прочей прибыли.</p>
+      <p><b>Структура таблицы — три блока.</b> «Деньги» — движение по расчётному счёту; сумма столбцов от «Клиент (приток)» до «НДС: получено / уплачено» даёт «Поток до кредита». «Расчёты по НДС» — начисление и уплата налога. «Прочее справочно» — начисленные проценты и списание убытка. Переключатель над таблицей показывает один блок или все сразу; в Excel выгружаются все столбцы независимо от режима.</p>
+      <p><b>«К уплате за квартал».</b> Налоговый период по НДС — квартал (ст.&nbsp;163 НК). Столбец показывает сумму декларации: начислено минус вычет за календарный квартал, в его последнем месяце. Уплата — тремя равными долями до 28-го числа каждого месяца следующего квартала (п.&nbsp;1 ст.&nbsp;174 НК). Отрицательная величина — квартал к возмещению, деньги приходят одной суммой с лагом камеральной проверки (поле «лаг возврата НДС»).</p>
+      <p><b>Налог на прибыль внутри казначейского цикла.</b> Уплата налога и комиссия по страхованию участвуют в расчёте кассового разрыва наравне с остальными потоками: если денег на счёте не хватает, происходит выборка по кредитной линии и на неё начисляются проценты. Схема замкнута — налог зависит от процентов, проценты от долга, долг от налога, — поэтому расчёт сходится итерацией. До версии 2026.09.23 налог добавлялся только при отрисовке: линия его не финансировала, накопленный остаток уходил в минус, а проценты были занижены (в режиме cash-sweep — на 0,7 млн ₽ на базовом кейсе).</p>
+      <p><b>После окончания договора выборок нет.</b> Притока от клиента больше не существует, поэтому хвост НДС (ст.&nbsp;174 НК) и налог за последний год ЛК платит собственными средствами. В этих строках накопленный остаток может быть отрицательным — это и есть потребность в собственных деньгах после закрытия сделки.</p>
       <p>Над таблицей — сводки по НДС и по налогу на прибыль. Вся таблица выгружается в Excel одним листом, чтобы бухгалтер видел картину целиком.</p>
     </div>
 
@@ -1459,6 +1475,15 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
 <script>
   var withVat=true;
   var repayType='annuity';   // погашение кредита по умолчанию — аннуитет
+  // Налог на прибыль и комиссия по страхованию — полноценные денежные потоки казначейства:
+  // раньше они добавлялись только при отрисовке, поэтому кредитная линия их не финансировала,
+  // накопленный остаток уходил в минус, а проценты по кредиту были занижены.
+  // Схема расчёта замкнута: налог зависит от процентов, проценты — от долга, долг — от налога,
+  // поэтому графики переносятся между проходами и сходятся итерацией (как проценты на налог).
+  var PTAX_CARRY={}, KAS_CARRY={}, ptaxPass=0;
+  function schedDiff(a,b){var d=0,k={};
+    Object.keys(a||{}).forEach(function(x){k[x]=1;}); Object.keys(b||{}).forEach(function(x){k[x]=1;});
+    Object.keys(k).forEach(function(x){d+=Math.abs((a[x]||0)-(b[x]||0));}); return d;}
   var taxIntCarry=0, taxIntPass=0;      // проценты на уплаченный налог: сходящаяся итерация (тело -> налог -> % -> тело)
   var fundMode='credit';                // credit | own
   // Дата передачи предмета по умолчанию — дата договора + 10 дней (пока не задана вручную)
@@ -1657,6 +1682,15 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     try{syncTopScrollbars();}catch(e){}}
   // двухуровневая шапка (ДДС): второй ряд должен «прилипать» ровно под первым.
   // высота первого ряда зависит от переноса текста, поэтому меряем её и кладём в --th1.
+  var ddsMode=3;
+  function ddsView(n){
+    ddsMode=n; var t=document.getElementById('tblDDS'); if(!t)return;
+    t.className=(n===1)?'mOnly':((n===2)?'vOnly':'');
+    [1,2,3].forEach(function(i){var b=document.getElementById('ddsB'+i); if(!b)return;
+      var on=(i===n); b.style.background=on?'var(--ink)':'transparent'; b.style.color=on?'#fff':'var(--muted)';});
+    if(typeof syncStickyHead==='function')syncStickyHead();
+    if(typeof syncTopScrollbars==='function')syncTopScrollbars();
+  }
   function syncStickyHead(){
     var ths=document.querySelectorAll('.tableWrap table thead');
     for(var i=0;i<ths.length;i++){
@@ -2324,14 +2358,22 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     var a=XLRAW.credit; if(!a||!a[idx])return null; var r=a[idx];
     if(tblId==='tblDDS'){
       // знаки: оттоки отрицательные, как в таблице на экране
+      // блок «Деньги»
       if(col===1)return r.inC;        if(col===2)return r.kas;
-      if(col===3)return r.inV;        if(col===4)return -r.oS;
-      if(col===5)return -r.oAE;       if(col===6)return -r.oProp;
-      if(col===7)return -r.oReg;      if(col===8)return r.inComp;
-      if(col===9)return -r.oV;        if(col===10)return -r.ptx;
-      if(col===11)return -r.oC;       if(col===12)return r.drawn;
-      if(col===13)return -r.repaid;   if(col===14)return r.debt;
-      if(col===18)return r.interest;
+      if(col===3)return -r.oS;        if(col===4)return -r.oAE;
+      if(col===5)return -r.oProp;     if(col===6)return -r.oReg;
+      if(col===7)return r.inComp;     if(col===8)return -r.ptx;
+      if(col===9)return r.inV-r.oV;   if(col===10)return -r.oC;
+      if(col===11)return r.drawn;     if(col===12)return -r.repaid;
+      if(col===13)return r.debt;
+      if(col===14)return r.pre;       if(col===15)return r.cf;
+      if(col===16)return r.cum;
+      // блок «Расчёты по НДС»
+      if(col===17)return r.vAdv;      if(col===18)return r.vPay;
+      if(col===19)return r.vIn;       if(col===20)return (r.vQ===null?null:r.vQ);
+      if(col===21)return r.inV;       if(col===22)return -r.oV;
+      // прочее справочно
+      if(col===24)return r.interest;
     }
     if(tblId==='tblBk'){
       if(col===1)return r.drawn;    if(col===2)return r.repaid;
@@ -2390,14 +2432,18 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
       return null;
     }
     if(tblId==='tblDDS'){
-      // 1 клиент, 2 страхование, 3 возврат НДС, 4 поставщик, 5 доп.расходы, 6 налог им., 7 регистрация,
-      // 8 компенсация, 9 НДС в бюджет, 10 налог на прибыль, 11 комиссия, 12 выборка, 13 погашение,
-      // 14 долг, 15 поток до кредита, 16 ДП за месяц, 17 накопленный, 18 % кредита (справочно) ...
-      if(col===14)return isFirst?'=RC[4]+RC[-2]+RC[-1]':'=R[-1]C+RC[4]+RC[-2]+RC[-1]';   // долг = пред + % + выборка + погашение (оно со знаком минус)
-      if(col===15)return '=SUM(RC[-14]:RC[-4])';                                          // поток до кредита: от клиента до комиссии банка
-      if(col===16)return '=RC[-1]+RC[-4]+RC[-3]';                                         // + комиссия + выборка + погашение
-      if(col===17)return isFirst?'=RC[-1]':'=R[-1]C+RC[-1]';                               // накопленный остаток
-      if(col===18)return isFirst?null:('=R[-1]C[-4]*'+FUND+'/100*'+(XDC[rowIdx]!==undefined?XDC[rowIdx]:(1/12)).toFixed(8));  // % кредита: остаток × ставка × коэффициент периода
+      // БЛОК «ДЕНЬГИ»: 1 клиент, 2 страхование, 3 поставщик, 4 доп.расходы, 5 налог им., 6 регистрация,
+      // 7 компенсация, 8 налог на прибыль, 9 НДС получено/уплачено, 10 комиссия банка, 11 выборка,
+      // 12 погашение, 13 долг, 14 поток до кредита, 15 ДП за месяц, 16 накопленный остаток.
+      // БЛОК «НДС»: 17 начислен с аванса, 18 с платежей, 19 вычет, 20 к уплате за квартал,
+      // 21 возмещено факт, 22 уплачено факт, 23 сальдо. ПРОЧЕЕ: 24 % кредита, 25 списание убытка.
+      if(col===9)return '=RC[12]+RC[13]';                                                  // НДС нетто = возмещено (21) + уплачено (22, со знаком минус)
+      if(col===13)return isFirst?'=RC[11]+RC[-2]+RC[-1]':'=R[-1]C+RC[11]+RC[-2]+RC[-1]';   // долг = пред + % (24) + выборка + погашение
+      if(col===14)return '=SUM(RC[-13]:RC[-4])';                                           // поток до кредита: клиент…комиссия банка (1..10)
+      if(col===15)return '=RC[-1]+RC[-4]+RC[-3]';                                          // поток до кредита + выборка + погашение
+      if(col===16)return isFirst?'=RC[-1]':'=R[-1]C+RC[-1]';                                // накопленный остаток
+      if(col===23)return isFirst?'=RC[-6]+RC[-5]-RC[-4]+RC[-2]+RC[-1]':'=R[-1]C+RC[-6]+RC[-5]-RC[-4]+RC[-2]+RC[-1]';  // сальдо с бюджетом
+      if(col===24)return isFirst?null:('=R[-1]C[-11]*'+FUND+'/100*'+(XDC[rowIdx]!==undefined?XDC[rowIdx]:(1/12)).toFixed(8));  // % кредита: остаток × ставка × коэффициент периода
       return null;
     }
     if(tblId==='tblTax'){
@@ -2406,7 +2452,9 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
       return null;
     }
     if(tblId==='tblBk'){
-      if(col===3)return isFirst?null:('=R[-1]C[2]*'+FUND+'/100/12');
+      // проценты по конвенции начисления (ACT/ACT, ACT/365, ACT/360 или ставка/12) —
+      // тот же коэффициент периода, что и в расчёте, иначе лист расходится с таблицей
+      if(col===3)return isFirst?null:('=R[-1]C[2]*'+FUND+'/100*'+(XDC[rowIdx]!==undefined?XDC[rowIdx]:(1/12)).toFixed(8));
       if(col===4)return isFirst?null:'=RC[-2]-RC[-1]';
       if(col===5)return isFirst?'=RC[-4]':'=R[-1]C+RC[-4]-RC[-1]';
       return null;
@@ -2454,8 +2502,18 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     var fundV=vv('fund'),ptaxV=vv('ptax'),spiV=vv('spiM'),coefV=vv('amCoef');
     var buyV=(function(){var m=(document.getElementById('buyoutMode')||{}).value,b=vv('buyout');return m==='pct'?priceV*b/100:b;})();
     var kk=1+vatV/100, pNet=priceV/kk, aNet=pNet*advV/100;
-    var bodyV=(function(){var e=document.getElementById('expBody'),r=e?e.getElementsByTagName('tr')[0]:null;
-      if(!r)return pNet-aNet; var c=r.children[r.children.length-1]; return xNum((c.textContent||'').replace(/\u00A0/g,' '))||pNet-aNet;})();
+    var bodyV=(function(){
+      // берём колонку «Остаток стоимости» ПО ИМЕНИ, а не последнюю: после появления
+      // столбца «Досрочный выкуп» последняя ячейка — прочерк, и тело уезжало на сумму
+      // процентов на уплаченный налог и прочих статей.
+      var tbl=document.getElementById('tblExp'), e=document.getElementById('expBody');
+      var r=e?e.getElementsByTagName('tr')[0]:null; if(!r||!tbl||!tbl.tHead)return pNet-aNet;
+      var hs=tbl.tHead.rows[tbl.tHead.rows.length-1].cells, idx=-1;
+      for(var i=0;i<hs.length;i++){if(/Остаток стоимости/.test(hs[i].textContent)){idx=i;break;}}
+      if(idx<0)idx=r.children.length-1;
+      var c=r.children[idx]; if(!c)return pNet-aNet;
+      var v=xNum((c.textContent||'').replace(/\u00A0/g,' '));
+      return (v===null||!isFinite(v))?(pNet-aNet):v;})();
     var taxIntV=(function(){var rr=document.getElementById('plBody');if(!rr)return 0;
       var tr=rr.getElementsByTagName('tr');for(var i=0;i<tr.length;i++){
         if(/на уплаченный налог/.test(tr[i].children[0].textContent)){
@@ -2540,8 +2598,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
         // нарастающие столбцы ДДС («Накопленный остаток», «Остаток расчётов по НДС»):
         // суммировать нельзя, а сослаться на строку выше — тоже (ниже идут годовые строки
         // списания убытка), поэтому итог отдаём значением
-        if(tblId==='tblDDS'&&(ci===17||ci===22))return xN(c.n,'ftn',ci);
-        if(tblId==='tblDDS'&&ci===17)return xN(c.n,'ftn',ci);   // накопленный остаток — конечное значение
+        // новая структура: 16 — «Накопленный остаток», 23 — «Сальдо расчётов с бюджетом»
+        if(tblId==='tblDDS'&&(ci===16||ci===23))return xN(c.n,'ftn',ci);
         return xF('=SUM(R'+dataStart+'C:R'+(cur-1)+'C)',c.n,'ftn',ci);
       })));
     });
@@ -2795,7 +2853,15 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
   }
   function updKasko(i,v){kasko[i]=parseFloat(v)||0;calc();}
 
+  // Сходимость считается циклом, а не рекурсией: два итерационных контура
+  // (проценты на налог и график налога в казначействе) вместе давали до 100
+  // вложенных вызовов и переполняли стек на длинных сроках.
+  var NEED_RECALC=false;
   function calc(){
+    var guard=0;
+    do{ NEED_RECALC=false; calcCore(); }while(NEED_RECALC && ++guard<150);
+  }
+  function calcCore(){
     var price=val('price'),priceD=val('priceD'),vat=val('vat'),fund=val('fund'),spread=val('spread'),adv=val('adv'),term=Math.max(1,Math.round(val('term')));
     var vatLag=Math.round(val('vatlag')),comm=val('bankComm'),ptax=val('ptax');
     syncVatView();
@@ -3110,12 +3176,23 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
         var yr=Math.min(yOf(t),Math.ceil(N/12)); yInt[yr]=(yInt[yr]||0)+interest;
         var inC=clientAt(t), inV=vatIn[t]||0, oS=suppAt(t), oV=vatOut[t]||0, oC=(commIdx===t)?commCost:0;
         var oDef=suppIntAt(t), oGuar=guarAt(t), oAE=aeLKAt(t), oProp=propAt(t), oReg=regAt(t), inComp=compAt(t), oExtra=oDef+oGuar+oAE+oProp+oReg;   // % отсрочки + гарантия + доп.расходы (в кредит)
-        var netCF=inC+inComp+inV-oS-oExtra-oV-oC; cash+=netCF;
+        var oPtx=PTAX_CARRY[t]||0, inKas=KAS_CARRY[t]||0;   // налог на прибыль и комиссия по страхованию
+        var netCF=inC+inComp+inV+inKas-oS-oExtra-oV-oC-oPtx; cash+=netCF;
         var drawn=0,repaid=0;
         // Новые выборки кредита возможны только в период действия договора.
         // После его окончания притока от клиента нет, а хвост НДС (ст. 174 НК) платится
         // из собственных средств ЛК — иначе долг бесконечно рос бы на процентах.
-        if(cash<-0.5 && t<=N){drawn=-cash;debt+=drawn;drawnTot+=drawn;if(firstDraw<0)firstDraw=t;cash=0;}
+        if(cash<-0.5 && t<=N){drawn=-cash;debt+=drawn;drawnTot+=drawn;if(firstDraw<0)firstDraw=t;cash=0;
+          // Револьверная линия: после новой выборки график погашения пересчитывается
+          // на остаток срока. Иначе аннуитет, рассчитанный от первоначального долга,
+          // не закрывает добавленную сумму и к концу договора остаётся хвост.
+          if(schedSet && (method==='annuity'||method==='diff')){
+            var Rl=repEnd-t; if(Rl<1)Rl=1;
+            var iRl=0; for(var q2=t;q2<t+Rl;q2++)iRl+=iFundAt(q2); iRl=iRl/Rl;
+            annPay=(iRl===0)?debt/Rl:debt*iRl/(1-Math.pow(1+iRl,-Rl));
+            diffPrin=debt/Rl;
+          }
+        }
         // фаза выборки (до drawEnd) — у всех методов гасим излишком; после — по выбранному методу
         if(t<=drawEnd){
           if(debt>0.5&&cash>0.5){repaid=Math.min(cash,debt);debt-=repaid;cash-=repaid;}
@@ -3149,7 +3226,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
         if(t===0){principal=impAdv;}
         else if(t>=1&&t<=N){interest=bal*iDef;principal=impAnn-interest;if(principal>bal)principal=bal;bal-=principal;if(bal<0.5)bal=0;sIntD+=interest;var yr=Math.min(yOf(t),Math.ceil(N/12));yInt[yr]=(yInt[yr]||0)+interest;}
         var inC=clientAt(t),inV=vatIn[t]||0,oV=vatOut[t]||0,oGuar=guarAt(t),oAE=aeLKAt(t)+propAt(t)+regAt(t);
-        var netCF=inC+inV-principal-interest-oGuar-oAE-oV; cash+=netCF;
+        var netCF=inC+inV+(KAS_CARRY[t]||0)-principal-interest-oGuar-oAE-oV-(PTAX_CARRY[t]||0); cash+=netCF;
         var own=cash<0?-cash:0; if(own>ownPeak)ownPeak=own;
         rows.push({t:t,inC:inC,inV:inV,oS:principal,oDef:0,oGuar:oGuar,oAE:oAE,oExtra:oGuar+oAE,oV:oV,oC:0,interest:interest,netCF:netCF,drawn:0,repaid:0,debt:own});
       }
@@ -3160,7 +3237,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
       for(var t=0;t<=MAXM;t++){
         var inC=clientAt(t), inV=vatIn[t]||0, oS=suppAt(t), oV=vatOut[t]||0;
         var oDef=suppIntAt(t), oGuar=guarAt(t), oAE=aeLKAt(t), oProp=propAt(t), oReg=regAt(t), inComp=compAt(t), oExtra=oDef+oGuar+oAE+oProp+oReg;
-        var netCF=inC+inComp+inV-oS-oExtra-oV; cash+=netCF;
+        var netCF=inC+inComp+inV+(KAS_CARRY[t]||0)-oS-oExtra-oV-(PTAX_CARRY[t]||0); cash+=netCF;
         var own=cash<0?-cash:0; if(own>ownPeak)ownPeak=own;
         rows.push({t:t,inC:inC,inComp:inComp,inV:inV,oS:oS,oDef:oDef,oGuar:oGuar,oAE:oAE,oProp:oProp,oReg:oReg,oExtra:oExtra,oV:oV,oC:0,interest:0,netCF:netCF,drawn:0,repaid:0,debt:0,vatAdv:(t===0?advGross*(vat/(100+vat)):0),vatPay:oV});
       }
@@ -3417,9 +3494,16 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     // это давало ~0,9 с на одно нажатие стрелки. Теперь промежуточные проходы считают
     // только математику, а рисуется один раз — последний, сошедшийся.
     if(Math.abs(taxIntNew-taxIntCarry)>0.00005 && taxIntPass<60){
-      taxIntPass++; taxIntCarry=taxIntNew; calc(); return;
+      taxIntPass++; taxIntCarry=taxIntNew; NEED_RECALC=true; return;
     }
     taxIntPass=0; taxIntCarry=taxIntNew;
+
+    // === СХОДИМОСТЬ: график налога на прибыль внутри казначейства ===
+    // налог -> кассовый разрыв -> выборка кредита -> проценты -> налог. Итерируем до стабилизации.
+    if((schedDiff(ptaxM,PTAX_CARRY)>0.01 || schedDiff(kaskoM,KAS_CARRY)>0.01) && ptaxPass<40){
+      ptaxPass++; PTAX_CARRY=ptaxM; KAS_CARRY=kaskoM; NEED_RECALC=true; return;
+    }
+    ptaxPass=0; PTAX_CARRY=ptaxM; KAS_CARRY=kaskoM;
 
     // ===== график выборок и погашения кредита (тренчи, FIFO) =====
     var drawMs=[]; T.rows.forEach(function(r){if(r.drawn>0.5)drawMs.push(r.t);});
@@ -3756,9 +3840,20 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
       }
     })();
     // точные значения цепочки кредита — чтобы формулы в Excel сходились до копейки
-    XLRAW.credit=T.rows.map(function(r){return {t:r.t,interest:r.interest,drawn:r.drawn,repaid:r.repaid,debt:r.debt,
-      inC:r.inC,inComp:r.inComp,inV:r.inV,oS:r.oS,oV:r.oV,oC:r.oC,oProp:r.oProp||0,oReg:r.oReg||0,
-      oAE:(r.oAE||0)+(r.oDef||0)+(r.oGuar||0),kas:(kaskoM[r.t]||0),ptx:(ptaxM[r.t]||0)};});
+    // точные значения и для справочных колонок НДС — иначе итог листа считается
+    // по округлённым до рубля ячейкам и расходится с калькулятором на десяток рублей
+    (function(){var cumX=0;
+      XLRAW.credit=T.rows.map(function(r){
+        var vAdvX=(r.t===0)?advGross*(vat/(100+vat)):0;
+        var vPayX=(r.t>=1&&r.t<=N)?clientAt(r.t)*(vat/(100+vat)):0;
+        var vInX=((r.t===0)?inputVat:0)+aeInVatAt(r.t);
+        var cfX=r.netCF+(r.drawn||0)-(r.repaid||0); cumX+=cfX;
+        var dQx=null, dd=dateAt(r.t);
+        if(dd.getMonth()%3===2){var qk3=qkey(dd); dQx=(qOut[qk3]||0)-(qIn[qk3]||0);}
+        return {t:r.t,interest:r.interest,drawn:r.drawn,repaid:r.repaid,debt:r.debt,
+          inC:r.inC,inComp:r.inComp,inV:r.inV,oS:r.oS,oV:r.oV,oC:r.oC,oProp:r.oProp||0,oReg:r.oReg||0,
+          oAE:(r.oAE||0)+(r.oDef||0)+(r.oGuar||0),kas:(kaskoM[r.t]||0),ptx:(ptaxM[r.t]||0),
+          vAdv:vAdvX,vPay:vPayX,vIn:vInX,vQ:dQx,pre:r.netCF,cf:cfX,cum:cumX};});})();
     var tb=document.getElementById('trBody'),th='';
     var lastRow=Math.max(T.paidOff>=0?T.paidOff+1:0, N>=12?13:N+1, 13);
     var ptaxLast=0; Object.keys(ptaxM).forEach(function(mk){if(Number(mk)>ptaxLast)ptaxLast=Number(mk);});
@@ -3775,64 +3870,74 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
       if(r.t>lastRow && noActivity) return;
       if(r.t>Math.max(lastRow,N,ptaxLast) && noActivity) return;   // хвостовые строки с активностью показываем — чтобы «Итого» сходилось с видимыми строками
       tKasM+=kasHere; tPtaxM+=ptaxHere;
-      var delta=r.netCF+kasHere-ptaxHere;
+      var delta=r.netCF;                              // налог на прибыль и страхование уже внутри netCF
       var dstr=(delta>=0?'+':'−')+fmtRub(Math.abs(delta));
       var dcol=delta>=0?'var(--teal)':'var(--red)';
       var buyHere=(r.t===N&&buyoutGross>0.5);
       // денежный поток месяца = поток до кредита + выборка − погашение; ведём накопленный остаток
       var cfMonth=delta+(r.drawn||0)-(r.repaid||0);
       cumCash+=cfMonth; tCF+=cfMonth;
-      var M=function(v,neg,col){                      // ячейка суммы со знаком: оттоки со знаком минус
-        if(!(Math.abs(v)>0.5))return '<td>—</td>';
+      var M=function(v,neg,col,cls){                  // ячейка суммы со знаком: оттоки со знаком минус
+        var q=cls?(' class="'+cls+'"'):'';
+        if(!(Math.abs(v)>0.5))return '<td'+q+'>—</td>';
         var x=neg?-Math.abs(v):v;
         var c=col||(x<0?'var(--red)':'var(--teal)');
-        return '<td style="color:'+c+'">'+(x<0?'−':'')+fmtRub(Math.abs(x))+'</td>';
+        return '<td'+q+' style="color:'+c+'">'+(x<0?'−':'')+fmtRub(Math.abs(x))+'</td>';
       };
-      var G=function(v){return (Math.abs(v)>0.5)?'<td style="color:var(--muted)">'+fmtRub(v)+'</td>':'<td>—</td>';};
+      var G=function(v,cls){var q=cls?(' class="'+cls+'"'):'';
+        return (Math.abs(v)>0.5)?('<td'+q+' style="color:var(--muted)">'+fmtRub(v)+'</td>'):('<td'+q+'>—</td>');};
       // остаток расчётов с бюджетом по НДС: начислено − вычет − уплачено деньгами + возмещено деньгами
       // (положительный = должны бюджету, отрицательный = бюджет должен нам; к концу приходит в ноль)
       vatBal += (vAdvAcc+vPayAcc) - vInAcc - (r.oV||0) + (r.inV||0);
       var VB=function(){ return (Math.abs(vatBal)>0.5)
-        ? '<td style="color:'+(vatBal<0?'var(--teal)':'var(--muted)')+'">'+(vatBal<0?'−':'')+fmtRub(Math.abs(vatBal))+'</td>'
-        : '<td>—</td>'; };
+        ? '<td class="gV" style="color:'+(vatBal<0?'var(--teal)':'var(--muted)')+'">'+(vatBal<0?'−':'')+fmtRub(Math.abs(vatBal))+'</td>'
+        : '<td class="gV">—</td>'; };
       var dstr2=(cfMonth>=0?'+':'−')+fmtRub(Math.abs(cfMonth));
-      var cstr=(cumCash>=0?'':'−')+fmtRub(Math.abs(cumCash));
+      var cstr=((cumCash>=-0.5)?'':'−')+fmtRub(Math.abs(cumCash));   // −0 ₽ не показываем
+      // НДС одной колонкой в денежном блоке: возмещено из бюджета минус уплачено в бюджет
+      var vNet=(r.inV||0)-(r.oV||0);
+      var VN=(Math.abs(vNet)>0.5)
+        ? '<td class="gM" style="color:'+(vNet<0?'var(--red)':'var(--teal)')+'">'+(vNet<0?'−':'+')+fmtRub(Math.abs(vNet))+'</td>'
+        : '<td class="gM">—</td>';
+      // к уплате за квартал (ст. 174 НК): начислено − вычет за квартал, в последнем месяце квартала
+      var dQ=dateAt(r.t), qD=null;
+      if(dQ.getMonth()%3===2){var qk2=qkey(dQ); qD=(qOut[qk2]||0)-(qIn[qk2]||0);}
+      var QD=(qD===null)?'<td class="gV"></td>'
+        :((Math.abs(qD)>0.5)?'<td class="gV" style="color:'+(qD<0?'var(--teal)':'var(--ink)')+';font-weight:600">'+(qD<0?'−':'')+fmtRub(Math.abs(qD))+'</td>':'<td class="gV">0 ₽</td>');
       th+='<tr'+(r.drawn>0.5?' class="draw"':(buyHere?' style="background:var(--tealSoft)"':''))+'><td>'+r.t+' · '+dateAt(r.t).toLocaleDateString('ru-RU',{month:'short',year:'2-digit'})+'</td>'+
-        // притоки
-        (r.inC>0.5?('<td style="color:var(--teal)">'+fmtRub(r.inC)+(buyHere?' <span style="font-size:10px;font-weight:600">(вкл. выкуп '+fmtRub(buyoutGross)+')</span>':'')+'</td>'):'<td>—</td>')+
-        M(kasHere,false)+ M(r.inV,false)+
-        // операционные оттоки
-        M(r.oS,true)+ M(r.oAE+r.oDef+r.oGuar,true)+
-        // транзит на клиента
-        M(r.oProp||0,true)+ M(r.oReg||0,true)+ M(r.inComp||0,false)+
-        // налоги
-        M(r.oV,true)+ M(ptaxHere,true)+
-        // кредит
-        M(r.oC||0,true,bankOn?'var(--muted)':null)+ M(r.drawn,false)+ M(r.repaid,true)+
-        '<td>'+fmtRub(r.debt)+'</td>'+
-        // итого по месяцу
-        '<td style="color:'+dcol+';font-weight:600">'+dstr+'</td>'+
-        '<td style="color:'+(cfMonth>=0?'var(--teal)':'var(--red)')+';font-weight:700">'+dstr2+'</td>'+
-        '<td style="color:'+(cumCash>=0?'var(--ink)':'var(--red)')+';font-weight:700">'+cstr+'</td>'+
-        // справочно
-        G(r.interest)+ G(vAdvAcc)+ G(vPayAcc)+ G(vInAcc)+ VB()+ '<td>—</td></tr>';
+        // ===== блок «Деньги» =====
+        (r.inC>0.5?('<td class="gM" style="color:var(--teal)">'+fmtRub(r.inC)+(buyHere?' <span style="font-size:10px;font-weight:600">(вкл. выкуп '+fmtRub(buyoutGross)+')</span>':'')+'</td>'):'<td class="gM">—</td>')+
+        M(kasHere,false,null,'gM')+
+        M(r.oS,true,null,'gM')+ M(r.oAE+r.oDef+r.oGuar,true,null,'gM')+
+        M(r.oProp||0,true,null,'gM')+ M(r.oReg||0,true,null,'gM')+ M(r.inComp||0,false,null,'gM')+
+        M(ptaxHere,true,null,'gM')+ VN+
+        M(r.oC||0,true,bankOn?'var(--muted)':null,'gM')+ M(r.drawn,false,null,'gM')+ M(r.repaid,true,null,'gM')+
+        '<td class="gM">'+fmtRub(r.debt)+'</td>'+
+        '<td class="gM" style="color:'+dcol+';font-weight:600">'+dstr+'</td>'+
+        '<td class="gM" style="color:'+(cfMonth>=0?'var(--teal)':'var(--red)')+';font-weight:700">'+dstr2+'</td>'+
+        '<td class="gM" style="color:'+(cumCash>=0?'var(--ink)':'var(--red)')+';font-weight:700">'+cstr+'</td>'+
+        // ===== блок «Расчёты по НДС» =====
+        G(vAdvAcc,'gV')+ G(vPayAcc,'gV')+ G(vInAcc,'gV')+ QD+
+        M(r.inV,false,null,'gV')+ M(r.oV,true,null,'gV')+ VB()+
+        // ===== прочее справочно =====
+        G(r.interest,'gR')+ '<td class="gR">—</td></tr>';
     });
     // --- годовые строки списания убытка от выкупа (после окончания договора) ---
     // 17 столбцов; заполняем только «Мес./дата» и «Списание убытка (аморт.)», остальные — прочерк
     if(lossSchedule.length){
       var _cd2=dateAt(0);
-      th+='<tr style="border-top:2px solid var(--line)"><td colspan="24" style="background:var(--paper);font-weight:600;font-size:11.5px;color:var(--muted)">Списание убытка от выкупа после окончания договора (п.3 ст.268 НК) — уменьшает налоговую базу по прибыли ЛК; денежным потоком не является</td></tr>';
+      th+='<tr style="border-top:2px solid var(--line)"><td colspan="26" style="background:var(--paper);font-weight:600;font-size:11.5px;color:var(--muted)">Списание убытка от выкупа после окончания договора (п.3 ст.268 НК) — уменьшает налоговую базу по прибыли ЛК; денежным потоком не является</td></tr>';
       lossSchedule.forEach(function(r){
         var d1=new Date(_cd2.getFullYear(),_cd2.getMonth()+r.m1,1), d2=new Date(_cd2.getFullYear(),_cd2.getMonth()+r.m2,1);
         var per=d1.toLocaleDateString('ru-RU',{month:'short',year:'2-digit'})+'–'+d2.toLocaleDateString('ru-RU',{month:'short',year:'2-digit'});
         th+='<tr style="background:var(--paper)"><td>'+r.yr+'-й год · '+per+'</td>'+
-          new Array(23).join('<td>—</td>')+
-          '<td style="color:var(--teal);font-weight:600">'+fmtRub(r.w)+'</td></tr>';
+          new Array(17).join('<td class="gM">—</td>')+new Array(8).join('<td class="gV">—</td>')+'<td class="gR">—</td>'+
+          '<td class="gR" style="color:var(--teal);font-weight:600">'+fmtRub(r.w)+'</td></tr>';
       });
     }
     tb.innerHTML=th;
     // итоги по столбцам казначейства
-    var dT=tot.netCF+tKasM-tPtaxM, dTs2=(dT>=0?'+':'−')+fmtRub(Math.abs(dT));
+    var dT=tot.netCF, dTs2=(dT>=0?'+':'−')+fmtRub(Math.abs(dT));
     var tComp=0,tProp=0,tReg=0;T.rows.forEach(function(r){tComp+=(r.inComp||0);tProp+=(r.oProp||0);tReg+=(r.oReg||0);});
     // живая сверка НДС: доказывает, что справочные столбцы не задваивают денежные
     (function(){
@@ -3848,7 +3953,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
         ', возмещено из бюджета '+fmtRub(tot.inV)+', итого '+fmtRub(tot.oV)+' − '+fmtRub(tot.inV)+' = <b>'+fmtRub(cash)+'</b>.<br>'+
         '<b>Куда делся вычет.</b> Из '+fmtRub(tVIn)+' входного НДС '+fmtRub(tVIn-tot.inV)+
         ' <b>зачтено</b> против начисленного (деньгами не возвращалось — на эту сумму просто не платили налог), '+
-        'и только '+fmtRub(tot.inV)+' пришло <b>деньгами</b> как возмещение. Движение видно в столбце «Остаток расчётов с бюджетом по НДС»: он уходит в минус на сумму вычета, гасится начислениями и возмещением и приходит в ноль.<br>'+
+        'и только '+fmtRub(tot.inV)+' пришло <b>деньгами</b> как возмещение. Движение видно в столбце «Сальдо расчётов с бюджетом»: он уходит в минус на сумму вычета, гасится начислениями и возмещением и приходит в ноль.<br>'+
         '<span style="color:'+(okv?'var(--teal)':'var(--red)')+';font-weight:600">'+
         (okv?'✓ Сальдо начисления равно сальдо денежных расчётов — суммы не задваиваются.'
             :'✗ Расхождение '+fmtRub(saldo-cash)+' — требует проверки.')+'</span> '+
@@ -3884,22 +3989,28 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
       el.innerHTML=parts.length?parts.join('<br><br>'):'';
     })();
     (function(){
-      var MF=function(v,neg){ if(!(Math.abs(v)>0.5))return '<td>—</td>';
-        var x=neg?-Math.abs(v):v;
-        return '<td style="color:'+(x<0?'var(--red)':'var(--teal)')+'">'+(x<0?'−':'')+fmtRub(Math.abs(x))+'</td>'; };
-      var GF=function(v){return (Math.abs(v)>0.5)?'<td style="color:var(--muted)">'+fmtRub(v)+'</td>':'<td>—</td>';};
+      var MF=function(v,neg,cls){ if(!(Math.abs(v)>0.5))return '<td'+(cls?(' class="'+cls+'"'):'')+'>—</td>';
+        var x=neg?-Math.abs(v):v, q=cls?(' class="'+cls+'"'):'';
+        return '<td'+q+' style="color:'+(x<0?'var(--red)':'var(--teal)')+'">'+(x<0?'−':'')+fmtRub(Math.abs(x))+'</td>'; };
+      var GF=function(v,cls){var q=cls?(' class="'+cls+'"'):'';
+        return (Math.abs(v)>0.5)?('<td'+q+' style="color:var(--muted)">'+fmtRub(v)+'</td>'):('<td'+q+'>—</td>');};
+      var vNetT=tot.inV-tot.oV, qDueT=tVAdv+tVPay-tVIn;
       document.getElementById('trFoot').innerHTML='<tr><td>Итого</td>'+
-        MF(tot.inC,false)+MF(tKasM,false)+MF(tot.inV,false)+
-        MF(tot.oS,true)+MF(tot.oAE+tot.oDef+tot.oGuar,true)+
-        MF(tProp,true)+MF(tReg,true)+MF(tComp,false)+
-        MF(tot.oV,true)+MF(tPtaxM,true)+
-        MF(commCost,true)+MF(tot.drawn,false)+MF(tot.repaid,true)+'<td>—</td>'+
-        '<td style="font-weight:600">'+dTs2+'</td>'+
-        '<td style="font-weight:700;color:'+(tCF>=0?'var(--teal)':'var(--red)')+'">'+(tCF>=0?'+':'−')+fmtRub(Math.abs(tCF))+'</td>'+
-        '<td style="font-weight:700;color:'+(cumCash>=0?'var(--ink)':'var(--red)')+'">'+(cumCash>=0?'':'−')+fmtRub(Math.abs(cumCash))+'</td>'+
-        GF(tot.interest)+GF(tVAdv)+GF(tVPay)+GF(tVIn)+
-        '<td style="font-weight:600;color:'+(Math.abs(vatBal)<5?'var(--teal)':'var(--red)')+'">'+(Math.abs(vatBal)<5?'0 ₽':fmtRub(vatBal))+'</td>'+
-        (lossSchedule.length?'<td style="color:var(--teal)">'+fmtRub(taxLossAtSale)+'</td>':'<td>—</td>')+
+        MF(tot.inC,false,'gM')+MF(tKasM,false,'gM')+
+        MF(tot.oS,true,'gM')+MF(tot.oAE+tot.oDef+tot.oGuar,true,'gM')+
+        MF(tProp,true,'gM')+MF(tReg,true,'gM')+MF(tComp,false,'gM')+
+        MF(tPtaxM,true,'gM')+
+        '<td class="gM" style="font-weight:600;color:'+(vNetT<0?'var(--red)':'var(--teal)')+'">'+(vNetT<0?'−':'+')+fmtRub(Math.abs(vNetT))+'</td>'+
+        MF(commCost,true,'gM')+MF(tot.drawn,false,'gM')+MF(tot.repaid,true,'gM')+'<td class="gM">—</td>'+
+        '<td class="gM" style="font-weight:600">'+dTs2+'</td>'+
+        '<td class="gM" style="font-weight:700;color:'+(tCF>=0?'var(--teal)':'var(--red)')+'">'+(tCF>=0?'+':'−')+fmtRub(Math.abs(tCF))+'</td>'+
+        '<td class="gM" style="font-weight:700;color:'+(cumCash>=0?'var(--ink)':'var(--red)')+'">'+(cumCash>=0?'':'−')+fmtRub(Math.abs(cumCash))+'</td>'+
+        GF(tVAdv,'gV')+GF(tVPay,'gV')+GF(tVIn,'gV')+
+        '<td class="gV" style="font-weight:600">'+fmtRub(qDueT)+'</td>'+
+        MF(tot.inV,false,'gV')+MF(tot.oV,true,'gV')+
+        '<td class="gV" style="font-weight:600;color:'+(Math.abs(vatBal)<5?'var(--teal)':'var(--red)')+'">'+(Math.abs(vatBal)<5?'0 ₽':fmtRub(vatBal))+'</td>'+
+        GF(tot.interest,'gR')+
+        (lossSchedule.length?'<td class="gR" style="color:var(--teal)">'+fmtRub(taxLossAtSale)+'</td>':'<td class="gR">—</td>')+
         '</tr>';
     })();
 
@@ -4068,7 +4179,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     // (после восстановления по ссылке старт другой → расхождение до рубля). Итерация сходится
     // геометрически, поэтому запас проходов увеличен.
     if(Math.abs(taxIntNew-taxIntCarry)>0.00005 && taxIntPass<60){
-      taxIntPass++; taxIntCarry=taxIntNew; calc(); return;
+      taxIntPass++; taxIntCarry=taxIntNew; NEED_RECALC=true; return;
     }
     taxIntPass=0; taxIntCarry=taxIntNew;
   }
