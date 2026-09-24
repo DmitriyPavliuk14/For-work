@@ -235,7 +235,7 @@
     <div>
       <div class="eyebrow">Финансовая аренда · недвижимость</div>
       <h1>Калькулятор лизинга недвижимости</h1>
-      <div style="font-size:11px;color:var(--faint);margin-top:3px">версия <b id="appVer">2026.09.23-3</b> · если здесь другая версия — на сайте лежит старый файл</div>
+      <div style="font-size:11px;color:var(--faint);margin-top:3px">версия <b id="appVer">2026.09.24-1</b> · если здесь другая версия — на сайте лежит старый файл</div>
     </div>
     <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end">
       <button onclick="resetToBase()" title="Вернуть ВСЕ параметры калькулятора к базовым" style="flex:none;padding:8px 14px;border:1px solid var(--line);background:var(--card);color:var(--muted);border-radius:8px;font-size:12.5px;font-weight:600;cursor:pointer;white-space:nowrap">↺ Сброс всего</button>
@@ -253,6 +253,7 @@
     <button id="b3" onclick="tab(3)">Маржа и прибыль</button>
     <button id="b11" onclick="tab(11)">Мои сделки</button>
     <button id="b4" onclick="tab(4)">Методология</button>
+    <button id="b14" onclick="tab(14)">Справочник</button>
   </div>
 
   <!-- ===== TAB 0: КАЛЬКУЛЯТОР ===== -->
@@ -274,6 +275,7 @@
       <button id="vatNo" onclick="setVat(false)">Цены БЕЗ НДС</button>
     </div>
     <div class="grid g4 mb12">
+      <div><label class="lbl">Продукт (из справочника)</label><select id="prodSel" onchange="pickProduct(this.value)"></select></div>
       <div><label class="lbl">Фондирование, % годовых (без НДС)</label><input id="fund" type="number" step="0.1" value="17.5"></div>
       <div><label class="lbl">Спред, % годовых (без НДС)</label><input id="spread" type="number" step="0.5" value="6"><div class="hint" id="spreadH" style="font-size:11px;color:var(--muted);margin-top:2px">—</div></div>
       <div><label class="lbl">Аванс клиента, %</label><input id="adv" type="number" value="25"></div>
@@ -387,6 +389,7 @@
       <div class="metric big"><div class="lab">Сумма договора лизинга</div><div class="val num" id="oSum">—</div><div class="hint" id="oSumH">с НДС</div></div>
     </div>
 
+    <div id="warnRef" class="offbox" style="display:none;background:var(--amberSoft);border-color:#F5D9A8;color:var(--amber);cursor:default"></div>
     <div id="warnLegacy" class="offbox" style="display:none;background:var(--amberSoft);border-color:#F5D9A8;color:var(--amber);cursor:default">⚠ Открыт расчёт по <b>старой формуле ставки</b> ((фондирование + спред) / 1,22). Так считались КП, отправленные до 22.09.2026 — цифры показаны ровно те, что видел клиент. Для нового расчёта нажмите «Сброс всего».</div>
     <div id="warnUnprofit" class="offbox" style="display:none;background:#FEE2E2;border-color:#FCA5A5;color:var(--red);cursor:default">⚠ <span id="warnUnprofitTxt"></span></div>
     <div class="marg mb22">
@@ -1094,6 +1097,122 @@
       <p style="color:var(--muted)"><b>Допущения:</b> поставщику оплачивается 100% в мес.&nbsp;0; аннуитет с балунным выкупным платежом на мес.&nbsp;N; налог на имущество и регистрация — транзит на клиента; амортизация линейная с коэффициентом по амортизационной группе; списание убытка от выкупа уменьшает налог только при наличии прочей прибыли ЛК.</p>
     </div>
   </div>
+
+  <div id="t14" style="display:none">
+    <h2>Справочник</h2>
+    <p style="font-size:12.5px;color:var(--muted);margin-bottom:14px">Единый источник значений для всех вкладок и формул. <b>Налоги и право</b> — жёстко: соответствующие поля на вкладках только для чтения. <b>Продукты</b> — набор коммерческих условий, который подставляется при выборе продукта и при «Сбросе всего»; в конкретной сделке менеджер может отойти от него, и отличие подсвечивается янтарной рамкой.</p>
+
+    <div id="refLocked" class="offbox" style="background:var(--amberSoft);border-color:#F5D9A8;color:var(--amber);cursor:default;display:none">🔒 Справочник защищён PIN-кодом. Нажмите «Разблокировать», чтобы вносить изменения.</div>
+
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">
+      <button id="refUnlock" onclick="refAskPin()" style="padding:8px 14px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;font-size:12.5px;font-weight:600;cursor:pointer">🔓 Разблокировать</button>
+      <button onclick="refApplyNow()" style="padding:8px 14px;border:1px solid var(--teal);background:var(--teal);color:#fff;border-radius:8px;font-size:12.5px;font-weight:600;cursor:pointer">Сохранить и применить</button>
+      <button onclick="refExport()" style="padding:8px 14px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;font-size:12.5px;font-weight:600;cursor:pointer">⬇ Выгрузить JSON</button>
+      <button onclick="document.getElementById('refFile').click()" style="padding:8px 14px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;font-size:12.5px;font-weight:600;cursor:pointer">⬆ Загрузить JSON</button>
+      <input type="file" id="refFile" accept="application/json,.json" style="display:none" onchange="refImport(this)">
+      <button onclick="refResetFactory()" style="padding:8px 14px;border:1px solid var(--line);background:var(--card);color:var(--muted);border-radius:8px;font-size:12.5px;font-weight:600;cursor:pointer">Вернуть заводские</button>
+    </div>
+    <div id="refMsg" style="font-size:12.5px;margin-bottom:14px;color:var(--teal);display:none"></div>
+
+    <h2>Продукты</h2>
+    <div class="panel mb12">
+      <div style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;margin-bottom:10px">
+        <div style="flex:1;min-width:220px"><label class="lbl">Активный продукт</label>
+          <select id="refProdSel" onchange="refPickProduct(this.value)"></select></div>
+        <button onclick="refAddProduct()" style="padding:9px 14px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;font-size:12.5px;font-weight:600;cursor:pointer">+ Добавить</button>
+        <button onclick="refDelProduct()" style="padding:9px 14px;border:1px solid var(--line);background:var(--card);color:var(--red);border-radius:8px;font-size:12.5px;font-weight:600;cursor:pointer">Удалить</button>
+      </div>
+      <div><label class="lbl">Название продукта</label><input id="refProdName" type="text" placeholder="Недвижимость стандарт"></div>
+      <div class="grid g4 mb8" style="margin-top:10px">
+        <div><label class="lbl">Фондирование, % (без НДС)</label><input id="refFund" type="number" step="0.1"></div>
+        <div><label class="lbl">Спред, % (без НДС)</label><input id="refSpread" type="number" step="0.5"></div>
+        <div><label class="lbl">Аванс, %</label><input id="refAdv" type="number"></div>
+        <div><label class="lbl">Срок лизинга, мес.</label><input id="refTerm" type="number"></div>
+      </div>
+      <div class="grid g4 mb8">
+        <div><label class="lbl">Выкупной платёж</label><input id="refBuyout" type="number"></div>
+        <div><label class="lbl">Единица выкупа</label><select id="refBuyoutMode"><option value="rub">рубли</option><option value="pct">% от стоимости</option></select></div>
+        <div><label class="lbl">Профиль платежей</label><select id="refPayMode"><option value="ann">аннуитет</option><option value="light">лёгкий старт</option><option value="mid">убывающий</option><option value="high">резко убывающий</option></select></div>
+        <div><label class="lbl">Коэфф. убывания</label><input id="refAccRatio" type="number" step="0.05"></div>
+      </div>
+      <div class="grid g4 mb8">
+        <div><label class="lbl">Комиссия банка, %</label><input id="refBankComm" type="number" step="0.1"></div>
+        <div><label class="lbl">Конвенция начисления</label><select id="refDayCount"><option value="actact">ACT/ACT</option><option value="act365">ACT/365</option><option value="act360">ACT/360</option><option value="m12">ставка / 12</option></select></div>
+        <div><label class="lbl">Тип погашения кредита</label><select id="refRepay"><option value="annuity">аннуитет</option><option value="diff">дифференцированный</option><option value="sweep">cash-sweep</option></select></div>
+        <div><label class="lbl">Технические платежи</label><select id="refTechOn"><option value="0">выключены</option><option value="1">включены</option></select></div>
+      </div>
+      <div class="grid g4">
+        <div><label class="lbl">Тех. платежей, шт.</label><input id="refTechN" type="number"></div>
+        <div><label class="lbl">Сумма тех. платежа, ₽</label><input id="refTechAmt" type="number"></div>
+      </div>
+    </div>
+
+    <h2>Налоги и право</h2>
+    <div class="panel mb12">
+      <div class="grid g4 mb8">
+        <div><label class="lbl">Ставка НДС, %</label><input id="refVat" type="number" step="0.5"></div>
+        <div><label class="lbl">Налог на прибыль, %</label><input id="refPtax" type="number" step="0.5"></div>
+        <div><label class="lbl">Лаг возврата НДС, мес.</label><input id="refVatlag" type="number"></div>
+        <div><label class="lbl">Налог на имущество, %</label><input id="refPropRate" type="number" step="0.1"></div>
+      </div>
+      <div class="grid g4 mb8">
+        <div><label class="lbl">Порог пошлины, ₽</label><input id="refDutyThr" type="number"><div class="hint" style="font-size:11px;color:var(--muted);margin-top:2px">ниже порога — фиксированная сумма</div></div>
+        <div><label class="lbl">Ставка пошлины, %</label><input id="refDutyPct" type="number" step="0.05"></div>
+        <div><label class="lbl">Потолок пошлины, ₽</label><input id="refDutyCap" type="number"></div>
+        <div><label class="lbl">Фиксированная пошлина, ₽</label><input id="refDutyFix" type="number"><div class="hint" style="font-size:11px;color:var(--muted);margin-top:2px">и за регистрацию договора</div></div>
+      </div>
+      <div><label class="lbl">Предельный коэффициент ускорения</label><input id="refCoefMax" type="number" step="0.5" style="max-width:220px"><div class="hint" style="font-size:11px;color:var(--muted);margin-top:2px">п. 2 ст. 259.3 НК: не более 3, только для групп 4–10</div></div>
+      <div style="margin-top:12px"><label class="lbl">СПИ по амортизационным группам, мес.</label>
+        <div class="grid g5" style="grid-template-columns:repeat(5,1fr);gap:8px;margin-top:6px">
+          <div><label class="lbl" style="font-size:11px">Группа 1</label><input id="refSpi1" type="number"></div>
+          <div><label class="lbl" style="font-size:11px">Группа 2</label><input id="refSpi2" type="number"></div>
+          <div><label class="lbl" style="font-size:11px">Группа 3</label><input id="refSpi3" type="number"></div>
+          <div><label class="lbl" style="font-size:11px">Группа 4</label><input id="refSpi4" type="number"></div>
+          <div><label class="lbl" style="font-size:11px">Группа 5</label><input id="refSpi5" type="number"></div>
+          <div><label class="lbl" style="font-size:11px">Группа 6</label><input id="refSpi6" type="number"></div>
+          <div><label class="lbl" style="font-size:11px">Группа 7</label><input id="refSpi7" type="number"></div>
+          <div><label class="lbl" style="font-size:11px">Группа 8</label><input id="refSpi8" type="number"></div>
+          <div><label class="lbl" style="font-size:11px">Группа 9</label><input id="refSpi9" type="number"></div>
+          <div><label class="lbl" style="font-size:11px">Группа 10</label><input id="refSpi10" type="number"></div>
+        </div>
+      </div>
+    </div>
+
+    <h2>Страхование и досрочный выкуп</h2>
+    <div class="panel mb12">
+      <div class="grid g4 mb8">
+        <div><label class="lbl">Срок страхования, лет</label><input id="refKaskoTerm" type="number"></div>
+        <div><label class="lbl">Комиссия ЛК, %</label><input id="refKaskoComm" type="number" step="1"></div>
+        <div><label class="lbl">Выкуп возможен с месяца</label><input id="refEbFrom" type="number"></div>
+        <div><label class="lbl">Граница 1-й ступени, мес.</label><input id="refEbB1" type="number"></div>
+      </div>
+      <div class="grid g4">
+        <div><label class="lbl">Граница 2-й ступени, мес.</label><input id="refEbB2" type="number"></div>
+        <div><label class="lbl">Компенсация на 1-й ступени, мес.</label><input id="refEbM1" type="number"></div>
+        <div><label class="lbl">Компенсация на 2-й ступени, мес.</label><input id="refEbM2" type="number"></div>
+        <div><label class="lbl">Компенсация далее, мес.</label><input id="refEbM3" type="number"></div>
+      </div>
+    </div>
+
+    <h2>Защита от случайной правки</h2>
+    <div class="panel mb22">
+      <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap">
+        <div style="max-width:220px"><label class="lbl">PIN-код (4–6 цифр)</label><input id="refPinNew" type="password" inputmode="numeric" maxlength="6" placeholder="••••"></div>
+        <button onclick="refSetPin()" style="padding:9px 14px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;font-size:12.5px;font-weight:600;cursor:pointer">Установить</button>
+        <button onclick="refClearPin()" style="padding:9px 14px;border:1px solid var(--line);background:var(--card);color:var(--muted);border-radius:8px;font-size:12.5px;font-weight:600;cursor:pointer">Снять PIN</button>
+      </div>
+      <p style="font-size:12px;color:var(--muted);margin-top:10px">PIN хранится в браузере этого рабочего места и в выгрузку справочника не попадает. Это защита от случайной правки, а не от злоумышленника: тот, кто откроет исходный код страницы, обойдёт её. Если PIN забыт — его снимает очистка данных сайта в браузере, вместе с сохранёнными сделками.</p>
+    </div>
+
+    <div class="edu" style="border-left-color:var(--blue)">
+      <h3>Как это работает</h3>
+      <p><b>Жёсткие поля.</b> Ставка НДС, налог на прибыль, лаг возврата НДС и ставка налога на имущество на вкладках показаны серым и не редактируются: их источник — этот справочник. Пороги и суммы госпошлины, таблица СПИ и предельный коэффициент ускорения раньше были зашиты прямо в формулы — теперь они здесь, и при изменении НК правка кода не нужна.</p>
+      <p><b>Продукты.</b> Набор коммерческих условий. Выбор продукта на вкладке «Калькулятор» подставляет весь набор одним действием. Менеджер может отойти от продукта в конкретной сделке — поле получит янтарную рамку, и в подсказке будет видно справочное значение.</p>
+      <p><b>Ранее отправленные КП и сохранённые сделки не меняются.</b> Ссылка и сделка кодируются от заводских значений, а не от справочника, поэтому остаются снимком: клиент по старой ссылке видит ровно те цифры, которые получил. Если в восстановленной сделке налоговые величины отличаются от справочника, наверху появляется предупреждение.</p>
+      <p><b>Раздача по филиалам.</b> «Выгрузить JSON» даёт файл справочника, «Загрузить JSON» применяет его на другом рабочем месте. Сам файл калькулятора при этом не меняется.</p>
+    </div>
+  </div>
+
 </div>
 <div id="kpPrint"></div>
 
@@ -1622,11 +1741,291 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     for(var it=0;it<200;it++){var mid=(lo+hi)/2, fMid=npv(mid); if(Math.abs(fMid)<1e-6||hi-lo<1e-9)return mid; if(fLo*fMid<0){hi=mid;fHi=fMid;}else{lo=mid;fLo=fMid;}}
     return (lo+hi)/2;
   }
-  function resetToBase(){
+  /* ═══════════════════ СПРАВОЧНИК ═══════════════════
+     Единый источник значений для всех вкладок и формул.
+     Два уровня жёсткости:
+       • налоги и право  — поля на вкладках только для чтения, меняются лишь здесь;
+       • коммерция       — подставляется как значение по умолчанию, менеджер может
+                            переопределить в конкретной сделке (отличие подсвечивается).
+     ВАЖНО про совместимость: базой для кодирования ссылок и сохранённых сделок
+     остаются ЗАВОДСКИЕ значения (FACTORY), а не справочник. Поэтому изменение
+     справочника никогда не меняет цифры в уже отправленном КП и в сохранённой сделке —
+     они являются снимком по построению, без штампов версий и удлинения ссылки. */
+  var REF_KEY='calcRealtyRef.v1';
+  var REF_HARD=['vat','ptax','vatlag','propRate'];                 // жёсткие поля (налоги)
+  var REF_PROD=['fund','spread','adv','term','buyout','accRatio','bankComm','techN','techAmt'];
+  var REF_PROD_SEL=['buyoutMode','dayCount'];
+  var REF_PROD_CHK=['techOn'];
+  var REF_INS=['kaskoTerm','kaskoComm'];
+  var REF_EB=['ebFrom','ebB1','ebB2','ebM1','ebM2','ebM3'];
+  var FACTORY={}, FACTORY_CHK={}, FACTORY_SEL={};
+  (function(){                                                      // снимок заводских значений
     document.querySelectorAll('input').forEach(function(el){
-      if(el.type==='checkbox'){el.checked=el.defaultChecked;}
+      if(!el.id)return;
+      if(el.type==='checkbox')FACTORY_CHK[el.id]=el.defaultChecked; else FACTORY[el.id]=el.defaultValue;});
+    document.querySelectorAll('select').forEach(function(el){ if(el.id)FACTORY_SEL[el.id]=el.value; });
+  })();
+  function refFactory(){                                            // справочник «как с завода»
+    var r={v:1,activeProduct:'std',products:[],
+      tax:{dutyThr:22000000,dutyPct:0.2,dutyCap:1000000,dutyFix:44000,coefMax:3,
+           spi:[13,25,37,61,85,121,181,241,301,361]},
+      ins:{},eb:{},pin:''};
+    REF_HARD.forEach(function(id){r.tax[id]=Number(FACTORY[id]||0);});
+    REF_INS.forEach(function(id){r.ins[id]=Number(FACTORY[id]||0);});
+    REF_EB.forEach(function(id){r.eb[id]=Number(FACTORY[id]||0);});
+    var p={id:'std',name:'Недвижимость стандарт',f:{},sel:{},chk:{}};
+    REF_PROD.forEach(function(id){p.f[id]=FACTORY[id];});
+    REF_PROD_SEL.forEach(function(id){p.sel[id]=FACTORY_SEL[id];});
+    REF_PROD_CHK.forEach(function(id){p.chk[id]=!!FACTORY_CHK[id];});
+    p.payMode='ann'; p.repayType='annuity';
+    r.products=[p];
+    return r;
+  }
+  var REF=refFactory();
+  function refLoad(){
+    try{var raw=localStorage.getItem(REF_KEY); if(!raw)return;
+      var o=JSON.parse(raw); if(!o||typeof o!=='object')return;
+      var base=refFactory();
+      // мягкое слияние: недостающие ключи берём с завода, лишние игнорируем
+      if(o.tax)Object.keys(base.tax).forEach(function(k){ if(k in o.tax)base.tax[k]=o.tax[k]; });
+      if(o.ins)Object.keys(base.ins).forEach(function(k){ if(k in o.ins)base.ins[k]=o.ins[k]; });
+      if(o.eb) Object.keys(base.eb ).forEach(function(k){ if(k in o.eb )base.eb[k] =o.eb[k];  });
+      if(Array.isArray(o.products)&&o.products.length){
+        base.products=o.products.map(function(pp,i){
+          var np={id:String(pp.id||('p'+i)),name:String(pp.name||('Продукт '+(i+1))),f:{},sel:{},chk:{}};
+          REF_PROD.forEach(function(id){np.f[id]=(pp.f&&(id in pp.f))?pp.f[id]:FACTORY[id];});
+          REF_PROD_SEL.forEach(function(id){np.sel[id]=(pp.sel&&(id in pp.sel))?pp.sel[id]:FACTORY_SEL[id];});
+          REF_PROD_CHK.forEach(function(id){np.chk[id]=(pp.chk&&(id in pp.chk))?!!pp.chk[id]:!!FACTORY_CHK[id];});
+          np.payMode=pp.payMode||'ann'; np.repayType=pp.repayType||'annuity';
+          return np;});
+      }
+      if(o.activeProduct)base.activeProduct=String(o.activeProduct);
+      if(typeof o.pin==='string')base.pin=o.pin;
+      if(!base.products.some(function(pp){return pp.id===base.activeProduct;}))base.activeProduct=base.products[0].id;
+      REF=base;
+    }catch(e){}
+  }
+  function refSave(){ try{localStorage.setItem(REF_KEY,JSON.stringify(REF));}catch(e){} }
+  function refProduct(){
+    for(var i=0;i<REF.products.length;i++)if(REF.products[i].id===REF.activeProduct)return REF.products[i];
+    return REF.products[0];
+  }
+  // значения справочника → поля. Жёсткие пишем и запираем, коммерческие кладём
+  // в defaultValue (база для «Сброса» и для подсветки отличий) и в value.
+  function applyRef(setValues){
+    REF_HARD.forEach(function(id){var e=document.getElementById(id); if(!e)return;
+      e.defaultValue=String(REF.tax[id]); e.value=String(REF.tax[id]);
+      e.readOnly=true; e.title='Значение задаётся в справочнике';
+      e.style.background='var(--paper)'; e.style.color='var(--muted)';});
+    var p=refProduct();
+    REF_PROD.forEach(function(id){var e=document.getElementById(id); if(!e)return;
+      e.defaultValue=String(p.f[id]); if(setValues!==false)e.value=String(p.f[id]);});
+    REF_PROD_SEL.forEach(function(id){var e=document.getElementById(id); if(!e)return;
+      if(setValues!==false)e.value=String(p.sel[id]);});
+    REF_PROD_CHK.forEach(function(id){var e=document.getElementById(id); if(!e)return;
+      e.defaultChecked=!!p.chk[id]; if(setValues!==false)e.checked=!!p.chk[id];});
+    REF_INS.forEach(function(id){var e=document.getElementById(id); if(!e)return;
+      e.defaultValue=String(REF.ins[id]); if(setValues!==false)e.value=String(REF.ins[id]);});
+    REF_EB.forEach(function(id){var e=document.getElementById(id); if(!e)return;
+      e.defaultValue=String(REF.eb[id]); if(setValues!==false)e.value=String(REF.eb[id]);});
+    if(setValues!==false){
+      if(typeof applyPayMode==='function')applyPayMode(p.payMode||'ann');
+      if(typeof setRT==='function'&&(p.repayType||'annuity')!=='annuity')setRT(p.repayType);
+    }
+  }
+  /* ── вкладка «Справочник»: чтение, запись, PIN, продукты ── */
+  var REF_UNLOCKED=false;
+  function refHash(str){ var h=5381,i; for(i=0;i<str.length;i++)h=((h<<5)+h+str.charCodeAt(i))>>>0; return 'h'+h.toString(36); }
+  function refLockedNow(){ return !!REF.pin && !REF_UNLOCKED; }
+  function refSyncLock(){
+    var box=document.getElementById('refLocked'), btn=document.getElementById('refUnlock');
+    var lock=refLockedNow();
+    if(box)box.style.display=lock?'block':'none';
+    if(btn)btn.style.display=(REF.pin&&!REF_UNLOCKED)?'inline-block':'none';
+    var t=document.getElementById('t14'); if(!t)return;
+    t.querySelectorAll('input,select').forEach(function(e){
+      if(e.id==='refPinNew'||e.id==='refFile')return;
+      e.disabled=lock; e.style.opacity=lock?'0.55':'';});
+  }
+  function refAskPin(){
+    var v=prompt('PIN-код справочника:');
+    if(v===null)return;
+    if(refHash(String(v))===REF.pin){REF_UNLOCKED=true;refSyncLock();refMsg('Справочник разблокирован');}
+    else refMsg('Неверный PIN',true);
+  }
+  function refMsg(t,bad){
+    var e=document.getElementById('refMsg'); if(!e)return;
+    e.textContent=t; e.style.color=bad?'var(--red)':'var(--teal)'; e.style.display='block';
+    setTimeout(function(){e.style.display='none';},4000);
+  }
+  var RV=function(id){var e=document.getElementById(id);return e?e.value:'';};
+  var RN=function(id){var e=document.getElementById(id);return e?(parseFloat(String(e.value).replace(',','.'))||0):0;};
+  function renderProdSel(){
+    ['refProdSel','prodSel'].forEach(function(sid){
+      var sel=document.getElementById(sid); if(!sel)return;
+      sel.innerHTML=REF.products.map(function(p){
+        return '<option value="'+p.id+'"'+(p.id===REF.activeProduct?' selected':'')+'>'+
+          String(p.name).replace(/</g,'&lt;')+'</option>';}).join('');
+    });
+  }
+  function renderRef(){                       // справочник → поля вкладки
+    var p=refProduct();
+    var set=function(id,v){var e=document.getElementById(id); if(e)e.value=(v===undefined||v===null)?'':String(v);};
+    set('refProdName',p.name);
+    set('refFund',p.f.fund); set('refSpread',p.f.spread); set('refAdv',p.f.adv); set('refTerm',p.f.term);
+    set('refBuyout',p.f.buyout); set('refAccRatio',p.f.accRatio); set('refBankComm',p.f.bankComm);
+    set('refTechN',p.f.techN); set('refTechAmt',p.f.techAmt);
+    set('refBuyoutMode',p.sel.buyoutMode); set('refDayCount',p.sel.dayCount);
+    set('refPayMode',p.payMode||'ann'); set('refRepay',p.repayType||'annuity');
+    set('refTechOn',p.chk.techOn?'1':'0');
+    set('refVat',REF.tax.vat); set('refPtax',REF.tax.ptax); set('refVatlag',REF.tax.vatlag); set('refPropRate',REF.tax.propRate);
+    set('refDutyThr',REF.tax.dutyThr); set('refDutyPct',REF.tax.dutyPct); set('refDutyCap',REF.tax.dutyCap); set('refDutyFix',REF.tax.dutyFix);
+    set('refCoefMax',REF.tax.coefMax);
+    for(var i=1;i<=10;i++)set('refSpi'+i,REF.tax.spi[i-1]);
+    set('refKaskoTerm',REF.ins.kaskoTerm); set('refKaskoComm',REF.ins.kaskoComm);
+    REF_EB.forEach(function(id){set('ref'+id.charAt(0).toUpperCase()+id.slice(1),REF.eb[id]);});
+    renderProdSel(); refSyncLock();
+  }
+  function refCollect(){                      // поля вкладки → справочник
+    var p=refProduct();
+    p.name=RV('refProdName')||p.name;
+    p.f.fund=RN('refFund'); p.f.spread=RN('refSpread'); p.f.adv=RN('refAdv'); p.f.term=RN('refTerm');
+    p.f.buyout=RN('refBuyout'); p.f.accRatio=RN('refAccRatio'); p.f.bankComm=RN('refBankComm');
+    p.f.techN=RN('refTechN'); p.f.techAmt=RN('refTechAmt');
+    p.sel.buyoutMode=RV('refBuyoutMode'); p.sel.dayCount=RV('refDayCount');
+    p.payMode=RV('refPayMode'); p.repayType=RV('refRepay');
+    p.chk.techOn=(RV('refTechOn')==='1');
+    REF.tax.vat=RN('refVat'); REF.tax.ptax=RN('refPtax'); REF.tax.vatlag=RN('refVatlag'); REF.tax.propRate=RN('refPropRate');
+    REF.tax.dutyThr=RN('refDutyThr'); REF.tax.dutyPct=RN('refDutyPct'); REF.tax.dutyCap=RN('refDutyCap'); REF.tax.dutyFix=RN('refDutyFix');
+    REF.tax.coefMax=RN('refCoefMax');
+    for(var i=1;i<=10;i++)REF.tax.spi[i-1]=RN('refSpi'+i);
+    REF.ins.kaskoTerm=RN('refKaskoTerm'); REF.ins.kaskoComm=RN('refKaskoComm');
+    REF_EB.forEach(function(id){REF.eb[id]=RN('ref'+id.charAt(0).toUpperCase()+id.slice(1));});
+  }
+  function refApplyNow(){
+    if(refLockedNow()){refMsg('Сначала разблокируйте справочник',true);return;}
+    refCollect(); refSave(); applyRef(true); renderRef(); calc();
+    refMsg('Справочник сохранён и применён к текущему расчёту');
+  }
+  // выбор продукта на вкладке «Калькулятор»: подставляем коммерческие условия,
+  // не трогая стоимость объекта, клиента и предмет лизинга
+  function pickProduct(id){
+    if(!REF.products.some(function(p){return p.id===id;}))return;
+    REF.activeProduct=id; refSave(); applyRef(true); renderProdSel();
+    try{renderRef();}catch(e){}
+    calc();
+  }
+  function refPickProduct(id){
+    if(refLockedNow())return;
+    refCollect();                       // не теряем правки текущего продукта
+    REF.activeProduct=id; refSave(); renderRef(); applyRef(true); calc();
+  }
+  function refAddProduct(){
+    if(refLockedNow()){refMsg('Сначала разблокируйте справочник',true);return;}
+    refCollect();
+    var src=refProduct(), id='p'+Date.now().toString(36);
+    var np={id:id,name:src.name+' — копия',f:{},sel:{},chk:{},payMode:src.payMode,repayType:src.repayType};
+    REF_PROD.forEach(function(k){np.f[k]=src.f[k];});
+    REF_PROD_SEL.forEach(function(k){np.sel[k]=src.sel[k];});
+    REF_PROD_CHK.forEach(function(k){np.chk[k]=src.chk[k];});
+    REF.products.push(np); REF.activeProduct=id; refSave(); renderRef();
+    refMsg('Продукт добавлен — задайте название и условия');
+  }
+  function refDelProduct(){
+    if(refLockedNow()){refMsg('Сначала разблокируйте справочник',true);return;}
+    if(REF.products.length<2){refMsg('Последний продукт удалить нельзя',true);return;}
+    var id=REF.activeProduct;
+    REF.products=REF.products.filter(function(p){return p.id!==id;});
+    REF.activeProduct=REF.products[0].id; refSave(); renderRef(); applyRef(true); calc();
+    refMsg('Продукт удалён');
+  }
+  function refSetPin(){
+    var v=String(RV('refPinNew')||'');
+    if(!/^\d{4,6}$/.test(v)){refMsg('PIN — от 4 до 6 цифр',true);return;}
+    if(REF.pin&&!REF_UNLOCKED){refMsg('Сначала разблокируйте справочник',true);return;}
+    REF.pin=refHash(v); REF_UNLOCKED=true; refSave();
+    var e=document.getElementById('refPinNew'); if(e)e.value='';
+    refSyncLock(); refMsg('PIN установлен');
+  }
+  function refClearPin(){
+    if(REF.pin&&!REF_UNLOCKED){refMsg('Сначала разблокируйте справочник',true);return;}
+    REF.pin=''; REF_UNLOCKED=false; refSave(); refSyncLock(); refMsg('PIN снят');
+  }
+  function refExport(){
+    var copy=JSON.parse(JSON.stringify(REF)); delete copy.pin;   // PIN не выгружаем
+    var blob=new Blob([JSON.stringify(copy,null,1)],{type:'application/json'});
+    var a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+    a.download='Справочник_лизинг_недвижимость.json'; document.body.appendChild(a); a.click();
+    setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},400);
+  }
+  function refImport(inp){
+    if(refLockedNow()){refMsg('Сначала разблокируйте справочник',true);inp.value='';return;}
+    var f=inp.files&&inp.files[0]; if(!f)return;
+    var rd=new FileReader();
+    rd.onload=function(){
+      try{
+        var o=JSON.parse(String(rd.result)); if(!o||typeof o!=='object')throw new Error('формат');
+        var keepPin=REF.pin;
+        localStorage.setItem(REF_KEY,JSON.stringify(o));
+        refLoad(); REF.pin=keepPin; refSave();
+        applyRef(true); renderRef(); calc(); refMsg('Справочник загружен');
+      }catch(e){ refMsg('Не удалось прочитать файл справочника',true); }
+      inp.value='';
+    };
+    rd.readAsText(f);
+  }
+  function refResetFactory(){
+    if(refLockedNow()){refMsg('Сначала разблокируйте справочник',true);return;}
+    var keepPin=REF.pin; REF=refFactory(); REF.pin=keepPin; refSave();
+    applyRef(true); renderRef(); calc(); refMsg('Возвращены заводские значения');
+  }
+  // предупреждение: в восстановленной сделке налоговые величины отличаются от справочника
+  var refWarnSig='';
+  function refWarnMismatch(){
+    var el=document.getElementById('warnRef'); if(!el)return;
+    var bad=REF_HARD.filter(function(id){var e=document.getElementById(id);
+      return e&&Math.abs((parseFloat(String(e.value).replace(',','.'))||0)-Number(REF.tax[id]))>1e-9;});
+    var sig=bad.map(function(id){return id+'='+document.getElementById(id).value;}).join(';');
+    if(sig===refWarnSig)return;
+    refWarnSig=sig;
+    if(!bad.length){el.style.display='none';return;}
+    var names={vat:'ставка НДС',ptax:'налог на прибыль',vatlag:'лаг возврата НДС',propRate:'налог на имущество'};
+    el.innerHTML='⚠ Расчёт открыт с налоговыми величинами, отличными от справочника ('+
+      bad.map(function(id){return names[id]+' '+document.getElementById(id).value;}).join(', ')+
+      '). Так считалась эта сделка на момент сохранения. Для расчёта по текущему справочнику нажмите «Сброс всего».';
+    el.style.display='block';
+  }
+
+  // подсветка полей, отличающихся от справочника
+  // Запись в DOM — только когда состояние поля действительно поменялось:
+  // иначе 17 присвоений стиля на каждом пересчёте заметно тормозят ввод стрелками.
+  var refDiffSig='';
+  function refMarkDiffs(){
+    var p=refProduct(), ids=REF_PROD.concat(REF_INS,REF_EB), sig='', st=[];
+    ids.forEach(function(id){var e=document.getElementById(id); if(!e||e.readOnly){st.push(null);return;}
+      var base=(REF_PROD.indexOf(id)>=0)?p.f[id]:((REF_INS.indexOf(id)>=0)?REF.ins[id]:REF.eb[id]);
+      var same=(String(e.value).replace(',','.')===String(base).replace(',','.'));
+      st.push({e:e,same:same,base:base}); sig+=(same?'1':'0');});
+    if(sig===refDiffSig)return;
+    refDiffSig=sig;
+    st.forEach(function(x){ if(!x)return;
+      x.e.style.borderColor=x.same?'':'var(--amber)';
+      x.e.title=x.same?'':('Отличается от справочника: '+x.base);});
+  }
+
+  // Два сброса. resetToBase — «как в справочнике» (кнопка «Сброс всего», старт файла).
+  // resetToFactory — «как с завода»: с него начинается восстановление ссылки и сохранённой
+  // сделки, поэтому справочник на уже отправленные расчёты не влияет.
+  function resetToBase(){ resetCore(true); }
+  function resetToFactory(){ resetCore(false); }
+  function resetCore(useRef){
+    document.querySelectorAll('input').forEach(function(el){
+      if(el.type==='checkbox'){el.checked=(el.id&&(el.id in FACTORY_CHK))?FACTORY_CHK[el.id]:el.defaultChecked;}
+      else if(el.id&&(el.id in FACTORY)){el.value=FACTORY[el.id];}
       else{el.value=el.defaultValue;}
     });
+    document.querySelectorAll('select').forEach(function(el){
+      if(el.id&&(el.id in FACTORY_SEL))el.value=FACTORY_SEL[el.id];});
     withVat=true; vatStash=null;
     document.getElementById('vatYes').className='on';
     document.getElementById('vatNo').className='';
@@ -1640,6 +2039,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     kasko=[0,0,0]; kaskoTermEdited=false; bankTermEdited=false; cadEdited=false;
     applyPayMode('ann'); applyScheme('classic',true);
     renderSupp();renderKasko();
+    if(useRef)applyRef(true);
     calc();
   }
   function resetTab(divId){
@@ -1677,7 +2077,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     }
   }
   function tab(i){if(i===5&&EBRENDER)try{EBRENDER();}catch(e){}
-    for(var j=0;j<14;j++){var t=document.getElementById('t'+j),b=document.getElementById('b'+j);if(t)t.style.display=(j===i)?'block':'none';if(b)b.className=(j===i)?'on':'';}
+    if(i===14)try{renderRef();}catch(e){}
+    for(var j=0;j<15;j++){var t=document.getElementById('t'+j),b=document.getElementById('b'+j);if(t)t.style.display=(j===i)?'block':'none';if(b)b.className=(j===i)?'on':'';}
     try{syncStickyHead();}catch(e){}
     try{syncTopScrollbars();}catch(e){}}
   // двухуровневая шапка (ДДС): второй ряд должен «прилипать» ровно под первым.
@@ -2022,11 +2423,18 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
   }
   function esc(s){return String(s===undefined||s===null?'':s).replace(/[<>&"]/g,function(c){return {'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c];});}
   // компактное состояние: сохраняем ТОЛЬКО отличия от базовых значений → короткая ссылка
+  // База для кодирования ссылки и сравнения — ЗАВОДСКИЕ значения, снятые при загрузке.
+  // Справочник меняет defaultValue полей, поэтому брать базу оттуда нельзя: иначе поле,
+  // совпавшее со справочником, не попало бы в ссылку, и получатель увидел бы заводское
+  // значение вместо отправленного.
   function baseDefaults(){
     var d={};
     DEAL_IDS.forEach(function(id){var e=document.getElementById(id);if(!e)return;
-      if(e.tagName==='SELECT'){var o=e.querySelector('option[selected]')||e.options[0]; d[id]=o?o.value:''; return;}
-      d[id]=(e.type==='checkbox')?(e.defaultChecked?1:0):e.defaultValue;});
+      if(e.tagName==='SELECT'){
+        d[id]=(id in FACTORY_SEL)?FACTORY_SEL[id]:((e.querySelector('option[selected]')||e.options[0]||{}).value||'');
+        return;}
+      if(e.type==='checkbox'){d[id]=((id in FACTORY_CHK)?FACTORY_CHK[id]:e.defaultChecked)?1:0; return;}
+      d[id]=(id in FACTORY)?FACTORY[id]:e.defaultValue;});
     return d;
   }
   // короткие коды полей для компактной ссылки: индекс в DEAL_IDS -> base36
@@ -2066,7 +2474,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
   }
   function applyStateSlim(s){
     if(!s||!s.d)return false;
-    resetToBase();
+    resetToFactory();   // база ссылки — заводские значения, а не справочник
     // Ссылки старого формата считались по прежней формуле ставки и от прежних базовых значений.
     // Восстанавливаем и то и другое — иначе ранее отправленное КП покажет клиенту другие цифры.
     (function(){var rm=document.getElementById('rateMode');
@@ -2930,8 +3338,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     // --- амортизационная группа → коэффициент ускорения и СПИ (автоматически, ст. 259.3 / Пост. №1) ---
     var AM_GROUP_MIN_M=[13,25,37,61,85,121,181,241,301,361]; // мин. срок (мес.) по группам 1..10
     var amGroup=Math.round(val('amGroup')); if(amGroup<1)amGroup=1; if(amGroup>10)amGroup=10;
-    var amCoefAuto=amGroup>=4?3:1;             // до 3х; запрещено для групп 1-3
-    var spiMAuto=AM_GROUP_MIN_M[amGroup-1];    // нижняя граница диапазона группы
+    var amCoefAuto=amGroup>=4?REF.tax.coefMax:1;   // предел коэффициента — из справочника
+    var spiMAuto=(REF.tax.spi&&REF.tax.spi[amGroup-1])||AM_GROUP_MIN_M[amGroup-1];   // СПИ по группе — из справочника
     (function(){var ce=document.getElementById('amCoef'),se=document.getElementById('spiM');
       if(ce&&Math.round((parseFloat(ce.value)||0)*10)!==Math.round(amCoefAuto*10))ce.value=amCoefAuto;
       if(se&&Math.round(parseFloat(se.value)||0)!==spiMAuto)se.value=spiMAuto;})();
@@ -3024,8 +3432,9 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     var regCalc=0;
     if(!regOff){
       var kc=cadVal, deal=priceVat;
-      var perehod=(kc<=22000000)?44000:Math.min(1000000,Math.max(kc*0.002,deal*0.002));  // переход права
-      var dogovor=44000;                                                                  // регистрация договора
+      var DT=REF.tax.dutyThr, DP=REF.tax.dutyPct/100, DC=REF.tax.dutyCap, DF=REF.tax.dutyFix;   // из справочника
+      var perehod=(kc<=DT)?DF:Math.min(DC,Math.max(kc*DP,deal*DP));                       // переход права
+      var dogovor=DF;                                                                     // регистрация договора
       regCalc=perehod+dogovor;
       var rf=document.getElementById('regFee');
       if(rf&&regAuto&&Math.round(parseFloat(rf.value)||0)!==Math.round(regCalc))rf.value=Math.round(regCalc);
@@ -3041,12 +3450,13 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
       var el=document.getElementById('regFormula'); if(!el)return;
       if(regOff){el.innerHTML='<span style="color:var(--faint)">Расходы на регистрацию не применяются.</span>';return;}
       var kc=cadVal, deal=priceVat, per, txt;
-      if(kc<=22000000){ per=44000; txt='кадастровая стоимость '+fmtRub(kc)+' ≤ 22 млн → <b>44 000 ₽</b>'; }
-      else { var byCad=kc*0.002, byDeal=deal*0.002, base=Math.max(byCad,byDeal);
-        per=Math.min(1000000,base);
-        txt='кадастровая '+fmtRub(kc)+' &gt; 22 млн → 0,2% = '+fmtRub(byCad)+
-            (byDeal>byCad?(' (но не менее 0,2% цены сделки = '+fmtRub(byDeal)+')'):'')+
-            (base>1000000?' → ограничение 1 000 000 ₽':'')+' → <b>'+fmtRub(per)+'</b>'; }
+      var DT=REF.tax.dutyThr, DP=REF.tax.dutyPct/100, DC=REF.tax.dutyCap, DF=REF.tax.dutyFix;
+      if(kc<=DT){ per=DF; txt='кадастровая стоимость '+fmtRub(kc)+' ≤ '+fmtRub(DT)+' → <b>'+fmtRub(DF)+'</b>'; }
+      else { var byCad=kc*DP, byDeal=deal*DP, base=Math.max(byCad,byDeal);
+        per=Math.min(DC,base);
+        txt='кадастровая '+fmtRub(kc)+' &gt; '+fmtRub(DT)+' → '+fmtPct(REF.tax.dutyPct)+' = '+fmtRub(byCad)+
+            (byDeal>byCad?(' (но не менее '+fmtPct(REF.tax.dutyPct)+' цены сделки = '+fmtRub(byDeal)+')'):'')+
+            (base>DC?(' → ограничение '+fmtRub(DC)):'')+' → <b>'+fmtRub(per)+'</b>'; }
       el.innerHTML='<b>Переход права собственности:</b> '+txt+
         '<br><b>Регистрация договора лизинга:</b> 44 000 ₽'+
         '<br><b>Итого: '+fmtRub(per+44000)+'</b>'+
@@ -4182,6 +4592,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
       taxIntPass++; taxIntCarry=taxIntNew; NEED_RECALC=true; return;
     }
     taxIntPass=0; taxIntCarry=taxIntNew;
+    try{refMarkDiffs();refWarnMismatch();}catch(e){}
   }
 
   // Стрелки «вверх/вниз» в числовых полях при удержании шлют input каждые ~50 мс.
@@ -4197,6 +4608,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
   renderSupp();renderKasko();
   try{applyScheme('classic',true);}catch(e){}
   try{syncFundUI();syncBuyUnit();syncRT();syncVatView();fmtPriceField();}catch(e){}
+  // справочник применяется до первого расчёта; на восстановление ссылки и сделки не влияет
+  try{refLoad();applyRef(true);renderRef();renderProdSel();}catch(e){}
   calc();
   try{initFieldSync();}catch(e){}
   try{syncStickyHead();syncTopScrollbars();}catch(e){}
